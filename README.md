@@ -1,105 +1,101 @@
-#### OWP Open Source Project Template Instructions
+#Topmodel BMI
+Developing a BMI topmodel function based on tmod9502.c, a C code written based on the original Beven Keith code Fortran code. See specifications for the original code at: https://csdms.colorado.edu/wiki/Model:TOPMODEL
 
-1. Create a new project.
-2. [Copy these files into the new project](#installation)
-3. Update the README, replacing the contents below as prescribed.
-4. Add any libraries, assets, or hard dependencies whose source code will be included
-   in the project's repository to the _Exceptions_ section in the [TERMS](TERMS.md).
-  - If no exceptions are needed, remove that section from TERMS.
-5. If working with an existing code base, answer the questions on the [open source checklist](opensource-checklist.md)
-6. Delete these instructions and everything up to the _Project Title_ from the README.
-7. Write some great software and tell people about it.
+tmod9502.c
 
-> Keep the README fresh! It's the first thing people see and will make the initial impression.
+  TOPMODEL DEMONSTRATION PROGRAM VERSION 95.02
 
-## Installation
+  This C version by Fred Ogden, Sept. 2009.  Converted to ANSI C
+  and given somewhat more meaningful variable names.  Compared
+  against original FORTRAN version on a simple data set with no
+  infiltration excess.
+  
+  after Keith Beven 1985
+  Revised for distribution 1993,1995
 
-To install all of the template files, run the following script from the root of your project's directory:
+****************************************************************
+  This program is distributed freely with only two conditions.
 
-```
-bash -c "$(curl -s https://raw.githubusercontent.com/NOAA-OWP/owp-open-source-project-template/open_source_template.sh)"
-```
+  1. In any use for commercial or paid consultancy purposes a 
+     suitable royalty agreement must be negotiated with Lancaster 
+     University (Contact Keith Beven)
 
-----
+  2. In any publication arising from use for research purposes the
+     source of the program should be properly acknowledged and a 
+     pre-print of the publication sent to Keith Beven at the address
+     below.
 
-# Project Title
+  All rights retained 1993, 1995
+  Keith Beven
+  Centre for Research on Environmental Systems and Statistics
+  Institute of Environmental and Biological Sciences
+  Lancaster University, Lancaster LA1 4YQ, UK
 
-**Description**:  Put a meaningful, short, plain-language description of what
-this project is trying to accomplish and why it matters.
-Describe the problem(s) this project solves.
-Describe how this software can improve the lives of its audience.
+  Tel: (+44) 1524 593892  Fax: (+44) 1524 593985
+  Email:  K.Beven@UK.AC.LANCASTER
+  
+****************************************************************
 
-Other things to include:
+  SIMPLE SUBCATCHMENT VERSION OF TOPMODEL
 
-  - **Technology stack**: Indicate the technological nature of the software, including primary programming language(s) and whether the software is intended as standalone or as a module in a framework or other ecosystem.
-  - **Status**:  Alpha, Beta, 1.1, etc. It's OK to write a sentence, too. The goal is to let interested people know where this project is at. This is also a good place to link to the [CHANGELOG](CHANGELOG.md).
-  - **Links to production or demo instances**
-  - Describe what sets this apart from related-projects. Linking to another doc or page is OK if this can't be expressed in a sentence or two.
+  This program allows single or multiple subcatchment calculations 
+  but with single average rainfall and potential evapotranspiration
+  inputs to the whole catchment.  Subcatchment discharges are routed
+  to the catchment outlet using a linear routing algorithm with
+  constant main channel velocity and internal subcatchment 
+  routing velocity.  The program requires ln(a/tanB) distributions
+  for each subcatchment.  These may be calculated using the
+  GRIDATB program which requires raster elevation data as input.
+  It is recommended that those data should be 50 m resolution or
+  better.
 
+  NOTE that TOPMODEL is not intended to be a traditional model
+  package but is more a collection of concepts that can be used
+  **** where appropriate ****. It is up to the user to verify that
+  the assumptions are appropriate (see discussion in 
+  Beven et al.(1994).   This version of the model  will be
+  best suited to catchments with shallow soils and moderate
+  topography which do not suffer from excessively long dry 
+  periods.  Ideally predicted contributing areas should be
+  checked against what actually happens in the catchment.
 
-**Screenshot**: If the software has visual components, place a screenshot after the description; e.g.,
+  It includes infiltration excess calculations and parameters
+  based on the exponential conductivity Green-Ampt model of 
+  Beven (HSJ, 1984) but if infiltration excess does occur it
+  does so over whole area of a subcatchment.  Spatial variability
+  in conductivities can however be handled by specifying 
+  Ko parameter values for different subcatchments, even if they
+  have the same ln(a/tanB) and routing parameters, ie. to 
+  represent different parts of the area. 
 
-![](https://raw.githubusercontent.com/NOAA-OWP/owp-open-source-project-template/master/doc/Screenshot.png)
+  Note that time step calculations are explicit ie. SBAR
+  at start of time step is used to determine contributing area.  
+  Thus with long (daily) time steps contributing area depends on 
+  initial value together with any volume filling effect of daily 
+  inputs.  Also baseflow at start of time step is used to update 
+  SBAR at end of time step
 
+  Current program limits are:
+          Number of time steps = 2500
+          Number of subcatchments = 10
+          Number of ln(a/tanB) increments = 30
+          Number of subcatchment routing ordinates = 10
+          Number of time delay histogram ordinates = 20
+          Size of subcatchment pixel maps = 100 x 100
 
-## Dependencies
+  Limits are mostly set in Common blocks in file TMCOMMON.FOR
+*****************************************************************
 
-Describe any dependencies that must be installed for this software to work.
-This includes programming languages, databases or other storage mechanisms, build tools, frameworks, and so forth.
-If specific versions of other software are required, or known not to work, call that out.
+  This version uses five files as follows:
+       Channel 4 "TOPMOD.DAT" contains run and file information
+       Channel 7 <INPUTS$> contains rainfall, pe and qobs data
+       Channel 8 <SUBCAT$> contains subcatchment data      
+       Channel 9 <PARAMS$> contains parameter data
+       Channel 10 <OUTPUT$> is output file
 
-## Installation
-
-Detailed instructions on how to install, configure, and get the project running.
-This should be frequently tested to ensure reliability. Alternatively, link to
-a separate [INSTALL](INSTALL.md) document.
-
-## Configuration
-
-If the software is configurable, describe it in detail, either here or in other documentation to which you link.
-
-## Usage
-
-Show users how to use the software.
-Be specific.
-Use appropriate formatting when showing code snippets.
-
-## How to test the software
-
-If the software includes automated tests, detail how to run those tests.
-
-## Known issues
-
-Document any known significant shortcomings with the software.
-
-## Getting help
-
-Instruct users how to get help with this software; this might include links to an issue tracker, wiki, mailing list, etc.
-
-**Example**
-
-If you have questions, concerns, bug reports, etc, please file an issue in this repository's Issue Tracker.
-
-## Getting involved
-
-This section should detail why people should get involved and describe key areas you are
-currently focusing on; e.g., trying to get feedback on features, fixing certain bugs, building
-important pieces, etc.
-
-General instructions on _how_ to contribute should be stated with a link to [CONTRIBUTING](CONTRIBUTING.md).
-
-
-----
-
-## Open source licensing info
-1. [TERMS](TERMS.md)
-2. [LICENSE](LICENSE)
+  In addition
+       Channel 12 <MAPFILE$> is used to read subcatchment ln(a/tanB)
+                   maps if IMAP = 1
 
 
-----
-
-## Credits and references
-
-1. Projects that inspired you
-2. Related projects
-3. Books, papers, talks, or other sources that have meaningful impact or influence on this project
+*****************************************************************

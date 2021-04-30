@@ -1,0 +1,32 @@
+These files are the topmodel and example input files.  You can run this two 
+different ways.   On Windows computers, just run "top_win.exe" in a command 
+window.   To get a command window, do the following <start> - <run> type 
+"command" in the <run> dialog.   Then change directory to the place on your 
+machine where you unzipped this file.   Then you can run "top_win.exe".  If you 
+want/need to compile the code, either use MicroSoft C Developer Studio to 
+re-compile, or install "mingw", the gnu C compiler port to Windows.  To compile
+with mingw running on Windows or with gcc running on Linux, type:
+
+gcc -g tmod9502.c -o topmod.exe -lm
+
+the -g includes debug information in case you know how to use gdb the gnu debugger
+the -o names th executable "topmod.exe", and -lm links in the math library which
+is needed for sqrt(), log(), exp(), and pow() operations.
+
+This zip file contains the following files:
+
+inputs.dat   - the example inputs file
+params.dat   - the example parameter file
+README.1ST   - this file
+subcat.dat   - the example subcatchment data file (incl. ln(a/tanB) dist.)
+tmod9502.c   - the C source code.  
+               the executable will be named topmod.exe.
+topmod.run   - the example main driver file.   A file of this name/contents must
+               exist.
+top_win.exe  - the compiled executable for M.S. Windows.   This will not run in
+               Linux.
+demo_hydrograph.out - execution output for the C topmodel version for unit testing.
+
+If you have questions about units, look in the source code, or do an on-line 
+search.   There is a lot on the www about TOPMODEL.
+

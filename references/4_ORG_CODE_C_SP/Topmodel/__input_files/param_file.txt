@@ -1,0 +1,20 @@
+;--------------------------------------------
+;TopModel input parameter file for Lutz
+;10/22/02  (Min/max values from D. Kinner)
+;--------------------------------------------
+0.01    ;SZM   [0.001, 0.03]
+1.0     ;T0    [-4, 3]
+1.0     ;TD    [0.001, 50]
+1000    ;CHV   [500, 5000]
+1500    ;RV    [500, 5000]
+0.2     ;SRMAX [0.0, 0.05]
+50.0    ;Q0    [1.0, 100.0] (Made up values)
+0.1     ;SR0   [0.0, 0.05]
+1       ;INFEX [0 or 1] (Infil. flag)
+3.0     ;XK0   [0.5, 13.2] (K0, from Beven paper)
+0.1     ;HF    [0.06, 0.178] (d_psi, from Beven paper)
+0.36    ;DTH   [0.35, 0.37]  (d_theta, from Beven paper)
+
+;1E-4   ;CLK   [4E-5, 2E-4]
+;0.3    ;SBMAX [0.2, 0.5]
+;0.3    ;Direct flow [0.0, 0.6]
