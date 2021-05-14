@@ -4,7 +4,8 @@
 
 #define TOPMODEL_DEBUG 0
 
-#define INPUT_VAR_NAME_COUNT 0
+//TODO: Use ACTIVE_BMI flag to condition num of inputs
+#define INPUT_VAR_NAME_COUNT 2
 #define OUTPUT_VAR_NAME_COUNT 1
 
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
@@ -20,7 +21,7 @@ static const int output_var_item_count[OUTPUT_VAR_NAME_COUNT] = {
 };
 
 static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
-        "m/h",
+        "m h-1",
 };
 
 static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
@@ -32,115 +33,70 @@ static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
 };
 
 static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {
+        "atmosphere_water__liquid_equivalent_precipitation_rate",
+        "water_potential_evaporation_flux"
 };
 
 static const char *input_var_types[INPUT_VAR_NAME_COUNT] = {
+        "double",
+        "double"
 };
 
 static const char *input_var_units[INPUT_VAR_NAME_COUNT] = {
+        "kg m-2",
+        "m s-1"
 };
 
 static const int input_var_item_count[INPUT_VAR_NAME_COUNT] = {
+        1,
+        1
 };
 
 static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {
+        0,
+        0
 };
 
 static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
+        "node",
+        "node"
 };
-
-/** Count the number of values in a delimited string representing an array of values. */
-static int count_delimited_values(char* string_val, char* delimiter)
-{
-    char *copy, *copy_to_free, *value;
-    int count = 0;
-
-    // Make duplicate to avoid changing original string
-    // Then work on copy, but keep 2nd pointer to copy so that memory can be freed
-    copy_to_free = copy = strdup(string_val);
-    while ((value = strsep(&copy, delimiter)) != NULL)
-        count++;
-    free(copy_to_free);
-    return count;
-}
-
-int read_file_line_counts(const char* file_name, int* line_count, int* max_line_length)
-{
-
-    /**line_count = 0;
-    *max_line_length = 0;
-    int current_line_length = 0;
-    FILE* fp = fopen(file_name, "r");
-    // Ensure exists
-    if (fp == NULL) {
-        printf("File does not exist.\n Failed in function read_file_line_counts\n");
-        return -1;
-    }
-    int seen_non_whitespace = 0;
-    char c;
-    for (c = fgetc(fp); c != EOF; c = fgetc(fp)) {
-        // keep track if this line has seen any char other than space or tab
-        if (c != ' ' && c != '\t' && c != '\n')
-            seen_non_whitespace++;
-        // Update line count, reset non-whitespace count, adjust max_line_length (if needed), and reset current line count
-        if (c == '\n') {
-            *line_count += 1;
-            seen_non_whitespace = 0;
-            if (current_line_length > *max_line_length)
-                *max_line_length = current_line_length;
-            current_line_length = 0;
-        }
-        else {
-            current_line_length += 1;
-        }
-    }
-    fclose(fp);
-
-    // If we saw some non-whitespace char on last line, assume last line didn't have its own \n, so count needs to be
-    // incremented by 1.
-    if (seen_non_whitespace > 0) {
-        *line_count += 1;
-    }
-
-    // Before returning, increment the max line length by 1, since the \n will be on the line also.
-    *max_line_length += 1;*/
-
-    return 0;
-}
 
 int read_init_config(const char* config_file, topmodel_model* model) {
 
-  char input_fname[30],subcat_fname[30],params_fname[30],output_fname[30];
-  char out_hyd_fname[30];
-  
-  model-> max_atb_increments=30;
-  model-> max_num_subcatchments=10;
-  model-> max_time_delay_ordinates=20;
-
-  if((model->control_fptr=fopen(config_file,"r"))==NULL)
+    if((model->control_fptr=fopen(config_file,"r"))==NULL)
     {printf("Can't open control file named topmod.run\n");exit(-9);}
 
-  fgets(model->title,256,model->control_fptr);
-  fscanf(model->control_fptr,"%s",input_fname);
-  fscanf(model->control_fptr,"%s",subcat_fname);
-  fscanf(model->control_fptr,"%s",params_fname);
-  fscanf(model->control_fptr,"%s",output_fname);
-  fscanf(model->control_fptr,"%s",out_hyd_fname);
+    fgets(model->title,256,model->control_fptr);
+    
+    char subcat_fname[30],params_fname[30];
+    fscanf(model->control_fptr,"%s",subcat_fname);
+    fscanf(model->control_fptr,"%s",params_fname);
 
-  if((model->input_fptr=fopen("./data/inputs.dat","r"))==NULL)
-    {printf("Can't open input file named %s\n",input_fname);exit(-9);}
+    char output_fname[30],out_hyd_fname[30];
+    fscanf(model->control_fptr,"%s",output_fname);
+    fscanf(model->control_fptr,"%s",out_hyd_fname);
 
-  if((model->subcat_fptr=fopen("./data/subcat.dat","r"))==NULL)
+    #ifndef BMI_ACTIVE
+        char input_fname[30];
+        fscanf(model->control_fptr,"%s",input_fname);
+        if((model->input_fptr=fopen("./data/inputs.dat","r"))==NULL)
+          {printf("Can't open input file named %s\n",input_fname);exit(-9);}
+    #endif 
+
+    if((model->subcat_fptr=fopen("./data/subcat.dat","r"))==NULL)
     {printf("Can't open subcat file named %s\n",subcat_fname);exit(-9);}
 
-  if((model->params_fptr=fopen("./data/params.dat","r"))==NULL)
+    if((model->params_fptr=fopen("./data/params.dat","r"))==NULL)
     {printf("Can't open params file named %s\n",params_fname);exit(-9);}
 
-  if((model->output_fptr=fopen("./topmod.out","w"))==NULL)
+    if((model->output_fptr=fopen("./topmod.out","w"))==NULL)
     {printf("Can't open output file named %s\n",output_fname);exit(-9);}
 
-  if((model->out_hyd_fptr=fopen("./hyd.out","w"))==NULL)
+    if((model->out_hyd_fptr=fopen("./hyd.out","w"))==NULL)
     {printf("Can't open output file named %s\n",out_hyd_fname);exit(-9);}
+
+    fclose(model->control_fptr);
 
 }
 
@@ -149,14 +105,39 @@ int init_config(const char* config_file, topmodel_model* model)
 
     read_init_config(config_file,model);
     
-    /*  READ IN nstep, DT and RAINFALL, PE, QOBS INPUTS */
-    inputs(model->input_fptr, &model->nstep, &model->dt, &model->rain, &model->pe, &model->Qobs, &model->Q, &model->contrib_area);
+    #ifndef BMI_ACTIVE
+        /* READ IN nstep, DT and RAINFALL, PE, QOBS INPUTS */
+        inputs(model->input_fptr, &model->nstep, &model->dt, &model->rain, &model->pe, 
+            &model->Qobs, &model->Q, &model->contrib_area);
+    #else    
+        /* Hard-def input values not read-in */
+        model->nstep = 1480;
+        model->dt = 1;
+
+        /* allocate memory for arrays */
+        d_alloc(&model->rain,(model->nstep));
+        d_alloc(&model->pe,(model->nstep));
+        d_alloc(&model->Qobs,(model->nstep));   //TODO: Consider removing this all together
+        d_alloc(&model->Q,(model->nstep));
+        d_alloc(&model->contrib_area,(model->nstep));
+
+        for(int i=1;i<=(model->nstep);i++)
+          {
+          (model->Q)[i]=0.0;
+          }
+    #endif
 
     /*  READ IN SUBCATCHMENT TOPOGRAPHIC DATA */
     fscanf(model->subcat_fptr,"%d %d %d,",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
 
+    // Yes, this needs to be here
     if(model->yes_print_output == TRUE)
         {fprintf(model->output_fptr,"%s\n",model->title);}
+
+    // Set up maxes for subcat and params read-in functions
+    model-> max_atb_increments=30;
+    model-> max_num_subcatchments=10;
+    model-> max_time_delay_ordinates=20;
 
     tread(model->subcat_fptr,model->output_fptr,model->subcat,&model->num_topodex_values,&model->num_channels,
         &model->area,&model->dist_area_lnaotb,&model->lnaotb,model->yes_print_output,
@@ -169,7 +150,7 @@ int init_config(const char* config_file, topmodel_model* model)
         &model->dth,&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
         &model->szq,model->Q,&model->sbar,model->max_atb_increments,model->max_time_delay_ordinates,
         &model->bal,&model->num_time_delay_histo_ords,&model->num_delay);
-
+  
     return BMI_SUCCESS;
 }
 
@@ -221,16 +202,21 @@ static int Get_current_time (Bmi *self, double * time)
 
 static int Initialize (Bmi *self, const char *cfg_file)
 {
+
     topmodel_model *topmodel;
     topmodel = (topmodel_model *) self->data;
 
-    int config_read_result=init_config(cfg_file, topmodel);
+    // Read and setup data from file
+    init_config(cfg_file, topmodel);
 
+    // Initialize model varables which are cumulatively defined
     topmodel->current_time_step=0;
-    
     topmodel->sump = 0.0;
     topmodel->sumae = 0.0;
     topmodel->sumq = 0.0;    
+
+    topmodel->precip_rate = 0.0;  //TODO: Unit conversion
+    topmodel->potential_et_m_per_s = 0.0; //TODO: Unit conversion
 
     return BMI_SUCCESS;
 }
@@ -263,7 +249,8 @@ static int Update (Bmi *self)
         topmodel->num_time_delay_histo_ords,topmodel->Q,
         topmodel->time_delay_histogram,topmodel->subcat,&topmodel->bal,
         &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step,
-        &topmodel->sump,&topmodel->sumae,&topmodel->sumq);
+        &topmodel->sump,&topmodel->sumae,&topmodel->sumq, 
+        topmodel->precip_rate, topmodel->potential_et_m_per_s);
 
     if (topmodel->yes_print_output == TRUE){
     results(topmodel->output_fptr,topmodel->out_hyd_fptr,topmodel->nstep, 
@@ -308,10 +295,6 @@ static int Finalize (Bmi *self)
     topmodel_model* model = (topmodel_model *)(self->data);
     self->data = (void*)new_bmi_topmodel();
 
-    fclose(model->control_fptr);
-    fclose(model->input_fptr);
-    fclose(model->subcat_fptr);
-    fclose(model->params_fptr);
     fclose(model->output_fptr);
     fclose(model->out_hyd_fptr);
   }
@@ -482,6 +465,21 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> Qout;
+        return BMI_SUCCESS;
+    }
+
+    // TODO: Confirm these are OK to def even if not true model input?
+    if (strcmp (name, "water_potential_evaporation_flux") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> potential_et_m_per_s;
+        return BMI_SUCCESS;
+    }
+
+    if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel->precip_rate;
         return BMI_SUCCESS;
     }
 
@@ -720,22 +718,15 @@ static int Get_grid_nodes_per_face(Bmi *self, int grid, int *nodes_per_face)
 }
 
 
-topmodel_model *
-new_bmi_topmodel()  //(void)?
+topmodel_model * new_bmi_topmodel()  //(void)?
 {
     topmodel_model *data;
     data = (topmodel_model*) malloc(sizeof(topmodel_model));
 
-    // READ THESE FROM CONFIG FILE:
-/*    data->time_step_size = 1;
-    data->num_timesteps  = 1;
-    data->current_time_step = 1;
-*/
     return data;
 }
 
-Bmi* 
-register_bmi_topmodel(Bmi *model)
+Bmi* register_bmi_topmodel(Bmi *model)
 {
     if (model) {
         model->data = (void*)new_bmi_topmodel();
@@ -796,29 +787,4 @@ register_bmi_topmodel(Bmi *model)
     }
 
     return model;
-}
-
-
-//For inital development/testing
-int 
-main(void)
-{
-    Bmi *model = (Bmi *) malloc(sizeof(Bmi));
-
-    register_bmi_topmodel(model);
-
-    const char *cfg_file = "./data/topmod.run";
-
-    model->initialize(model, cfg_file);
-
-    for (int i=1;i<=950;i++)
-    {
-        model->update(model);
-    }
-
-    //  model->update_until(model,950);
-
-    model->finalize(model);
-
-    return 0;
 }

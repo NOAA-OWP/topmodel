@@ -10,6 +10,8 @@
 #define TRUE  1
 #define FALSE 0
 
+#define BMI_ACTIVE TRUE
+
 /*** Function/subroutine prototypes ***/
 extern void init(FILE *in_param_fptr,FILE *output_fptr,char *subcat, 
               int num_channels,int num_topodex_values,
@@ -34,7 +36,8 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq);
+                double *sump, double *sumae, double *sumq, 
+                double precip_rate, double potential_et_m_per_s);
 
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
                int *num_topodex_values,int *num_channels,double *area,
@@ -126,7 +129,7 @@ struct topmodel_model{
   /******************** Returns ********************/
   double Qout;
 
-   /******************* BMI vars *******************/ 
+  /******************* BMI vars ********************/ 
   int current_time_step;    /*current time step*/
                             /*for BMI time functions*/
 
@@ -135,6 +138,11 @@ struct topmodel_model{
   double sump;   /* adjusted rainfall rate */
   double sumae;  /* adjusted evapotranspiration */   
   double sumq;   /* adjusted simulated discharge (Qout) */
+
+  /************** Get External Values **************/ 
+  double potential_et_m_per_s;
+  double precip_rate;
+
 };
 typedef struct topmodel_model topmodel_model;
 
