@@ -109,9 +109,10 @@ int init_config(const char* config_file, topmodel_model* model)
         /* READ IN nstep, DT and RAINFALL, PE, QOBS INPUTS */
         inputs(model->input_fptr, &model->nstep, &model->dt, &model->rain, &model->pe, 
             &model->Qobs, &model->Q, &model->contrib_area);
-    #else    
+    #else
+        /* TODO: consider number of steps dynamically defined?*/    
         /* Hard-def input values not read-in */
-        model->nstep = 1480;
+        model->nstep = 730;
         model->dt = 1;
 
         /* allocate memory for arrays */

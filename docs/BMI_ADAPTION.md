@@ -31,7 +31,7 @@
 		-	`init()`: MODEL PARAMETERS `params.dat`
 	-	`topmod()` --> `update()`
 	-	`results()` --> `update()`
-	-	`fclose()` --> `finalize()` 
+	-	`fclose()` placed at end of each .dat read-in function
 5.	Include ``current_time_step`` to `results()` and `topmod()`
 6.	Remove timeloop from `topmod()`; set ``it`` to ``current_time_step``
 7.	Include state variables in model structure, declared in `topmodel.h`, & to be passed in `topmod()`
@@ -39,6 +39,6 @@
 	-	```sumae```
 	-	```sumq```
 8.	Only print summary results at end of model run `nstep==current_time_step`
-9.  Note the use of `main()` in `bmi_topmodel.c` acts as a *psuedo-framework* for standalone development  
+9.  Note the use of `main()` in `bmi_topmodel.c` (or in separate .c file) acts as a *psuedo-framework* for standalone development  
 
 
