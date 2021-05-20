@@ -30,7 +30,7 @@ int main(void)
   model->initialize(model, cfg_file);
 
   printf("\n Looping Update TOPMODEL BMI model\n");
-  for (int i=1;i<=1480;i++){
+  for (int i=1;i<=730;i++){
     model->update(model);
   }
 
