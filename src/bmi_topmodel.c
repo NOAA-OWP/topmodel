@@ -69,7 +69,7 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     //Read the first line, up to 255 characters, of the the file
     fgets(model->title,256,model->control_fptr);
     
-    char subcat_fname[30],params_fname[30],input_fname[30];
+    char subcat_fname[256],params_fname[256],input_fname[256];
     
     //Read a string, breaks on whitespace (or newline)
     //These must be done IN ORDER
@@ -84,7 +84,7 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     fscanf(model->control_fptr,"%s",subcat_fname);
     fscanf(model->control_fptr,"%s",params_fname);
 
-    char output_fname[30],out_hyd_fname[30];
+    char output_fname[256],out_hyd_fname[256];
     fscanf(model->control_fptr,"%s",output_fname);
     fscanf(model->control_fptr,"%s",out_hyd_fname);
 
