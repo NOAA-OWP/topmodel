@@ -301,7 +301,33 @@ static int Finalize (Bmi *self)
 {
   if (self){
     topmodel_model* model = (topmodel_model *)(self->data);
-    self->data = (void*)new_bmi_topmodel();
+    
+    if( model->Q != NULL )
+        free(model->Q);
+    if( model->Qobs != NULL )
+        free(model->Qobs);
+    if( model->rain != NULL )
+        free(model->rain);
+    if( model->pe != NULL )
+        free(model->pe);
+    if( model->contrib_area != NULL )
+        free(model->contrib_are);
+    if( model->stor_unsat_zone != NULL )
+        free(model->stor_unsat_zone);
+    if( model->deficit_root_zone != NULL )
+        free(model->deficit_root_zone);
+    if( model->deficit_local != NULL )
+        free(model->deficit_local);
+    if( model->time_delay_histogram != NULL )
+        free(model->time_delay_histogram);
+    if( model->dist_area_lnaotb != NULL )
+        free(model->dist_area_lnaotb);
+    if( model->lnaotb != NULL )
+        free(model->lnaotb);
+    if( model->cum_dist_area_with_dist != NULL )
+        free(model->cum_dist_area_with_dist);
+    if( model->dist_from_outlet != NULL)
+        free(model->dist_from_outlet = NULL;
 
     fclose(model->output_fptr);
     fclose(model->out_hyd_fptr);
@@ -730,7 +756,20 @@ topmodel_model * new_bmi_topmodel()  //(void)?
 {
     topmodel_model *data;
     data = (topmodel_model*) malloc(sizeof(topmodel_model));
-
+    //Init pointers to NULL
+    data->Q = NULL;                    /* simulated discharge */
+    data->Qobs = NULL;                 /* observed discharge */
+    data->rain = NULL;                 /* rainfall rate */
+    data->pe = NULL;                   /* potential evapotranspiration */
+    data->contrib_area = NULL;         /* contributing area */
+    data->stor_unsat_zone = NULL;      /* storage in the unsat. zone */
+    data->deficit_root_zone = NULL;    /* root zone storage deficit */
+    data->deficit_local = NULL;        /* local storage deficit */
+    data->time_delay_histogram = NULL; /* time lag of outflows due to channel routing */
+    data->dist_area_lnaotb = NULL;     /* the distribution of area corresponding to ln(A/tanB) histo.*/
+    data->lnaotb = NULL;               /* these are the ln(a/tanB) values */
+    data->cum_dist_area_with_dist = NULL;  /* channel cum. distr. of area with distance */
+    data->dist_from_outlet = NULL;     /* distance from outlet to point on channel with area known */
     return data;
 }
 
