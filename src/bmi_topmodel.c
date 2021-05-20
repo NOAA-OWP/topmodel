@@ -311,7 +311,7 @@ static int Finalize (Bmi *self)
     if( model->pe != NULL )
         free(model->pe);
     if( model->contrib_area != NULL )
-        free(model->contrib_are);
+        free(model->contrib_area);
     if( model->stor_unsat_zone != NULL )
         free(model->stor_unsat_zone);
     if( model->deficit_root_zone != NULL )
