@@ -331,6 +331,8 @@ static int Finalize (Bmi *self)
 
     fclose(model->output_fptr);
     fclose(model->out_hyd_fptr);
+    
+    free(self->data);
   }
     return BMI_SUCCESS;
 }
