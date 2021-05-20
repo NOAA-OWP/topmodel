@@ -69,15 +69,14 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     //Read the first line, up to 255 characters, of the the file
     fgets(model->title,256,model->control_fptr);
     
-    char subcat_fname[30],params_fname[30];
+    char subcat_fname[30],params_fname[30],input_fname[30];
+    
     //Read a string, breaks on whitespace (or newline)
     //These must be done IN ORDER
+    fscanf(model->control_fptr,"%s",input_fname);
     #ifndef BMI_ACTIVE
         //Not in BMI mode, read inputs from input file
-        //This means that if using BMI, the topmod.run file cannot have a line for inputs.dat
         //It might be worth always scanning this line, but only opening the file if not BMI_ACTIVE
-        char input_fname[30];
-        fscanf(model->control_fptr,"%s",input_fname);
         if((model->input_fptr=fopen(input_fname,"r"))==NULL)
           {printf("Can't open input file named %s\n",input_fname);exit(-9);}
     #endif 
