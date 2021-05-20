@@ -63,13 +63,25 @@ static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
 };
 
 int read_init_config(const char* config_file, topmodel_model* model) {
-
+    //Open the topmod.run file
     if((model->control_fptr=fopen(config_file,"r"))==NULL)
     {printf("Can't open control file named topmod.run\n");exit(-9);}
-
+    //Read the first line, up to 255 characters, of the the file
     fgets(model->title,256,model->control_fptr);
     
     char subcat_fname[30],params_fname[30];
+    //Read a string, breaks on whitespace (or newline)
+    //These must be done IN ORDER
+    #ifndef BMI_ACTIVE
+        //Not in BMI mode, read inputs from input file
+        //This means that if using BMI, the topmod.run file cannot have a line for inputs.dat
+        //It might be worth always scanning this line, but only opening the file if not BMI_ACTIVE
+        char input_fname[30];
+        fscanf(model->control_fptr,"%s",input_fname);
+        if((model->input_fptr=fopen(input_fname,"r"))==NULL)
+          {printf("Can't open input file named %s\n",input_fname);exit(-9);}
+    #endif 
+
     fscanf(model->control_fptr,"%s",subcat_fname);
     fscanf(model->control_fptr,"%s",params_fname);
 
@@ -77,23 +89,19 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     fscanf(model->control_fptr,"%s",output_fname);
     fscanf(model->control_fptr,"%s",out_hyd_fname);
 
-    #ifndef BMI_ACTIVE
-        char input_fname[30];
-        fscanf(model->control_fptr,"%s",input_fname);
-        if((model->input_fptr=fopen("./data/inputs.dat","r"))==NULL)
-          {printf("Can't open input file named %s\n",input_fname);exit(-9);}
-    #endif 
-
-    if((model->subcat_fptr=fopen("./data/subcat.dat","r"))==NULL)
+    
+    //Attempt to read the parsed input file names, bail if they cannot be read/created
+    if((model->subcat_fptr=fopen(subcat_fname,"r"))==NULL)
     {printf("Can't open subcat file named %s\n",subcat_fname);exit(-9);}
 
-    if((model->params_fptr=fopen("./data/params.dat","r"))==NULL)
+    if((model->params_fptr=fopen(params_fname,"r"))==NULL)
     {printf("Can't open params file named %s\n",params_fname);exit(-9);}
-
-    if((model->output_fptr=fopen("./topmod.out","w"))==NULL)
+        
+    //TODO use BMI_ACTIVE or some other macro to disable output file creation?
+    if((model->output_fptr=fopen(output_fname,"w"))==NULL)
     {printf("Can't open output file named %s\n",output_fname);exit(-9);}
 
-    if((model->out_hyd_fptr=fopen("./hyd.out","w"))==NULL)
+    if((model->out_hyd_fptr=fopen(out_hyd_fname,"w"))==NULL)
     {printf("Can't open output file named %s\n",out_hyd_fname);exit(-9);}
 
     fclose(model->control_fptr);
