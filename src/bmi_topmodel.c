@@ -327,7 +327,7 @@ static int Finalize (Bmi *self)
     if( model->cum_dist_area_with_dist != NULL )
         free(model->cum_dist_area_with_dist);
     if( model->dist_from_outlet != NULL)
-        free(model->dist_from_outlet = NULL;
+        free(model->dist_from_outlet) = NULL;
 
     fclose(model->output_fptr);
     fclose(model->out_hyd_fptr);
