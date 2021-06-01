@@ -10,7 +10,16 @@
 #define TRUE  1
 #define FALSE 0
 
+// Framework to pass in forcings
+// When undefined, read in inputs from file
 #define BMI_ACTIVE TRUE
+
+// Print to console settings:
+// 0: Nothing
+// 1: Model info (source code)
+// 2: BMI info (e.g.current timestep)
+// Note: All errors causing program to exit will print console message
+#define TOPMODEL_DEBUG 0
 
 /*** Function/subroutine prototypes ***/
 extern void init(FILE *in_param_fptr,FILE *output_fptr,char *subcat, 
@@ -49,7 +58,8 @@ extern void expinf(int irof, int it, int rint, double df, double cumf,
                    double dt,double xk0, double szm, double hf);                  
 
 extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
-                 int ntstep, double *Qobs, double *Q, int current_time_step );
+                 int nstep, double *Qobs, double *Q, 
+                 int current_time_step, int yes_print_output);
 
 extern void itwo_alloc( int ***ptr, int x, int y);
 extern void dtwo_alloc( double ***ptr, int x, int y);
@@ -62,7 +72,7 @@ struct topmodel_model{
 
   /******************* I/O files *******************/  
   /*FILE *fptr;*/
-  FILE *control_fptr;  /* this file must be named topmodel.run */
+  FILE *control_fptr;  
   FILE *input_fptr;   
   FILE *subcat_fptr;  
   FILE *params_fptr;  
