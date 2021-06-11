@@ -95,6 +95,12 @@ typedef struct Bmi {
     /* Getters */
     int (*get_value)(struct Bmi *self, const char *name, void *dest);
 
+    /* TODO - FUTURE DEV: serialization to live w.i. "core bmi"
+    get_ and set_state will behave similarly to existing 
+    get_ and set_value core bmi functions */
+    //int (*get_state)(struct Bmi *self, char **names, void **dest);
+    //int (*set_value)(struct Bmi *self, const char **names, void *src);
+
     int (*get_value_ptr)(struct Bmi *self, const char *name, void **dest_ptr);
 
     int (*get_value_at_indices)(struct Bmi *self, const char *name, void *dest, int *inds, int count);

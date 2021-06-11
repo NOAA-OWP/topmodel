@@ -162,6 +162,8 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     // which calls this function read_init_config()
     // Output files (if opened) closed in finalize()
 
+    return BMI_SUCCESS;
+
 }
 
 int init_config(const char* config_file, topmodel_model* model)

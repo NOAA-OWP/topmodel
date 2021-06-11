@@ -694,7 +694,7 @@ if(irof!=1)
     {
     f2=cumf+dt*rint;
     r2=-xkf*szf*(cd+f2)/(1.0-exp(szf*f2));
-    if(fabs(f2<1.0e-09) || r2>rint )
+    if(fabs(f2)<1.0e-09 || r2>rint )
       {
       irof=0;
       df=rint*dt;
@@ -868,7 +868,7 @@ int error=0;
 if ((rows==0)||(cols==0))
   {
   printf("Error: Attempting to allocate array of size 0\n");
-  exit;
+  exit(-9);
   }
 
 frows=rows+1;  /* added one for FORTRAN numbering */
@@ -904,7 +904,7 @@ int error=0;
 if ((rows==0)||(cols==0))
   {
   printf("Error: Attempting to allocate array of size 0\n");
-  exit;
+  exit(-9);
   }
 
 frows=rows+1;  /* added one for FORTRAN numbering */

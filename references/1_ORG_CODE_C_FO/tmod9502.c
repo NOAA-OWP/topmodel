@@ -808,7 +808,7 @@ if(yes_print_output==TRUE)
   {
   fprintf(output_fptr,"Initial Balance BAL %12.5f\n",(*bal));
   fprintf(output_fptr,"Initial SBAR        %12.5f\n",(*sbar));
-  fprintf(output_fptr,"SR0                 %12.5f\n",(*sr0));
+  fprintf(output_fptr,"Initial SR0         %12.5f\n",(*sr0));
   }
 return;
 }
@@ -857,7 +857,7 @@ if(irof!=1)
     {
     f2=cumf+dt*rint;
     r2=-xkf*szf*(cd+f2)/(1.0-exp(szf*f2));
-    if(fabs(f2<1.0e-09) || r2>rint )
+    if(fabs(f2)<1.0e-09 || r2>rint )
       {
       irof=0;
       df=rint*dt;
@@ -977,7 +977,7 @@ vare=f1/(double)nstep;
 nse=1.0-vare/varq;
 
 printf("Objective function values:\n");
-printf("SSE %e    NSE %7.5lf   F2 %e NSE %7.5lf\n",f1,nse,f2);
+printf("SSE %e    NSE %7.5lf   F2 %e\n",f1,nse,f2);
 printf("Mean Obs Q %e   Variance Obs Q %e\n",qbar,varq);
 printf("    Error Variance %e\n",vare);
 
@@ -1002,7 +1002,7 @@ int error=0;
 if ((rows==0)||(cols==0))
   {
   printf("Error: Attempting to allocate array of size 0\n");
-  exit;
+  exit(-9);
   }
 
 frows=rows+1;  /* added one for FORTRAN numbering */
@@ -1038,7 +1038,7 @@ int error=0;
 if ((rows==0)||(cols==0))
   {
   printf("Error: Attempting to allocate array of size 0\n");
-  exit;
+  exit(-9);
   }
 
 frows=rows+1;  /* added one for FORTRAN numbering */
