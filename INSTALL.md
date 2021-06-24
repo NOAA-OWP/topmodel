@@ -27,4 +27,4 @@ cd ..
 ```
 
 Default configuration generates OUT files, topmod.out and hyd.out, to root directory.
-See [here](refs/original_code_c/demo_hydrograph.out) for example of hydrograph output..
+See [here](refs/original_code_c/demo_hydrograph.out) for example of hydrograph output.
