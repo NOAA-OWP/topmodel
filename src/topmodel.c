@@ -325,7 +325,7 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
 if(yes_print_output==TRUE && in<=current_time_step)
   { 
   fprintf(output_fptr,"%d %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e\n",
-          it, p, ep, Q[it], quz, qb, (*sbar), qof);
+          current_time_step, p, ep, Q[it], quz, qb, (*sbar), qof);
   }
 
 /*  BMI Adaption: END SINGLE TIME STEP ITERATION 
@@ -577,6 +577,7 @@ if((double)(*num_time_delay_histo_ords)<tch[num_channels])
    {
    (*num_time_delay_histo_ords)++;
    }
+printf("num delay 1: %d\n",(*num_delay));
 (*num_delay)=(int)tch[1];
 (*num_time_delay_histo_ords)-=(*num_delay);
 for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
@@ -641,19 +642,21 @@ for(ia=1;ia<=num_topodex_values;ia++)
 (*sbar)=-(*szm)*log((*Q0)/(*szq));
 
 /*   Reinitialise discharge array */
+printf("num delay: %d\n",(*num_delay));
 sum=0.0;
 for(i=1;i<=(*num_delay);i++)
   {
   Q[i]+=(*Q0)*area;
   }
     
-
+printf("num time delay: %d\n",(*num_time_delay_histo_ords));
 // TODO: JG: this forloop is where seg fault is happening
 for(i=1;i<=(*num_time_delay_histo_ords);i++)
   {
   sum+=(*time_delay_histogram)[i];
   in=(*num_delay)+i;
-  Q[in]+=(*Q0)*(area-sum);
+  Q[in]+=(*Q0)*(area-sum); //HERE
+  printf("in: %d\n",in);
   }
       
 /*  Initialise water balance.  BAL is positive for storage */

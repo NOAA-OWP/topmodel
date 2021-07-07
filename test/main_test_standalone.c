@@ -28,15 +28,26 @@ int main(void)
   printf("\n Initializeing TOPMODEL BMI model ... \n");
   model->initialize(model, cfg_file);
 
-  double tm_time;
+  double current_time, end_time, time_step;
   topmodel_model *topmodel;
   topmodel = (topmodel_model *) model->data;
 
-  //More C setup
-  int numsteps = topmodel->nstep;
-  printf(" nstep (S/F switch applied): %8.6e\n", numsteps);
+  // Get standalone value
+/*  const char *var_name = "stand_alone";
+  double *var = NULL;
+  var = (double*) malloc (sizeof (double)*1);
+  model->get_value(model, var_name, var);
+  //printf(" \n stand_alone %d\n", (int)var[0]);
+  int standalone = (int)var[0];
+  printf(" \n stand_alone %d\n", standalone);*/
+  
+  //Get number of timesteps
+  model->get_end_time(model, &end_time);
+  model->get_time_step(model, &time_step);
+  int numsteps = end_time/time_step;
+  //printf(" \n nstep (S/F switch applied): %d\n", numsteps);
 
-  //if (topmodel->stand_alone == FALSE){
+//if (standalone FALSE){
     printf("\n Setting up mock framwork for inputs-forcings...\n");
       
     // Add ET data from TOPMODEL forcing
@@ -53,7 +64,7 @@ int main(void)
     double *var_ppt = NULL;
     var_ppt = (double*) malloc (sizeof (double)*1);
     const char *var_ppt_name = "atmosphere_water__liquid_equivalent_precipitation_rate";
-  //}
+//  }
 
   printf("\n Looping Update TOPMODEL BMI model\n");
   for (int i=0;i<numsteps;i++){
@@ -68,15 +79,13 @@ int main(void)
 //    }
 
     model->update(model);
-    model->get_current_time(model, &tm_time);
+    model->get_current_time(model, &current_time);
     
-    printf("\n Current time hrs: %f\n",tm_time);
-    //printf(" PET value from ET array %8.6e\n", et_dbl[i]);
-    //printf(" PET from TOPMODEL struct %8.6e\n", topmodel->potential_et_m_per_s);
-    printf(" PET from TOPMODEL struct ARRAY %8.6e\n", topmodel->pe);
-    //printf(" PPT value from PPT array %8.6e\n", ppt_dbl[i]);
+    printf("\n Current time hrs: %f\n",current_time);
+    printf(" PET value from ET array %8.6e\n", et_dbl[i]);
+    printf(" PET from TOPMODEL struct %8.6e\n", topmodel->potential_et_m_per_s);
+    printf(" PPT value from PPT array %8.6e\n", ppt_dbl[i]);
     printf(" PPT from TOPMODEL struct %8.6e\n", topmodel->precip_rate);
-    printf(" QOUT %8.6e\n", topmodel->Qout);
   }
 
   printf("\n Finalizing TOPMODEL BMI model ... \n");
