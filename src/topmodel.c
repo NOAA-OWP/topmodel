@@ -108,7 +108,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq, 
+                double *sump, double *sumae, double *sumq, int stand_alone,
                 double precip_rate, double potential_et_m_per_s)
 {
 /*****************************************************************
@@ -156,16 +156,17 @@ if(yes_print_output==TRUE && current_time_step==1)
  "it      p        ep       q(it)       quz      q       sbar       qof\n");
   }
 
-/* BMI Adaption: Set iteration to bmi's current_time_step
-Counter++ is handled by bmi's update()*/
-it=current_time_step;
+if (stand_alone == TRUE)it=current_time_step;
+  /* BMI Adaption: Set iteration to bmi's current_time_step
+  Counter++ is handled by bmi's update()*/
 
-/*BMI Adaption: 
-  Pass-in external forcing data (scalar) to original array at current_time_step*/
-#ifdef BMI_ACTIVE
+else {
+  /*BMI Adaption: 
+  Pass-in external forcing data (scalar) to original array (now size 1)*/
+  it=0;
   pe[it]=potential_et_m_per_s;
   rain[it]=precip_rate;
-#endif
+}
 
 qof=0.0;
 quz=0.0;
@@ -646,6 +647,8 @@ for(i=1;i<=(*num_delay);i++)
   Q[i]+=(*Q0)*area;
   }
     
+
+// TODO: JG: this forloop is where seg fault is happening
 for(i=1;i<=(*num_time_delay_histo_ords);i++)
   {
   sum+=(*time_delay_histogram)[i];

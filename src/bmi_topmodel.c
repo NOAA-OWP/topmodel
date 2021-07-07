@@ -2,19 +2,12 @@
 #include "../include/bmi.h" 
 #include "../include/bmi_topmodel.h"
 
-//ACTIVE_BMI flag conditions num of inputs
-#ifndef BMI_ACTIVE
-#define INPUT_VAR_NAME_COUNT 0
-#else
-#define INPUT_VAR_NAME_COUNT 2
-#endif
-
-#define OUTPUT_VAR_NAME_COUNT 1
-#define STATE_VAR_NAME_COUNT 57
-
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
-
+#define OUTPUT_VAR_NAME_COUNT 1
+#define STATE_VAR_NAME_COUNT 57
+// Gather inputs-forcings via framework
+#define INPUT_VAR_NAME_COUNT 2 //cardinality of various bmi input arrays
 
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout"
@@ -40,16 +33,6 @@ static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
         "node",
 };
 
-//Cardinality of arrays here depend on BMI_ACTIVE
-#ifndef BMI_ACTIVE
-static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {};
-static const char *input_var_types[INPUT_VAR_NAME_COUNT] = {};
-static const char *input_var_units[INPUT_VAR_NAME_COUNT] = {};
-static const int input_var_item_count[INPUT_VAR_NAME_COUNT] = {};
-static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {};
-static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {};
-
-#else
 static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {
         "atmosphere_water__liquid_equivalent_precipitation_rate",
         "water_potential_evaporation_flux"
@@ -79,7 +62,6 @@ static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
         "node",
         "node"
 };
-#endif
 
 int read_init_config(const char* config_file, topmodel_model* model) {
     
@@ -90,29 +72,40 @@ int read_init_config(const char* config_file, topmodel_model* model) {
         exit(-9);
     }
 
+    /* BMI Adaption: Include additional items in config
+    stand_alone (bool), & when FALSE/0
+    nstep (int); dt (double), otherwise gathered from inputs.dat */
+
     /* Structure of config_file as follows: 
+    stand_alone
     title
     path/to/inputs.dat
     path/to/subcat.dat
     path/to/params.dat
     path/to/topmod.out
-    path/to/hyd.out */
+    path/to/hyd.out 
+    nstep dt*/ //Note: needed when stand_alone FALSE
 
-    //Read the first line, up to 255 characters, of the the file
+    //Read the stand_alone T/F
+    // note: newline is needed here!
+    fscanf(model->control_fptr,"%d\n",&model->stand_alone);
+
+    //Read the title line, up to 255 characters, of the the file
     fgets(model->title,256,model->control_fptr);
     
     //Read a string, breaks on whitespace (or newline)
     //These must be done IN ORDER
     char input_fname[MAX_FILENAME_LENGTH];
+    //It might be worth always scanning this line, but only opening the file if not STAND_ALONE
     fscanf(model->control_fptr,"%s",input_fname);
-#ifndef BMI_ACTIVE
-    //Not in BMI mode, read inputs from input file
-    //It might be worth always scanning this line, but only opening the file if not BMI_ACTIVE
-    if((model->input_fptr=fopen(input_fname,"r"))==NULL){
-        printf("Can't open input file named %s\n",input_fname);
-        exit(-9);
-    }
-#endif //end #ifndef BMI_ACTIVE
+    
+    //If stand_alone TRUE, read inputs from input file
+    if (model->stand_alone == TRUE){
+        if((model->input_fptr=fopen(input_fname,"r"))==NULL){
+            printf("Can't open input file named %s\n",input_fname);
+            exit(-9);
+        }
+    };
 
     char subcat_fname[MAX_FILENAME_LENGTH],params_fname[MAX_FILENAME_LENGTH];
     fscanf(model->control_fptr,"%s",subcat_fname);
@@ -135,9 +128,9 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     
     /*  READ IN SUBCATCHMENT TOPOGRAPHIC DATA */
     // This is needed here to gather yes_print_output for possible outfile read-in
-    fscanf(model->subcat_fptr,"%d %d %d,",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
+    fscanf(model->subcat_fptr,"%d %d %d",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
 
-    // Attept to read the output file names only if printing to file
+    // Attempt to read the output file names only if printing to file
     if(model->yes_print_output == TRUE){
         if((model->output_fptr=fopen(output_fname,"w"))==NULL){           
             printf("Can't open output file named %s\n",output_fname);
@@ -158,6 +151,28 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     printf("This run: %s\n",model->title);
 #endif
 
+    // Now that stand_alone T/F known, setup bmi inputs accordingly...
+    if (model->stand_alone == FALSE){
+        
+        //First, grab config last lines for nstep and dt when running in framework
+        fscanf(model->control_fptr,"%d\n",&model->nstep);
+        fscanf(model->control_fptr,"%d\n",&model->dt);
+    }
+    /*
+    // vs. gathering inputs-nativeCode via dat file
+    else{
+
+#define INPUT_VAR_NAME_COUNT 0 // there are no true input
+
+    static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {};
+    static const char *input_var_types[INPUT_VAR_NAME_COUNT] = {};
+    static const char *input_var_units[INPUT_VAR_NAME_COUNT] = {};
+    static const int input_var_item_count[INPUT_VAR_NAME_COUNT] = {};
+    static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {};
+    static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {};
+    }*/
+
+
     fclose(model->control_fptr);
     // Note all individual input files closed in init_config(),
     // which calls this function read_init_config()
@@ -169,35 +184,24 @@ int read_init_config(const char* config_file, topmodel_model* model) {
 
 int init_config(const char* config_file, topmodel_model* model)
 {
-
     read_init_config(config_file,model);
     
-    #ifndef BMI_ACTIVE
+    if (model->stand_alone == TRUE){
         /* READ IN nstep, DT and RAINFALL, PE, QOBS INPUTS */
         inputs(model->input_fptr, &model->nstep, &model->dt, &model->rain, &model->pe, 
             &model->Qobs, &model->Q, &model->contrib_area);
         fclose(model->input_fptr);
-    #else
-        /* TODO: consider number of steps dynamically defined?
-            array allocation should not depend on nstep*/ 
+    }
+    else {
+        /* allocate memory for "arrays" */
+        d_alloc(&model->rain,1);
+        d_alloc(&model->pe,1);
+        d_alloc(&model->Qobs,1);   //TODO: Consider removing this all together
+        d_alloc(&model->Q,1);
+        d_alloc(&model->contrib_area,1);
 
-        /* Hard-def input values not read-in */
-        // model->nstep = 70;  // for testing
-        model->nstep = 720;
-        model->dt = 1;
-
-        /* allocate memory for arrays */
-        d_alloc(&model->rain,(model->nstep));
-        d_alloc(&model->pe,(model->nstep));
-        d_alloc(&model->Qobs,(model->nstep));   //TODO: Consider removing this all together
-        d_alloc(&model->Q,(model->nstep));
-        d_alloc(&model->contrib_area,(model->nstep));
-
-        for(int i=1;i<=(model->nstep);i++)
-          {
-          (model->Q)[i]=0.0;  //This was done in original topmod9502.c inputs() function
-          }
-    #endif
+        (model->Q)[0]=0.0;
+    }
 
     // Set up maxes for subcat and params read-in functions
     model-> max_atb_increments=30;
@@ -209,7 +213,7 @@ int init_config(const char* config_file, topmodel_model* model)
         &model->cum_dist_area_with_dist,&model->tl,&model->dist_from_outlet,
         model->max_num_subcatchments,model->max_atb_increments);
     fclose(model->subcat_fptr);
-
+    
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
         model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
@@ -217,7 +221,8 @@ int init_config(const char* config_file, topmodel_model* model)
         &model->szq,model->Q,&model->sbar,model->max_atb_increments,model->max_time_delay_ordinates,
         &model->bal,&model->num_time_delay_histo_ords,&model->num_delay);
     fclose(model->params_fptr);
-  
+
+
     return BMI_SUCCESS;
 }
 
@@ -269,7 +274,6 @@ static int Get_current_time (Bmi *self, double * time)
 
 static int Initialize (Bmi *self, const char *cfg_file)
 {
-
     topmodel_model *topmodel;
     topmodel = (topmodel_model *) self->data;
 
@@ -317,7 +321,7 @@ static int Update (Bmi *self)
         topmodel->num_time_delay_histo_ords,topmodel->Q,
         topmodel->time_delay_histogram,topmodel->subcat,&topmodel->bal,
         &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step,
-        &topmodel->sump,&topmodel->sumae,&topmodel->sumq, 
+        &topmodel->sump,&topmodel->sumae,&topmodel->sumq,topmodel->stand_alone, 
         topmodel->precip_rate, topmodel->potential_et_m_per_s);
 
     //--------------------------------------------------
@@ -327,7 +331,7 @@ static int Update (Bmi *self)
     // Logic for each is handled indiv w.i. funct,
     // but wouldn't hurt to check conditions here as framework
     // will likely not even need to jump into results()
-    if (topmodel->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){
+    if (topmodel->stand_alone == TRUE){
     results(topmodel->output_fptr,topmodel->out_hyd_fptr,topmodel->nstep, 
         topmodel->Qobs, topmodel->Q, 
         topmodel->current_time_step, topmodel->yes_print_output);
@@ -586,23 +590,21 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         return BMI_SUCCESS;
     }
 
-    // These input vars only exist when BMI_ACTIVE TRUE
+    // These input vars only exist when stand_alone FALSE
     // Note: should not effect bmi exe but added for good meassure
-#ifdef BMI_ACTIVE
-    if (strcmp (name, "water_potential_evaporation_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> potential_et_m_per_s;
-        return BMI_SUCCESS;
-    }
+        if (strcmp (name, "water_potential_evaporation_flux") == 0) {
+            topmodel_model *topmodel;
+            topmodel = (topmodel_model *) self->data;
+            *dest = (void*)&topmodel-> potential_et_m_per_s;
+            return BMI_SUCCESS;
+        }
 
-    if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel->precip_rate;
-        return BMI_SUCCESS;
-    }
-#endif
+        if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
+            topmodel_model *topmodel;
+            topmodel = (topmodel_model *) self->data;
+            *dest = (void*)&topmodel->precip_rate;
+            return BMI_SUCCESS;
+        }
 
     return BMI_FAILURE;
 }

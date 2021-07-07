@@ -10,11 +10,6 @@
 #define TRUE  1
 #define FALSE 0
 
-// Framework to pass in forcings
-// When undefined, read in inputs from file
-// Can comment this out, but don't set to FALSE
-#define BMI_ACTIVE TRUE
-
 // Print to console settings:
 // 0: Nothing
 // 1: Model info (source code)
@@ -46,7 +41,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq, 
+                double *sump, double *sumae, double *sumq, int stand_alone,
                 double precip_rate, double potential_et_m_per_s);
 
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
@@ -156,6 +151,11 @@ struct TopModel_Struct{
   double potential_et_m_per_s;
   double precip_rate;
   double dbl_arr_test[3];
+
+  /************** Framework vars **************/ 
+  int stand_alone;
+  //double obs_values;
+
 };
 
 //-------------------------------------------------
