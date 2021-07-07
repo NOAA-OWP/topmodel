@@ -154,9 +154,9 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     // Now that stand_alone T/F known, setup bmi inputs accordingly...
     if (model->stand_alone == FALSE){
         
-        //First, grab config last lines for nstep and dt when running in framework
-        fscanf(model->control_fptr,"%d\n",&model->nstep);
-        fscanf(model->control_fptr,"%d\n",&model->dt);
+        //First, grab config last lines for nstep and dt when running in framework;
+        fscanf(model->control_fptr,"%d %lf",&model->nstep,&model->dt);
+        //printf("init nstep dt: %d %lf\n",model->nstep, model->dt,);
     }
     /*
     // vs. gathering inputs-nativeCode via dat file
@@ -213,7 +213,7 @@ int init_config(const char* config_file, topmodel_model* model)
         &model->cum_dist_area_with_dist,&model->tl,&model->dist_from_outlet,
         model->max_num_subcatchments,model->max_atb_increments);
     fclose(model->subcat_fptr);
-    
+
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
         model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
@@ -590,6 +590,12 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         return BMI_SUCCESS;
     }
 
+    if (strcmp (name, "stand_alone") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> stand_alone;
+        return BMI_SUCCESS;
+    }
     // These input vars only exist when stand_alone FALSE
     // Note: should not effect bmi exe but added for good meassure
         if (strcmp (name, "water_potential_evaporation_flux") == 0) {

@@ -5,5 +5,4 @@ data/subcat.dat
 data/params.dat
 topmod.out
 hyd.out
-100
-1
+100 1
