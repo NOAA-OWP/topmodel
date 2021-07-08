@@ -84,7 +84,7 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     path/to/params.dat
     path/to/topmod.out
     path/to/hyd.out 
-    nstep dt*/ //Note: needed when stand_alone FALSE
+    nstep dt*/ //Note: needed only when stand_alone FALSE
 
     //Read the stand_alone T/F
     // note: newline is needed here!
@@ -126,8 +126,12 @@ int read_init_config(const char* config_file, topmodel_model* model) {
         exit(-9);
     }
     
-    /*  READ IN SUBCATCHMENT TOPOGRAPHIC DATA */
+    /* READ IN SUBCATCHMENT TOPOGRAPHIC DATA */
     // This is needed here to gather yes_print_output for possible outfile read-in
+    // TODO: JG thought - 
+    //      If framework will never want these out files, 
+    //      just use model->stand_alone as control switch
+    //      move line to init_config() with others
     fscanf(model->subcat_fptr,"%d %d %d",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
 
     // Attempt to read the output file names only if printing to file
@@ -154,9 +158,8 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     // Now that stand_alone T/F known, setup bmi inputs accordingly...
     if (model->stand_alone == FALSE){
         
-        //First, grab config last lines for nstep and dt when running in framework;
+        //First, grab config last line for nstep and dt when running in framework;
         fscanf(model->control_fptr,"%d %lf",&model->nstep,&model->dt);
-        //printf("init nstep dt: %d %lf\n",model->nstep, model->dt,);
     }
     /*
     // vs. gathering inputs-nativeCode via dat file
@@ -196,11 +199,11 @@ int init_config(const char* config_file, topmodel_model* model)
         /* allocate memory for "arrays" */
         d_alloc(&model->rain,1);
         d_alloc(&model->pe,1);
-        d_alloc(&model->Qobs,1);   //TODO: Consider removing this all together
+        d_alloc(&model->Qobs,1);   //TODO: Consider removing this all together when framework
         d_alloc(&model->Q,1);
         d_alloc(&model->contrib_area,1);
 
-        (model->Q)[0]=0.0;
+        (model->Q)[1]=0.0;
     }
 
     // Set up maxes for subcat and params read-in functions
@@ -327,7 +330,11 @@ static int Update (Bmi *self)
     //--------------------------------------------------
     // This should be moved into the Finalize() method
     //--------------------------------------------------
-    // results() considers both file and console prints.
+    // results() 
+    // 1. generates hydrograph out file 
+    // 2. computes objective function stats
+    //        - print to console.
+    //        - print to main out file
     // Logic for each is handled indiv w.i. funct,
     // but wouldn't hurt to check conditions here as framework
     // will likely not even need to jump into results()
@@ -589,28 +596,24 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> Qout;
         return BMI_SUCCESS;
     }
-
-    if (strcmp (name, "stand_alone") == 0) {
+    
+    // STANDALONE Note: 
+    //      When TRUE/1 there are no bmi inputs being passed
+    //      both out vars still exist and init to 0  
+    //      ... these defs should still be okay
+    if (strcmp (name, "water_potential_evaporation_flux") == 0) {
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> stand_alone;
+        *dest = (void*)&topmodel-> potential_et_m_per_s;
         return BMI_SUCCESS;
     }
-    // These input vars only exist when stand_alone FALSE
-    // Note: should not effect bmi exe but added for good meassure
-        if (strcmp (name, "water_potential_evaporation_flux") == 0) {
-            topmodel_model *topmodel;
-            topmodel = (topmodel_model *) self->data;
-            *dest = (void*)&topmodel-> potential_et_m_per_s;
-            return BMI_SUCCESS;
-        }
 
-        if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
-            topmodel_model *topmodel;
-            topmodel = (topmodel_model *) self->data;
-            *dest = (void*)&topmodel->precip_rate;
-            return BMI_SUCCESS;
-        }
+    if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel->precip_rate;
+        return BMI_SUCCESS;
+    }
 
     return BMI_FAILURE;
 }
