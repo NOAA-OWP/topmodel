@@ -108,8 +108,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq, int stand_alone,
-                double precip_rate, double potential_et_m_per_s)
+                double *sump, double *sumae, double *sumq, int stand_alone)
 {
 /*****************************************************************
 
@@ -132,7 +131,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 ******************************************************************/
 
 /* BMI Adaption: 
-  current_time_step, *sump, *sumae, *sumq, precip_rate, potential_et_m_per_s
+  current_time_step, *sump, *sumae, *sumq, stand_alone
   added as function input parameters */
 
 double ex[31];
@@ -156,17 +155,11 @@ if(yes_print_output==TRUE && current_time_step==1)
  "it      p        ep       q(it)       quz      q       sbar       qof\n");
   }
 
-if (stand_alone == TRUE)it=current_time_step;
-  /* BMI Adaption: Set iteration to bmi's current_time_step
+/* BMI Adaption: Set iteration to bmi's current_time_step (standalone) or 1 (framework)
   Counter++ is handled by bmi's update()*/
 
-else {
-  /*BMI Adaption: 
-  Pass-in external forcing data (scalar) to original array (now size 1)*/
-  it=1;
-  pe[it]=potential_et_m_per_s;
-  rain[it]=precip_rate;
-}
+if (stand_alone == TRUE)it=current_time_step;
+else it=1;  
 
 qof=0.0;
 quz=0.0;
@@ -642,14 +635,12 @@ for(ia=1;ia<=num_topodex_values;ia++)
 (*sbar)=-(*szm)*log((*Q0)/(*szq));
 
 /*   Reinitialise discharge array */
-//printf("num_delay: %d\n",*num_delay); 0
 sum=0.0;
 for(i=1;i<=(*num_delay);i++)
   {
   Q[i]+=(*Q0)*area;
   }
-    
-// printf("num_time_delay_histo_ords: %d\n",*num_time_delay_histo_ords);    
+      
 for(i=1;i<=(*num_time_delay_histo_ords);i++)
   {
   sum+=(*time_delay_histogram)[i];
