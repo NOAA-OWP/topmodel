@@ -203,7 +203,11 @@ int init_config(const char* config_file, topmodel_model* model)
         d_alloc(&model->Q,1);
         d_alloc(&model->contrib_area,1);
 
+        (model->rain)[1]=0.0;
+        (model->pe)[1]=0.0;
+        (model->Qobs)[1]=0.0;
         (model->Q)[1]=0.0;
+        (model->contrib_area)[1]=0.0;
     }
 
     // Set up maxes for subcat and params read-in functions
@@ -287,10 +291,7 @@ static int Initialize (Bmi *self, const char *cfg_file)
     topmodel->current_time_step=0;
     topmodel->sump = 0.0;
     topmodel->sumae = 0.0;
-    topmodel->sumq = 0.0;    
-
-    topmodel->precip_rate = 0.0;  //TODO: Unit conversion
-    topmodel->potential_et_m_per_s = 0.0; //TODO: Unit conversion
+    topmodel->sumq = 0.0;
 
     return BMI_SUCCESS;
 }
@@ -324,8 +325,7 @@ static int Update (Bmi *self)
         topmodel->num_time_delay_histo_ords,topmodel->Q,
         topmodel->time_delay_histogram,topmodel->subcat,&topmodel->bal,
         &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step,
-        &topmodel->sump,&topmodel->sumae,&topmodel->sumq,topmodel->stand_alone, 
-        topmodel->precip_rate, topmodel->potential_et_m_per_s);
+        &topmodel->sump,&topmodel->sumae,&topmodel->sumq,topmodel->stand_alone);
 
     //--------------------------------------------------
     // This should be moved into the Finalize() method
@@ -599,19 +599,19 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     
     // STANDALONE Note: 
     //      When TRUE/1 there are no bmi inputs being passed
-    //      both out vars still exist and init to 0  
-    //      ... these defs should still be okay
+    //      defs here speak to "scalar"  
+    //      TODO: add logic to only apply these defs for framework runs 
     if (strcmp (name, "water_potential_evaporation_flux") == 0) {
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> potential_et_m_per_s;
+        *dest = (void*)&topmodel-> pe[1];
         return BMI_SUCCESS;
     }
 
     if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel->precip_rate;
+        *dest = (void*)&topmodel->rain[1];
         return BMI_SUCCESS;
     }
 

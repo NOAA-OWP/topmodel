@@ -27,8 +27,8 @@ int main(void)
   topmodel_model *topmodel;
   topmodel = (topmodel_model *) model->data;
 
-  const char *cfg_file = "./data/topmod_100.run";
-  //const char *cfg_file = "./data/topmod.run";
+  //const char *cfg_file = "./data/topmod_100.run";
+  const char *cfg_file = "./data/topmod.run";
  
   //printf("\n Initializeing TOPMODEL BMI model ... \n");
   model->initialize(model, cfg_file);
@@ -73,17 +73,15 @@ int main(void)
     printf("\n Current time hrs: %f\n",current_time);
     if (topmodel->stand_alone == FALSE){
       printf("    INPUTS:\n");
-      //printf("      PET value from ET array %8.6e\n", et_dbl[i]); 
-      printf("      PET from TOPMODEL struct %8.6e\n", topmodel->potential_et_m_per_s);
-      //printf("      PET from ORIG struct %8.6e\n", topmodel->pe);
-      //printf("      PPT value from PPT array %8.6e\n", ppt_dbl[i]);
-      printf("      PPT from TOPMODEL struct %8.6e\n", topmodel->precip_rate);
-      //printf("      PPT from ORIG struct %8.6e\n", topmodel->rain);
+      printf("      PET value from ET array %8.6e\n", et_dbl[i]); 
+      printf("      PET from TOPMODEL struct %8.6e\n", topmodel->pe);
+      printf("      PPT value from PPT array %8.6e\n", ppt_dbl[i]);
+      printf("      PPT from TOPMODEL struct %8.6e\n", topmodel->rain);
     }
     printf("    QOUT: %8.6e\n", topmodel-> Qout);
   }
 
-  printf("\n Finalizing TOPMODEL BMI model ... \n");
+  //printf("\n Finalizing TOPMODEL BMI model ... \n");
   model->finalize(model);
 
   return 0;
