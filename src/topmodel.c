@@ -163,7 +163,7 @@ if (stand_alone == TRUE)it=current_time_step;
 else {
   /*BMI Adaption: 
   Pass-in external forcing data (scalar) to original array (now size 1)*/
-  it=0;
+  it=1;
   pe[it]=potential_et_m_per_s;
   rain[it]=precip_rate;
 }
@@ -318,7 +318,7 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
   {
   in=it+num_delay+ir-1;
   if(in>current_time_step) break;
-  Q[in]+=(*Qout)*time_delay_histogram[ir];
+  Q[in]=(*Qout)*time_delay_histogram[ir];
   }
 
 /* BMI Adaption: replace nstep with current_time_step */
@@ -577,7 +577,7 @@ if((double)(*num_time_delay_histo_ords)<tch[num_channels])
    {
    (*num_time_delay_histo_ords)++;
    }
-printf("num delay 1: %d\n",(*num_delay));
+
 (*num_delay)=(int)tch[1];
 (*num_time_delay_histo_ords)-=(*num_delay);
 for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
@@ -642,21 +642,19 @@ for(ia=1;ia<=num_topodex_values;ia++)
 (*sbar)=-(*szm)*log((*Q0)/(*szq));
 
 /*   Reinitialise discharge array */
-printf("num delay: %d\n",(*num_delay));
+//printf("num_delay: %d\n",*num_delay); 0
 sum=0.0;
 for(i=1;i<=(*num_delay);i++)
   {
   Q[i]+=(*Q0)*area;
   }
     
-printf("num time delay: %d\n",(*num_time_delay_histo_ords));
-// TODO: JG: this forloop is where seg fault is happening
+// printf("num_time_delay_histo_ords: %d\n",*num_time_delay_histo_ords);    
 for(i=1;i<=(*num_time_delay_histo_ords);i++)
   {
   sum+=(*time_delay_histogram)[i];
   in=(*num_delay)+i;
-  Q[in]+=(*Q0)*(area-sum); //HERE
-  printf("in: %d\n",in);
+  Q[in]+=(*Q0)*(area-sum);
   }
       
 /*  Initialise water balance.  BAL is positive for storage */
@@ -845,9 +843,6 @@ if (current_time_step == nstep) {
 
   for(it=1;it<=current_time_step;it++)
     {
-    //TODO: *sumq *ssq now as pointers in model struct
-    //redundant to compute again...
-    //Also still assuming Q[]s as arrays vs scalar (to change...)  
     sumq+=Qobs[it];
     ssq+=Qobs[it]*Qobs[it];
     f1+=pow((Q[it]-Qobs[it]),2.0);
