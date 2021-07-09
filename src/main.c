@@ -9,7 +9,7 @@
 This main program is a mock framwork.
 This is not part of BMI, but acts as the driver that calls the model.
 Note there are no getter/setter functions here,
-therefore, when #ifndef STAND_ALONE, forcings/et data not being passed to it's array
+therefore, when stand_alone FALSE, forcings/et data not being passed to it's array
 and the inital NULL value is being maintained throughout model run  
 */
 
@@ -39,11 +39,12 @@ int main(void)
   printf("\n Looping Update TOPMODEL BMI model\n");
 #endif
   
-#ifdef STAND_ALONE
-  int numsteps = 950;
-#else
-  int numsteps = 720;
-#endif
+  //Get number of timesteps
+  double end_time, time_step;
+  model->get_end_time(model, &end_time);
+  model->get_time_step(model, &time_step);
+  int numsteps = end_time/time_step;
+  
   for (int i=1;i<=numsteps;i++){
     model->update(model);
   }
