@@ -40,12 +40,11 @@ int main(void)
 #endif
   
   //Get number of timesteps
-  double end_time, time_step;
-  model->get_end_time(model, &end_time);
-  model->get_time_step(model, &time_step);
-  int numsteps = end_time/time_step;
-  
-  for (int i=1;i<=numsteps;i++){
+  topmodel_model *topmodel;
+  topmodel = (topmodel_model *) model->data;
+  int n = topmodel->nstep;
+
+  for (int i=1;i<=n;i++){
     model->update(model);
   }
 

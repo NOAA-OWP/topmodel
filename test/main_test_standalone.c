@@ -24,21 +24,17 @@ int main(void)
   //printf("\n Registering TOPMODEL BMI model ... \n");
   register_bmi_topmodel(model);
 
-  topmodel_model *topmodel;
-  topmodel = (topmodel_model *) model->data;
-
   //const char *cfg_file = "./data/topmod_100.run";
   const char *cfg_file = "./data/topmod.run";
  
   //printf("\n Initializeing TOPMODEL BMI model ... \n");
   model->initialize(model, cfg_file);
 
-  //Get number of timesteps
-  double current_time, end_time, time_step;
-  model->get_end_time(model, &end_time);
-  model->get_time_step(model, &time_step);
-  int numsteps = end_time/time_step;
-  //printf(" \n nstep (S/F switch applied): %d\n", numsteps);
+  //Setup time variables
+  topmodel_model *topmodel;
+  topmodel = (topmodel_model *) model->data;
+  double current_time;
+  int numsteps = topmodel->nstep;
 
   // Add ET data from TOPMODEL forcing
   double et_dbl[] = {0.0000619,0.0000647,0.0000619,0.000056,0.0000457,0.0000323,0.0000156,0,0,0,0,0,0,0,0,0,0,0,0,0,0.000018,0.0000348,0.0000492,0.0000602,0.0000666,0.0000696,0.0000666,0.0000602,0.0000492,0.0000348,0.0000168,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0000338,0.0000652,0.0000923,0.000113,0.000125,0.0001305,0.000125,0.000113,0.0000923,0.0000652,0.0000316,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0000414,0.0000798,0.0001129,0.0001383,0.000153,0.0001598,0.000153,0.0001383,0.0001129,0.0000798,0.0000387,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0000191,0.0000368,0.0000521,0.0000638,0.0000706,0.0000737,0.0000706,0.0000638};
