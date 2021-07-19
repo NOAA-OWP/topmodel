@@ -1,6 +1,10 @@
 /*  TOPMODEL DEMONSTRATION PROGRAM VERSION 95.02
 
-  This C version by Fred Ogden, Sept. 2009.  Converted to ANSI C
+  In service of the NOAA-NWS Office of Water Prediction, this 
+  version has been adapted to support a Basic Model Inferface
+  (BMI), 2021.
+
+  after C version by Fred Ogden, Sept. 2009.  Converted to ANSI C
   and given somewhat more meaningful variable names.  Compared
   against original FORTRAN version on a simple data set with no
   infiltration excess.
@@ -71,7 +75,6 @@
   SBAR at end of time step
 
   Current program limits are:
-          Number of time steps = 2500
           Number of subcatchments = 10
           Number of ln(a/tanB) increments = 30
           Number of subcatchment routing ordinates = 10

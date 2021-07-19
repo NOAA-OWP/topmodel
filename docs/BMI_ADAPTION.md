@@ -1,8 +1,8 @@
 # Adapting TOPMODEL to Basic Model Interface (BMI)
 
 ## Source Code 
--	TOPMODEL [C version](../references/1_ORG_CODE_C_FO/tmod9502.c) converted by Fred Ogden ‘09.
--	Previous is an adaptation from Keith Beven’s 1985 [FORTRAN version](../references/2_ORG_ORG_CODE_FORTRAN_KB/TMOD9502.f).
+-	TOPMODEL [C version](../refs/original_code_c/tmod9502.c) converted by Fred Ogden ‘09.
+-	Previous is an adaptation from Keith Beven’s 1985 [FORTRAN version](../refs/original_code_fortran/TMOD9502.f).
 
 ## Summary of Files
 -	[`topmodel.c`](../src/topmodel.c) modified from orginal source

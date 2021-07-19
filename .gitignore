@@ -75,3 +75,20 @@ bower_components/
 .grunt/
 src/vendor/
 dist/
+
+# Model generated OUT & RUN files #
+###################################
+refs/original_code_c/hyd.out
+refs/original_code_c/topmod.out
+hyd.out
+topmod.out
+run_bmi
+z_trash
+test/hyd.out
+test/topmod.out
+test/run_bmi_test
+test/z_trash_test
+
+# Misc #
+########
+make_and_run_bmi.sh

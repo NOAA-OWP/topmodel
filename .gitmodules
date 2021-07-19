@@ -1,0 +1,9 @@
+[submodule "refs/csdms/bmi-builder"]
+	path = refs/csdms/bmi-builder
+	url = https://github.com/bmi-forum/bmi-builder.git
+[submodule "refs/csdms/bmi-c"]
+	path = refs/csdms/bmi-c
+	url = https://github.com/csdms/bmi-c.git
+[submodule "refs/csdms/bmi-example-c"]
+	path = refs/csdms/bmi-example-c
+	url = https://github.com/csdms/bmi-example-c.git
