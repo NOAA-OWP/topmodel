@@ -284,6 +284,39 @@ main(int argc, const char *argv[]){
                 if (status == BMI_FAILURE)return BMI_FAILURE;
                 printf("   get value ptr: %f\n",var);
             }
+            // Go ahead and test set_value_*() for last time step here
+            if (n == test_nstep){
+                // Test BMI set_value()
+                {    
+                    double *var_new = NULL;
+                    var_new = (double*) malloc (sizeof (double)*len);
+                    var = (double*) malloc (sizeof (double)*len);
+                    var_new[0] = 99.9;
+                    status = model->set_value(model, var_name, var_new);
+                    if (status == BMI_FAILURE)return BMI_FAILURE;
+                    printf("   set value: %f\n",var_new[0]);
+                    // get_value to see if changed
+                    model->get_value(model, var_name, var);
+                    printf("   new get value: %f\n", var[0]);
+                    free(var);
+                    free(var_new);
+                }
+                // Test BMI set_value_at_indices()
+                {
+                    double *dest_new = NULL;
+                    dest_new = (double*) malloc (sizeof (double)*len);
+                    dest = (double*) malloc (sizeof (double)*len);
+                    dest_new[0] = 11.1;
+                    status = model->set_value_at_indices(model, var_name, &inds, len, dest_new);
+                    if (status == BMI_FAILURE)return BMI_FAILURE;
+                    printf("   set value at indices: %f\n",dest_new[0]);
+                    // get_value_at_indices to see if changed
+                    model->get_value_at_indices(model, var_name, dest, &inds, len);
+                    printf("   new get value at indices: %f\n", dest[0]);
+                    free(dest);
+                    free(dest_new);
+                }
+            }
         }
         for (i=0; i<count_out; i++){
             const char *var_name = names_out[i];
@@ -315,73 +348,50 @@ main(int argc, const char *argv[]){
                 if (status == BMI_FAILURE)return BMI_FAILURE;
                 printf("   get value ptr: %f\n",var);
             }
+            // Go ahead and test set_value_*() for last time step here
+            if (n == test_nstep){
+                // Test BMI set_value()
+                {    
+                    double *var_new = NULL;
+                    var_new = (double*) malloc (sizeof (double)*len);
+                    var = (double*) malloc (sizeof (double)*len);
+                    var_new[0] = -99.9;
+                    status = model->set_value(model, var_name, var_new);
+                    if (status == BMI_FAILURE)return BMI_FAILURE;
+                    printf("   set value: %f\n",var_new[0]);
+                    // get_value to see if changed
+                    model->get_value(model, var_name, var);
+                    printf("   new get value: %f\n", var[0]);
+                    free(var);
+                    free(var_new);
+                }
+                // Test BMI set_value_at_indices()
+                {
+                    double *dest_new = NULL;
+                    dest_new = (double*) malloc (sizeof (double)*len);
+                    dest = (double*) malloc (sizeof (double)*len);
+                    dest_new[0] = -11.1;
+                    status = model->set_value_at_indices(model, var_name, &inds, len, dest_new);
+                    if (status == BMI_FAILURE)return BMI_FAILURE;
+                    printf("   set value at indices: %f\n",dest_new[0]);
+                    // get_value_at_indices to see if changed
+                    model->get_value_at_indices(model, var_name, dest, &inds, len);
+                    printf("   new get value at indices: %f\n", dest[0]);
+                    free(dest);
+                    free(dest_new);
+                }
+            }
         }
     }
 
     //  model->update_until(model,950);
-
-
-    // Test BMI set_value
-    double *var = NULL;
-    const char *var_name = "Qout";
-    int len = 1;
-    var = (double*) malloc (sizeof (double)*len);
-    // get_value
-    model->get_value(model, var_name, var);
-    fprintf(stdout, "\nQout = %f before set_value\n", var[0]);
-    // set_value
-    double *var_new = NULL;
-    var_new = (double*) malloc (sizeof (double)*len);
-    var_new[0] = 99.9;
-    model->set_value(model, var_name, var_new);
-    // get_value to see if changed
-    model->get_value(model, var_name, var);
-    fprintf(stdout, "Qout = %f after set_value\n", var[0]);
-    free(var);
-    free(var_new);
-
-    // Test BMI set_value_at_indices
-    int inds = 0;
-    double *dest = NULL;
-    dest = (double*) malloc (sizeof (double)*len);
-    // get_value_at_indices
-    model->get_value_at_indices(model, var_name, dest, &inds, len);
-    fprintf(stdout, "\nQout = %f before set_value_at_indices\n", dest[0]);
-    // set_value
-    double *dest_new = NULL;
-    dest_new = (double*) malloc (sizeof (double)*len);
-    dest_new[0] = 11.1;
-    model->set_value_at_indices(model, var_name, &inds, len, dest_new);
-    // get_value_at_indices to see if changed
-    model->get_value_at_indices(model, var_name, dest, &inds, len);
-    fprintf(stdout, "Qout = %f after set_value_at_indices\n", dest[0]);
-    free(dest);
-    free(dest_new);
     
-    /*int n_names;
-
-    model->get_output_item_count(model, &n_names);
-
-    names = (char**) malloc (sizeof(char *) * n_names);
-    for (i=0; i<n_names; i++)
-      names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-
-    model->get_output_var_names(model, names);
-
-    for (i = 0; i<n_names; i++)
-      printf ("Get Output Var Names: %s\n", names[i]);
-
-    for (i=0; i<n_names; i++)
-      free (names[i]);
-    free (names);*/
-    
-    // Test BMI finalize
-    //model->finalize(model);
-    fprintf (stdout, "\nFinalizing... ");
-    status = model->finalize(model);
-    if (status == BMI_FAILURE )
-      return BMI_FAILURE;
-    fprintf (stdout, "PASS\n");
-
+    // Test BMI CONTROL FUNCTION finalize()
+    {
+        printf (" \nFinalizing...\n");
+        status = model->finalize(model);
+        if (status == BMI_FAILURE) return BMI_FAILURE;
+        printf("\n******************\nEND BMI UNIT TEST\n\n");
+    }
     return 0;
 }
