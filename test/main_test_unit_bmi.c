@@ -384,11 +384,20 @@ main(int argc, const char *argv[]){
         }
     }
 
-    //  model->update_until(model,950);
-    
-    // Test BMI CONTROL FUNCTION finalize()
+    // Test BMI: CONTROL FUNCTION update_until()
     {
-        printf (" \nFinalizing...\n");
+        int added_nstep=5;
+        int total_nstep= added_nstep + test_nstep;
+        printf("\n updating until... new total timesteps in test loop: %i\n", total_nstep);
+        status = model->update_until(model,total_nstep);
+        if (status == BMI_FAILURE) return BMI_FAILURE;
+        // confirm updated current time
+        model->get_current_time(model, &now);
+        printf(" current time: %f\n", now);
+    }
+    // Test BMI: CONTROL FUNCTION finalize()
+    {
+        printf("\n finalizing...\n");
         status = model->finalize(model);
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf("\n******************\nEND BMI UNIT TEST\n\n");
