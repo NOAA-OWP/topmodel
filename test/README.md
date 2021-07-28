@@ -36,7 +36,7 @@ $ ./run_bmi
 ```
 The executable is configured for a `stand_alone` scenario and reads-in information the same as the previous source code for TOPMODEL.  The two output files, `topmod.out` and `hyd.out`
 are identical to those produced by the original source code, prior to any BMI implementation.  The results are a 1-1 match, as shown in the plot below.  Instructions on how to run original TOPMODEL can be
-found [here](Modules/TOPMODEL/references/1_ORG_CODE_C_FO/README.1ST).
+found [here](https://github.com/NOAA-OWP/alt-modular/blob/main/Modules/TOPMODEL/references/1_ORG_CODE_C_FO/README.1ST).
 
 ![image](https://user-images.githubusercontent.com/30940444/127345662-aa083fe7-d2d6-47a4-8c68-0a16686016c6.png)
 
