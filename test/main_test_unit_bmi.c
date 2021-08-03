@@ -382,10 +382,9 @@ main(int argc, const char *argv[]){
                 }
             }
         }
-        free(names_out);
-        free(names_in);
     }
-
+    free(names_out);
+    free(names_in);
     // Test BMI: CONTROL FUNCTION update_until()
     {
         int added_nstep=5;
