@@ -69,7 +69,7 @@ main(int argc, const char *argv[]){
         printf( " input variable names:\n");
         for (i=0; i<count_in; i++)
             printf("   %s\n", names_in[i]);
-        //free(names);
+        //free(names_in);
     }
     // Test get_output_item_count()
     {
@@ -382,6 +382,8 @@ main(int argc, const char *argv[]){
                 }
             }
         }
+        free(names_out);
+        free(names_in);
     }
 
     // Test BMI: CONTROL FUNCTION update_until()
