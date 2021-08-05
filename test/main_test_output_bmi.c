@@ -86,7 +86,7 @@ main(int argc, const char *argv[]){
     var = (double*) malloc (sizeof (double)*1);
 
     printf("\nBMI GETTER SETTER FUNCTIONS\n********************************\n");
-    int test_nstep=10;
+    int test_nstep=100;
     double now;
     printf(" timesteps in test loop: %i\n", test_nstep);
     
