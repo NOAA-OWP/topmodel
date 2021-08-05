@@ -3,6 +3,6 @@ Taegu Pyungkwang River Catchment: Calibration Data
 data/inputs_100.dat
 data/subcat.dat
 data/params.dat
-topmod.out
-hyd.out
+topmod_100.out
+hyd_100.out
 100 1
