@@ -4,33 +4,44 @@
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
-#define OUTPUT_VAR_NAME_COUNT 1
+#define OUTPUT_VAR_NAME_COUNT 3
+#define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 57
-// Gather inputs-forcings via framework
-#define INPUT_VAR_NAME_COUNT 2 //cardinality of various bmi input arrays
 
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
-        "Qout"
+        "Qout",
+        "land_surface_water__runoff_mass_flux",
+        "soil_water__domain_volume_deficit"
 };
 
 static const char *output_var_types[OUTPUT_VAR_NAME_COUNT] = {
         "double",
+        "double",
+        "double"
 };
 
 static const int output_var_item_count[OUTPUT_VAR_NAME_COUNT] = {
         1,
+        1,
+        1
 };
 
 static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
         "m h-1",
+        "m h-1",
+        "m"
 };
 
 static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
         0,
+        0,
+        0
 };
 
 static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
         "node",
+        "node",
+        "node"
 };
 
 static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {
@@ -596,6 +607,18 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> Qout;
         return BMI_SUCCESS;
     }
+    if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> Q[1];
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> sbar;
+        return BMI_SUCCESS;
+    }
     
     // STANDALONE Note: 
     //      When TRUE/1 there are no bmi inputs being passed
@@ -605,6 +628,8 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> pe[1];
+        //*dest = (void*)(topmodel->pe + topmodel->current_time_step);
+        
         return BMI_SUCCESS;
     }
 
