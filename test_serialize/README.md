@@ -27,7 +27,7 @@ and deserialization that calls and relies on these new BMI functions.
 The current implementation of this general utility uses the
 [msgpack-c library](https://github.com/msgpack/msgpack-c)
 and is currently found in
-```topmodel/test/serialization/serialize_state.c.```
+```topmodel/test_serialization/serialize_state.c.```
 Msgpack serializes to binary and is both fast and compact.
 
 **Note:**  You must install the msgpack-c library to run the test.
