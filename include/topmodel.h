@@ -41,7 +41,8 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq, int stand_alone);
+                double *sump, double *sumae, double *sumq, int stand_alone,
+                double quz);
 
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
                int *num_topodex_values,int *num_channels,double *area,
@@ -142,9 +143,9 @@ struct TopModel_Struct{
 
   /***************** State Var Sums ****************/
   /*  sum up values after model run complete */
-  double sump;   /* adjusted rainfall rate */
-  double sumae;  /* adjusted evapotranspiration */   
-  double sumq;   /* adjusted simulated discharge (Qout) */
+  double sump;   /* accumulated rainfall */
+  double sumae;  /* accumulated evapotranspiration */   
+  double sumq;   /* accumulated discharge (Qout) */
 
   /************** Get External Values **************/ 
   double potential_et_m_per_s;
@@ -154,6 +155,11 @@ struct TopModel_Struct{
   /************** Framework vars **************/ 
   int stand_alone;
   //double obs_values;
+
+  /************** Additional Output vars **************/ 
+  double quz; /* flow from root zone to unsaturated zone*/
+  double qb;  /* subsurface flow or baseflow*/
+  double qof; /* flow from saturated area and infiltration excess flow*/
 
 };
 
