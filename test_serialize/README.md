@@ -62,4 +62,4 @@ is increased, these constants may also need to be increased.
 
 **Note:** To print and inspect the values of all state variables after
 they have been deserialized (usually from a file), you should change the
-parameter  ````print_obj``` from 0 to 1 in ```topmodel_serialize_test.c```.
+parameter  ```print_obj``` from 0 to 1 in ```topmodel_serialize_test.c```.
