@@ -108,7 +108,8 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq, int stand_alone)
+                double *sump, double *sumae, double *sumq, int stand_alone,
+                double quz)
 {
 /*****************************************************************
 
@@ -136,7 +137,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 
 double ex[31];
 int ia,ib,in,irof,it,ir;
-double rex,cumf,max_contrib_area,qof,quz,ea,ep,p,rint,acm,df;
+double rex,cumf,max_contrib_area,qof,ea,ep,p,rint,acm,df;
 double acf,uz,sae,qb,of,sumrz,sumuz;
 
 irof=0;
@@ -652,7 +653,7 @@ for(i=1;i<=(*num_time_delay_histo_ords);i++)
 (*bal)=-(*sbar)-(*sr0);
 if(yes_print_output==TRUE)
   {
-  fprintf(output_fptr,"Initial Balance BAL %12.5f\n",(*bal));
+  fprintf(output_fptr,"Initial BAL %12.5f\n",(*bal));
   fprintf(output_fptr,"Initial SBAR        %12.5f\n",(*sbar));
   fprintf(output_fptr,"Initial SR0         %12.5f\n",(*sr0));
   }

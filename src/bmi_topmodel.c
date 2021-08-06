@@ -4,17 +4,23 @@
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
-#define OUTPUT_VAR_NAME_COUNT 3
+#define OUTPUT_VAR_NAME_COUNT 6
 #define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 57
 
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
         "land_surface_water__runoff_mass_flux",
-        "soil_water__domain_volume_deficit"
+        "soil_water__domain_volume_deficit",
+        "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",
+        "land_surface_water__baseflow_volume_flux",
+        "land_surface_water__domain_time_integral_of_overland_flow_volume_flux"
 };
 
 static const char *output_var_types[OUTPUT_VAR_NAME_COUNT] = {
+        "double",
+        "double",
+        "double",
         "double",
         "double",
         "double"
@@ -23,22 +29,34 @@ static const char *output_var_types[OUTPUT_VAR_NAME_COUNT] = {
 static const int output_var_item_count[OUTPUT_VAR_NAME_COUNT] = {
         1,
         1,
+        1,
+        1,
+        1,
         1
 };
 
 static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
         "m h-1",
         "m h-1",
-        "m"
+        "m",
+        "m h-1",
+        "m h-1",
+        "m h-1"
 };
 
 static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
+        0,
+        0,
+        0,
         0,
         0,
         0
 };
 
 static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
+        "node",
+        "node",
+        "node",
         "node",
         "node",
         "node"
@@ -336,7 +354,8 @@ static int Update (Bmi *self)
         topmodel->num_time_delay_histo_ords,topmodel->Q,
         topmodel->time_delay_histogram,topmodel->subcat,&topmodel->bal,
         &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step,
-        &topmodel->sump,&topmodel->sumae,&topmodel->sumq,topmodel->stand_alone);
+        &topmodel->sump,&topmodel->sumae,&topmodel->sumq,topmodel->stand_alone,
+        topmodel->quz);
 
     //--------------------------------------------------
     // This should be moved into the Finalize() method
@@ -619,7 +638,24 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> sbar;
         return BMI_SUCCESS;
     }
-    
+    if (strcmp (name, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> quz;
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "land_surface_water__baseflow_volume_flux") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> qb;
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> qof;
+        return BMI_SUCCESS;
+    }
     // STANDALONE Note: 
     //      When TRUE/1 there are no bmi inputs being passed
     //      defs here speak to "scalar"  
