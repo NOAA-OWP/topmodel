@@ -29,6 +29,10 @@ and is currently found in
 ```topmodel/test/serialization/serialize_state.c.```
 Msgpack serializes to binary and is both fast and compact.
 
+**Note:**  You must install the msgpack-c library to run the test.
+See instructions at: 
+[msgpack-c library](https://github.com/msgpack/msgpack-c).
+
 The new BMI functions that support serialization of models written in C
 are as follows.  These new functions are defined in
 ```topmodel/include/bmi.h```.
@@ -47,6 +51,7 @@ set_state_var():        Set the value of a state variable given its index
 
 The code for the actual test can be found in:
 ```topmodel/test_serialize/topmodel_serialize_test.c```,
-along with a small shell script for making and running the test.
+along with a small shell script called
+```make_and_run_ser_test.sh``` for making and running the test.
 
  
