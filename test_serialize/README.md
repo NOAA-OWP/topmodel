@@ -55,4 +55,11 @@ The code for the actual test can be found in:
 along with a small shell script called
 ```make_and_run_ser_test.sh``` for making and running the test.
 
- 
+**Note:** In ```serialize_state.c```, there are constants called
+```BUFFER_SIZE``` and ```UNPACKED_BUFFER_SIZE``` that must be big
+enough to accommodate all state variables.  If the model's nsteps
+is increased, these constants may also need to be increased.
+
+**Note:** To print and inspect the values of all state variables after
+they have been deserialized (usually from a file), you should change the
+parameter  ````print_obj``` from 0 to 1 in ```topmodel_serialize_test.c```.
