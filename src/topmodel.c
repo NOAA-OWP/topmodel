@@ -109,7 +109,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
                 double *sump, double *sumae, double *sumq, int stand_alone,
-                double quz)
+                double *quz, double *qb, double *qof)
 {
 /*****************************************************************
 
@@ -137,8 +137,8 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 
 double ex[31];
 int ia,ib,in,irof,it,ir;
-double rex,cumf,max_contrib_area,qof,ea,ep,p,rint,acm,df;
-double acf,uz,sae,qb,of,sumrz,sumuz;
+double rex,cumf,max_contrib_area,ea,ep,p,rint,acm,df;
+double acf,uz,sae,of,sumrz,sumuz;
 
 irof=0;
 rex=0.0;
@@ -162,8 +162,8 @@ if(yes_print_output==TRUE && current_time_step==1)
 if (stand_alone == TRUE)it=current_time_step;
 else it=1;  
 
-qof=0.0;
-quz=0.0;
+*qof=0.0;
+*quz=0.0;
 ep=pe[it];  
 p=rain[it];
 *sump+=p;  /* BMI Adaption: *sump now as pointer var; incl in model struct */
@@ -241,7 +241,7 @@ for(ia=1;ia<=num_topodex_values;ia++)
     if(uz>stor_unsat_zone[ia]) uz=stor_unsat_zone[ia];
     stor_unsat_zone[ia]-=uz;
     if(stor_unsat_zone[ia]<0.0000001) stor_unsat_zone[ia]=0.0;
-    quz+=uz*acf;
+    *quz+=uz*acf;
     }
     
   /***************************************************************/
@@ -282,7 +282,7 @@ for(ia=1;ia<=num_topodex_values;ia++)
         }
       }
     }
-  qof+=of;
+  (*qof)+=of;
 
   /*  Set contributing area plotting array */
   contrib_area[it]=acm;
@@ -292,14 +292,14 @@ for(ia=1;ia<=num_topodex_values;ia++)
   }
 
 /*  ADD INFILTRATION EXCESS RUNOFF */
-qof+=rex;
+(*qof)+=rex;
 
 if(irof==1) max_contrib_area=1.0;
 
 /*  CALCULATE SATURATED ZONE DRAINAGE */
-qb=szq*exp(-(*sbar)/szm);
-(*sbar)+=(-quz+qb);
-*Qout=qb+qof;
+(*qb)=szq*exp(-(*sbar)/szm);
+(*sbar)+=(-(*quz)+(*qb));
+*Qout=(*qb)+(*qof);
 *sumq+=(*Qout); /* BMI Adaption: *sumq now as pointer var; incl in model struct */
 
 /*  CHANNEL ROUTING CALCULATIONS */
@@ -319,7 +319,7 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
 if(yes_print_output==TRUE && in<=current_time_step)
   { 
   fprintf(output_fptr,"%d %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e\n",
-          current_time_step, p, ep, Q[it], quz, qb, (*sbar), qof);
+          current_time_step, p, ep, Q[it], (*quz), (*qb), (*sbar), (*qof));
   }
 
 /*  BMI Adaption: END SINGLE TIME STEP ITERATION 
@@ -653,7 +653,7 @@ for(i=1;i<=(*num_time_delay_histo_ords);i++)
 (*bal)=-(*sbar)-(*sr0);
 if(yes_print_output==TRUE)
   {
-  fprintf(output_fptr,"Initial BAL %12.5f\n",(*bal));
+  fprintf(output_fptr,"Initial BAL         %12.5f\n",(*bal));
   fprintf(output_fptr,"Initial SBAR        %12.5f\n",(*sbar));
   fprintf(output_fptr,"Initial SR0         %12.5f\n",(*sr0));
   }
