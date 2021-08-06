@@ -204,12 +204,15 @@ if(infex==1)
     cumf=0.0;
     }
   }
-/****************************************************************
+/******************************************************************/
 /* P IS RAINFALL AVAILABLE FOR INFILTRATION AFTER SURFACE CONTROL */
 /*   CALCULATION */
 
 acm=0.0;
 /*  START LOOP ON A/TANB INCREMENTS */
+//---------------------------------------
+// Note: Loop count starts at 1, not 0!
+//---------------------------------------
 for(ia=1;ia<=num_topodex_values;ia++)
   {
   acf=0.5*(dist_area_lnaotb[ia]+dist_area_lnaotb[ia+1]);
@@ -307,6 +310,9 @@ qb=szq*exp(-(*sbar)/szm);
 /*  CHANNEL ROUTING CALCULATIONS */
 /*  allow for time delay to catchment outlet num_delay as well as  */
 /*  internal routing array */
+//---------------------------------------
+// Note: Loop count starts at 1, not 0!
+//---------------------------------------
 for(ir=1;ir<=num_time_delay_histo_ords;ir++)
   {
   in=it+num_delay+ir-1;
@@ -327,6 +333,9 @@ if(yes_print_output==TRUE && in<=current_time_step)
 /*  CALCULATE BALANCE TERMS */
 sumrz=0.0;
 sumuz=0.0;
+//---------------------------------------
+// Note: Loop count starts at 1, not 0!
+//---------------------------------------
 for(ia=1;ia<=num_topodex_values;ia++)
   {
 
@@ -391,6 +400,9 @@ d_alloc(Qobs,(*nstep));
 d_alloc(Q,(*nstep));
 d_alloc(contrib_area,(*nstep));
 
+//---------------------------------------
+// Note: Loop count starts at 1, not 0!
+//---------------------------------------
 for(i=1;i<=(*nstep);i++)
   {
   fscanf(input_fptr,"%lf %lf %lf",&(*r)[i],&(*pe)[i],&(*Qobs)[i]);
@@ -697,7 +709,10 @@ if(irof!=1)
     {
     f2=cumf+dt*rint;
     r2=-xkf*szf*(cd+f2)/(1.0-exp(szf*f2));
-    if(fabs(f2)<1.0e-09 || r2>rint )
+    //--------------------------------------------------- 
+    // Bug fix: "fabs(f2<1.0e-09) -> "fabs(f2)<1.0e-09"
+    //---------------------------------------------------
+    if( fabs(f2)<1.0e-09 || r2>rint )
       {
       irof=0;
       df=rint*dt;
@@ -934,10 +949,12 @@ return;
 
 
 /*#############*/
-void d_alloc(double **var,int size)
+void d_alloc(double **var, int size)
 {
 /*sub allocates memory for a one-dimensional double precision array */
-  size++;  /* just for safety */
+
+   // Note: Be aware of extra size when serializing.
+   size++;  /* just for safety */
 
    *var = (double *)malloc(size * sizeof(double));
    if (*var == NULL)
@@ -950,10 +967,11 @@ void d_alloc(double **var,int size)
 }
 
 /*#############*/
-void i_alloc(int **var,int size)
+void i_alloc(int **var, int size)
 {
 /*sub allocates memory for a one-dimensional integer array */
 
+   // Note: Be aware of extra size when serializing.
    size++;  /* just for safety */
 
    *var = (int *)malloc(size * sizeof(int));
