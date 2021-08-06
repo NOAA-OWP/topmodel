@@ -107,8 +107,8 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 double srmax, double *contrib_area, double szq, double *Qout, 
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
-                double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq, int stand_alone,
+                double *sbar,int num_delay, int current_time_step, int stand_alone,
+                double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz,
                 double *quz, double *qb, double *qof)
 {
 /*****************************************************************
@@ -138,7 +138,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 double ex[31];
 int ia,ib,in,irof,it,ir;
 double rex,cumf,max_contrib_area,ea,ep,p,rint,acm,df;
-double acf,uz,sae,of,sumrz,sumuz;
+double acf,uz,sae,of;
 
 irof=0;
 rex=0.0;
@@ -326,17 +326,17 @@ if(yes_print_output==TRUE && in<=current_time_step)
     Note: original source code time-loop ends here*/
   
 /*  CALCULATE BALANCE TERMS */
-sumrz=0.0;
-sumuz=0.0;
 //---------------------------------------
 // Note: Loop count starts at 1, not 0!
 //---------------------------------------
+*sumrz=0.0;
+*sumuz=0.0;
 for(ia=1;ia<=num_topodex_values;ia++)
   {
 
   acf=0.5*(dist_area_lnaotb[ia]+dist_area_lnaotb[ia+1]);
-  sumrz+=deficit_root_zone[ia]*acf;
-  sumuz+=stor_unsat_zone[ia]*acf;
+  (*sumrz)+=deficit_root_zone[ia]*acf;
+  (*sumuz)+=stor_unsat_zone[ia]*acf;
 
   }
 
@@ -345,14 +345,14 @@ for(ia=1;ia<=num_topodex_values;ia++)
 if (current_time_step == nstep)
   {
 
-  (*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+sumrz-sumuz;
+  (*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
 
 #if TOPMODEL_DEBUG >=1  
   printf("\nWater Balance for Subcatchment: %s\n",subcat);
   printf(
   "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
   printf("%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
-          (*sump),(*sumae),(*sumq),sumrz,sumuz,(*sbar),(*bal));
+          (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
 #endif
 
   if (yes_print_output==TRUE)
@@ -361,7 +361,7 @@ if (current_time_step == nstep)
     fprintf(output_fptr,
     "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
     fprintf(output_fptr,"%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
-           (*sump),(*sumae),(*sumq),sumrz,sumuz,(*sbar),(*bal));
+           (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
     fprintf(output_fptr,"Maximum contributing area %12.5lf\n",max_contrib_area);
     }
   }

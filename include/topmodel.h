@@ -40,8 +40,8 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 double srmax, double *contrib_area, double szq, double *Qout, 
                 int num_time_delay_histo_ords,double *Q,
                 double *time_delay_histogram,char *subcat,double *bal,
-                double *sbar,int num_delay, int current_time_step, 
-                double *sump, double *sumae, double *sumq, int stand_alone,
+                double *sbar,int num_delay, int current_time_step, int stand_alone,
+                double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz,
                 double *quz, double *qb, double *qof);
 
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
@@ -142,10 +142,11 @@ struct TopModel_Struct{
                             /*for BMI time functions*/
 
   /***************** State Var Sums ****************/
-  /*  sum up values after model run complete */
   double sump;   /* accumulated rainfall */
   double sumae;  /* accumulated evapotranspiration */   
   double sumq;   /* accumulated discharge (Qout) */
+  double sumrz;  /* deficit_root_zone over the whole watershed */
+  double sumuz;  /* stor_unsat_zone over the whole watershed */
 
   /************** Get External Values **************/ 
   double potential_et_m_per_s;

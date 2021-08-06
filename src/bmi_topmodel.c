@@ -4,7 +4,7 @@
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
-#define OUTPUT_VAR_NAME_COUNT 9
+#define OUTPUT_VAR_NAME_COUNT 11
 #define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 57
 
@@ -17,10 +17,14 @@ static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "land_surface_water__domain_time_integral_of_overland_flow_volume_flux",
         "land_surface_water__domain_time_integral_of_precipitation_volume_flux",
         "land_surface_water__domain_time_integral_of_evaporation_volume_flux",
-        "land_surface_water__domain_time_integral_of_runoff_volume_flux"
+        "land_surface_water__domain_time_integral_of_runoff_volume_flux",
+        "soil_water__domain_root-zone_volume_deficit",
+        "soil_water__domain_unsaturated-zone_volume"
 };
 
 static const char *output_var_types[OUTPUT_VAR_NAME_COUNT] = {
+        "double",
+        "double",
         "double",
         "double",
         "double",
@@ -41,6 +45,8 @@ static const int output_var_item_count[OUTPUT_VAR_NAME_COUNT] = {
         1,
         1,
         1,
+        1,
+        1,
         1
 };
 
@@ -51,6 +57,8 @@ static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
         "m h-1",
         "m h-1",
         "m h-1",
+        "m",
+        "m",
         "m",
         "m",
         "m"
@@ -65,10 +73,14 @@ static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
         0,
         0,
         0,
+        0,
+        0,
         0
 };
 
 static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
+        "node",
+        "node",
         "node",
         "node",
         "node",
@@ -371,8 +383,8 @@ static int Update (Bmi *self)
         topmodel->srmax, topmodel->contrib_area, topmodel->szq, &topmodel->Qout, 
         topmodel->num_time_delay_histo_ords,topmodel->Q,
         topmodel->time_delay_histogram,topmodel->subcat,&topmodel->bal,
-        &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step,
-        &topmodel->sump,&topmodel->sumae,&topmodel->sumq,topmodel->stand_alone,
+        &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step, topmodel->stand_alone,
+        &topmodel->sump,&topmodel->sumae,&topmodel->sumq,&topmodel->sumrz,&topmodel->sumuz,
         &topmodel->quz, &topmodel->qb, &topmodel->qof);
 
     //--------------------------------------------------
@@ -387,7 +399,7 @@ static int Update (Bmi *self)
     // but wouldn't hurt to check conditions here as framework
     // will likely not even need to jump into results()
     if (topmodel->stand_alone == TRUE){
-    results(topmodel->output_fptr,topmodel->out_hyd_fptr,topmodel->nstep, 
+    results(topmodel->output_fptr, topmodel->out_hyd_fptr, topmodel->nstep, 
         topmodel->Qobs, topmodel->Q, 
         topmodel->current_time_step, topmodel->yes_print_output);
     }
@@ -690,6 +702,18 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sumq;
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "soil_water__domain_root-zone_volume_deficit") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> sumrz;
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "soil_water__domain_unsaturated-zone_volume") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> sumuz;
         return BMI_SUCCESS;
     }
     // STANDALONE Note: 
