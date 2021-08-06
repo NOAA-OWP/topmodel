@@ -12,6 +12,7 @@
 
 // Framework to pass in forcings
 // When undefined, read in inputs from file
+// Can comment this out, but don't set to FALSE
 #define BMI_ACTIVE TRUE
 
 // Print to console settings:
@@ -68,7 +69,9 @@ extern void i_alloc(int **var,int size);
 
 
 /*** Model structure ***/
-struct topmodel_model{
+
+// Changed: "struct topmodel_model{" to "struct TopModel_Struct{"
+struct TopModel_Struct{
 
   /******************* I/O files *******************/  
   /*FILE *fptr;*/
@@ -114,27 +117,27 @@ struct topmodel_model{
   double bal;              /* the residual of the water balance */
   double sbar;             /* the catchment average soil moisture deficit */
 
-  /*** THESE POINTERS WILL BE DIMENSIONED DYNAMICALLY TO BECOME 1-D ARRAYS *****/
-  double *Q;                    /* simulated discharge */
-  double *Qobs;                 /* observed discharge */
-  double *rain;                 /* rainfall rate */
-  double *pe;                   /* potential evapotranspiration */
-  double *contrib_area;         /* contributing area */
-  double *stor_unsat_zone;      /* storage in the unsat. zone */
-  double *deficit_root_zone;    /* root zone storage deficit */
-  double *deficit_local;        /* local storage deficit */
-  double *time_delay_histogram; /* time lag of outflows due to channel routing */
-  double *dist_area_lnaotb;     /* the distribution of area corresponding to ln(A/tanB) histo.*/
-  double *lnaotb;               /* these are the ln(a/tanB) values */
-  double *cum_dist_area_with_dist;  /* channel cum. distr. of area with distance */
-  double *dist_from_outlet;     /* distance from outlet to point on channel with area known */
+  // THESE POINTERS WILL BE DIMENSIONED DYNAMICALLY TO BECOME 1-D ARRAYS
+  double *Q;                    // simulated discharge
+  double *Qobs;                 // observed discharge
+  double *rain;                 // rainfall rate
+  double *pe;                   // potential evapotranspiration
+  double *contrib_area;         // contributing area
+  double *stor_unsat_zone;      // storage in the unsat. zone
+  double *deficit_root_zone;    // root zone storage deficit
+  double *deficit_local;        // local storage deficit
+  double *time_delay_histogram; // time lag of outflows due to channel routing
+  double *dist_area_lnaotb;     // the distribution of area corresponding to ln(A/tanB) histo.
+  double *lnaotb;               // these are the ln(a/tanB) values
+  double *cum_dist_area_with_dist;  // channel cum. distr. of area with distance
+  double *dist_from_outlet;     // distance from outlet to point on channel with area known
 
   /************** Other internal vars **************/
   int num_sub_catchments;
   int max_atb_increments;
   int max_num_subcatchments;
   int max_time_delay_ordinates;
-/*  int isc   //subcat loop no longer handled by topmod()*/
+  // int isc   //subcat loop no longer handled by topmod()
 
   /******************** Returns ********************/
   double Qout;
@@ -152,12 +155,17 @@ struct topmodel_model{
   /************** Get External Values **************/ 
   double potential_et_m_per_s;
   double precip_rate;
-
+  double dbl_arr_test[3];
 };
-typedef struct topmodel_model topmodel_model;
 
+//-------------------------------------------------
+// Define "topmodel_model" as a user-defined type
+// using TopModel_Struct above.
+//------------------------------------------------------
+// "struct topmodel_model" -> "struct TopModel_Struct"
+//------------------------------------------------------
+typedef struct TopModel_Struct topmodel_model;
 extern void alloc_topmodel(topmodel_model *model);
-
 extern void free_topmodel(topmodel_model *model);
 
 #endif
