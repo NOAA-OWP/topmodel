@@ -32,7 +32,7 @@ Msgpack serializes to binary and is both fast and compact.
 
 **Note:**  You must install the msgpack-c library to run the test.
 See instructions at: 
-[msgpack-c library](https://github.com/msgpack/msgpack-c).
+[msgpack-c library](https://github.com/msgpack/msgpack-c/tree/c_master).
 
 The new BMI functions that support serialization of models written in C
 are as follows.  These new functions are defined in
