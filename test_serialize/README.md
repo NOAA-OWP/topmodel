@@ -8,9 +8,10 @@ BMI function calls.  This excludes variables that are created only for
 temporary use within any given function.  A model's state variables will
 typically not be defined until after the model's BMI initialize() function
 has been called.  When a model's BMI update() function is called, the values
-of many of the state variables will be modified as the model advances in
-time.  If, after one or more BMI update() calls, all of a model's state
-variables are serialized and saved (i.e. to a buffer or a file), it becomes
+of many of the state variables will be modified (in-place) as the model
+advances in time.  If, after one or more BMI update() calls, all of a
+model's state variables are serialized and saved (i.e. to a buffer or a
+file), it becomes
 possible to deserialize them and to then set them as the state of a new
 instance of the same model.  The new instance can then continue running
 from the point in time that the original model's variables were serialized.
