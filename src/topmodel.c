@@ -109,7 +109,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, int stand_alone,
                 double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz,
-                double *quz, double *qb, double *qof)
+                double *quz, double *qb, double *qof, double *p, double *ep)
 {
 /*****************************************************************
 
@@ -137,7 +137,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 
 double ex[31];
 int ia,ib,in,irof,it,ir;
-double rex,cumf,max_contrib_area,ea,ep,p,rint,acm,df;
+double rex,cumf,max_contrib_area,ea,rint,acm,df;
 double acf,uz,sae,of;
 
 irof=0;
@@ -164,9 +164,9 @@ else it=1;
 
 *qof=0.0;
 *quz=0.0;
-ep=pe[it];  
-p=rain[it];
-*sump+=p;  /* BMI Adaption: *sump now as pointer var; incl in model struct */
+*ep=pe[it];  
+*p=rain[it];
+*sump+=*p;  /* BMI Adaption: *sump now as pointer var; incl in model struct */
 
 /* SKIP INFILTRATION EXCESS CALCULATIONS IF INFEX = 0 */
 if(infex==1)
@@ -183,14 +183,14 @@ if(infex==1)
 
     THIS SECTION CAN BE OMITTED WITHOUT PROBLEM
     *************************************************************/
-  if(p>0.0)
+  if(*p>0.0)
     {
     /*  Adjust Rainfall rate from m/time step to m/h */
-    rint=p/dt;
+    rint=*p/dt;
     expinf(irof,it,rint,df,cumf,dt,xk0,szm,hf);
     /*  DF is volumetric increment of infiltration and is returned in m/DT */
-    rex=p-df;
-    p-=rex;
+    rex=*p-df;
+    *p-=rex;
     }
   else
     {
@@ -220,7 +220,7 @@ for(ia=1;ia<=num_topodex_values;ia++)
   if(deficit_local[ia]<0.0) deficit_local[ia]=0.0;
 
   /*  ROOT ZONE CALCULATIONS */
-  deficit_root_zone[ia]-=p;
+  deficit_root_zone[ia]-=*p;
   if(deficit_root_zone[ia]<0.0)
     {
     stor_unsat_zone[ia]-=deficit_root_zone[ia];
@@ -248,9 +248,9 @@ for(ia=1;ia<=num_topodex_values;ia++)
   /*  CALCULATE EVAPOTRANSPIRATION FROM ROOT ZONE DEFICIT */
 
   ea=0.0;
-  if(ep>0.0)
+  if(*ep>0.0)
     {
-    ea=ep*(1.0-deficit_root_zone[ia]/srmax);
+    ea=*ep*(1.0-deficit_root_zone[ia]/srmax);
     if(ea>(srmax-deficit_root_zone[ia])) ea=srmax-deficit_root_zone[ia];
     deficit_root_zone[ia]+=ea;
     }
@@ -319,7 +319,7 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
 if(yes_print_output==TRUE && in<=current_time_step)
   { 
   fprintf(output_fptr,"%d %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e\n",
-          current_time_step, p, ep, Q[it], (*quz), (*qb), (*sbar), (*qof));
+          current_time_step, (*p), (*ep), Q[it], (*quz), (*qb), (*sbar), (*qof));
   }
 
 /*  BMI Adaption: END SINGLE TIME STEP ITERATION 
@@ -339,6 +339,8 @@ for(ia=1;ia<=num_topodex_values;ia++)
   (*sumuz)+=stor_unsat_zone[ia]*acf;
 
   }
+
+  //(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
 
 /*  BMI Adaption: Compute and print summary summations only at end of model run */
 /*  TODO: Find and replace line string in out file for any current_time_step? */

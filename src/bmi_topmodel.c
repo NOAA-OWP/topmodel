@@ -4,25 +4,31 @@
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
-#define OUTPUT_VAR_NAME_COUNT 11
+#define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 57
 
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
-        "land_surface_water__runoff_mass_flux",
-        "soil_water__domain_volume_deficit",
-        "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",
-        "land_surface_water__baseflow_volume_flux",
-        "land_surface_water__domain_time_integral_of_overland_flow_volume_flux",
-        "land_surface_water__domain_time_integral_of_precipitation_volume_flux",
-        "land_surface_water__domain_time_integral_of_evaporation_volume_flux",
-        "land_surface_water__domain_time_integral_of_runoff_volume_flux",
-        "soil_water__domain_root-zone_volume_deficit",
-        "soil_water__domain_unsaturated-zone_volume"
+        "land_surface_water__runoff_mass_flux", //Q[it]
+        "soil_water__domain_volume_deficit",    //sbar
+        "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",    //qz
+        "land_surface_water__baseflow_volume_flux", //qb
+        "land_surface_water__domain_time_integral_of_overland_flow_volume_flux",    //qof
+        "land_surface_water__domain_time_integral_of_precipitation_volume_flux",    //sump
+        "land_surface_water__domain_time_integral_of_evaporation_volume_flux",      //sumae
+        "land_surface_water__domain_time_integral_of_runoff_volume_flux",           //sumq
+        "soil_water__domain_root-zone_volume_deficit",  //sumrz
+        "soil_water__domain_unsaturated-zone_volume",   //sumuz
+        "land_surface_water__water_balance_volume",     //bal
+        "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",    //p
+        "land_surface_water__potential_evaporation_volume_flux"     //ep
 };
 
 static const char *output_var_types[OUTPUT_VAR_NAME_COUNT] = {
+        "double",
+        "double",
+        "double",
         "double",
         "double",
         "double",
@@ -47,6 +53,9 @@ static const int output_var_item_count[OUTPUT_VAR_NAME_COUNT] = {
         1,
         1,
         1,
+        1,
+        1,
+        1,
         1
 };
 
@@ -61,10 +70,16 @@ static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
         "m",
         "m",
         "m",
-        "m"
+        "m",
+        "m",
+        "m h-1",
+        "m h-1"
 };
 
 static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
+        0,
+        0,
+        0,
         0,
         0,
         0,
@@ -79,6 +94,9 @@ static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
 };
 
 static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
+        "node",
+        "node",
+        "node",
         "node",
         "node",
         "node",
@@ -385,7 +403,7 @@ static int Update (Bmi *self)
         topmodel->time_delay_histogram,topmodel->subcat,&topmodel->bal,
         &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step, topmodel->stand_alone,
         &topmodel->sump,&topmodel->sumae,&topmodel->sumq,&topmodel->sumrz,&topmodel->sumuz,
-        &topmodel->quz, &topmodel->qb, &topmodel->qof);
+        &topmodel->quz, &topmodel->qb, &topmodel->qof, &topmodel->p, &topmodel->ep );
 
     //--------------------------------------------------
     // This should be moved into the Finalize() method
@@ -714,6 +732,24 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sumuz;
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "land_surface_water__water_balance_volume") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> bal;
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> p;
+        return BMI_SUCCESS;
+    }
+    if (strcmp (name, "land_surface_water__potential_evaporation_volume_flux") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> ep;
         return BMI_SUCCESS;
     }
     // STANDALONE Note: 
