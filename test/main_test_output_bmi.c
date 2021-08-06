@@ -137,7 +137,7 @@ main(int argc, const char *argv[]){
             const char *var_name = names_out[i];
             // get_value() at each timestep
             model->get_value(model, var_name, var);
-            printf("  %s\t %f\n", var_name, var[0]);
+            printf("  %s\t %6.4e\n", var_name, var[0]); 
         }
     }
     

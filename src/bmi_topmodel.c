@@ -355,7 +355,7 @@ static int Update (Bmi *self)
         topmodel->time_delay_histogram,topmodel->subcat,&topmodel->bal,
         &topmodel->sbar,topmodel->num_delay,topmodel->current_time_step,
         &topmodel->sump,&topmodel->sumae,&topmodel->sumq,topmodel->stand_alone,
-        topmodel->quz);
+        &topmodel->quz, &topmodel->qb, &topmodel->qof);
 
     //--------------------------------------------------
     // This should be moved into the Finalize() method

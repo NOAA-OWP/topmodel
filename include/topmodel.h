@@ -42,7 +42,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 double *time_delay_histogram,char *subcat,double *bal,
                 double *sbar,int num_delay, int current_time_step, 
                 double *sump, double *sumae, double *sumq, int stand_alone,
-                double quz);
+                double *quz, double *qb, double *qof);
 
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
                int *num_topodex_values,int *num_channels,double *area,
