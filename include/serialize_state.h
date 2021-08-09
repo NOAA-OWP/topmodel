@@ -10,6 +10,7 @@ int serialize(Bmi* model1, const char *ser_file);
 
 int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj);
 
+int compare_states( Bmi* model1, Bmi* model2);
 
 #if defined(__cplusplus)
 }
