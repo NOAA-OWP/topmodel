@@ -26,7 +26,7 @@ framework utility can then be written to perform the tasks of serialization
 and deserialization that calls and relies on these new BMI functions.
 The current implementation of this general utility uses the
 [msgpack-c library](https://github.com/msgpack/msgpack-c)
-and is currently found in
+and can be found in
 ```topmodel/test_serialize/serialize_state.c.```
 That file implements three functions:
 ```serialize(), deserialize_to_state(), and compare_states().```
