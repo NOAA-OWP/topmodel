@@ -28,6 +28,8 @@ The current implementation of this general utility uses the
 [msgpack-c library](https://github.com/msgpack/msgpack-c)
 and is currently found in
 ```topmodel/test_serialize/serialize_state.c.```
+That file implements three functions:
+```serialize(), deserialize_to_state(), and compare_states().```
 Msgpack serializes to binary and is both fast and compact.
 
 **Note:**  You must install the msgpack-c library to run the test.
