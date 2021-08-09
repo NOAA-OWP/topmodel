@@ -40,6 +40,7 @@ int print_some(void *ptr_list[]){
   //       into array, then dereference the ptr.
   //       Careful with order of operations.
   //------------------------------------------------
+  puts("Printing some selected variables ...");
   double a[3];
   a[0] = *( (double *)ptr_list[56]);
   a[1] = *( (double *)ptr_list[56] + 1);
@@ -76,26 +77,26 @@ int main(void)
   //--------------------------------------------------------------   
   if (verbose){
       puts(""); 
-      puts("Allocating memory for TOPMODEL BMI model structure ...");
+      puts("Allocating memory for BMI TOPMODEL instances 1 & 2 ...");
   }
   Bmi *model1 = (Bmi *) malloc(sizeof(Bmi));
   Bmi *model2 = (Bmi *) malloc(sizeof(Bmi));
 
   //--------------------------------------------------------------
-  if (verbose){ puts("Registering TOPMODEL BMI models ..."); }
+  if (verbose){ puts("Registering TOPMODELs 1 & 2 ..."); }
 
   register_bmi_topmodel(model1);
   register_bmi_topmodel(model2);
 
   //--------------------------------------------------------------
-  if (verbose){ puts("Initializing TOPMODEL BMI models ..."); }
+  if (verbose){ puts("Initializing TOPMODELs 1 & 2 ..."); }
 
   model1->initialize(model1, cfg_file);
   model2->initialize(model2, cfg_file);
   
   //--------------------------------------------------------------
   if (verbose){
-      puts("Updating TOPMODEL BMI model");
+      puts("Updating TOPMODEL 1 ...");
       printf("  n_steps1 = %i \n", n_steps1);
       puts("");
   }
@@ -149,7 +150,7 @@ int main(void)
   
   //--------------------------------------------------------------
   if (verbose){
-      puts("Updating TOPMODEL BMI Model 2 ...");
+      puts("Updating BMI TOPMODEL 2 ...");
       printf("n_steps2 = %i \n", n_steps2);
       puts("");
   }
@@ -160,7 +161,7 @@ int main(void)
  
   //--------------------------------------------------------------
   if (verbose){
-      puts("Updating TOPMODEL BMI Model 1 ...");
+      puts("Updating BMI TOPMODEL 1 ...");
       printf("n_steps2 = %i \n", n_steps2);
       puts("");
   }
@@ -188,12 +189,12 @@ int main(void)
   if (verbose){ print_some( ptr_list ); }
 
   //--------------------------------------------------------------
-  if (verbose){ puts("Comparing model states ..."); }
+  if (verbose){ puts("Comparing TOPMODEL 1 & 2 state vars ..."); }
   
   compare_states( model1, model2 );
   
   //--------------------------------------------------------------
-  if (verbose){ puts("Finalizing TOPMODEL BMI Models ..."); }
+  if (verbose){ puts("Finalizing BMI TOPMODELs 1 & 2 ..."); }
 
   model1->finalize(model1);
   model2->finalize(model2);  
