@@ -182,7 +182,8 @@ int init_config(const char* config_file, topmodel_model* model)
             array allocation should not depend on nstep*/ 
 
         /* Hard-def input values not read-in */
-        model->nstep = 720;
+        model->nstep = 70;
+        // model->nstep = 720;
         model->dt = 1;
 
         /* allocate memory for arrays */
@@ -944,7 +945,8 @@ static int Get_state_var_ptrs (Bmi *self, void *ptr_list[])
     ptr_list[31] = &(state->sbar);
     //----------------------------------------------------
     // These vars ARE pointers to different-sized arrays
-    //----------------------------------------------------           
+    // Do not append "&".
+    //----------------------------------------------------         
     ptr_list[32] = state->Q;
     ptr_list[33] = state->Qobs;
     ptr_list[34] = state->rain;
@@ -983,7 +985,7 @@ static int Set_state_var (Bmi *self, void *src, int index)
     // using its position index within the state struct.
     //----------------------------------------------------
     if (!self){
-        return BMI_FAILURE;   
+        return BMI_FAILURE;
     }
 
     int n_state_vars, i;
@@ -1094,7 +1096,7 @@ static int Set_state_var (Bmi *self, void *src, int index)
     // Note: state->Q is a pointer to an array
     //       We don't need to change that pointer,
     //       just the values in the array.
-    //---------------------------------------------      
+    //---------------------------------------------     
     else if (index == 32){
         for (i=0; i<size; i++) {
             state->Q[i] = *( ((double *)src) + i); } }
