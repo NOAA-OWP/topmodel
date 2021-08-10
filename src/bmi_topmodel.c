@@ -182,8 +182,8 @@ int init_config(const char* config_file, topmodel_model* model)
             array allocation should not depend on nstep*/ 
 
         /* Hard-def input values not read-in */
-        model->nstep = 70;
-        // model->nstep = 720;
+        // model->nstep = 70;  // for testing
+        model->nstep = 720;
         model->dt = 1;
 
         /* allocate memory for arrays */
