@@ -911,8 +911,8 @@ static int Get_state_var_names (Bmi *self, char ** names)
         //---------------------------------------------------------------
         "num_sub_catchments", "max_atb_increments", \
         "max_num_subcatchments", "max_time_delay_ordinates", "Qout", \
-        "current_time_step", "sump", "sumae", "sumq", \
-        "potential_et_m_per_s", "precip_rate", "dbl_arr_test" };
+        "current_time_step", "sump", "sumae", "sumq", "sumuz", "sumrz", \
+        "quz", "qb", "qof", "p", "ep", "stand_alone", "dbl_arr_test" };    
     //int n_state_vars = sizeof(var_names) / sizeof(var_names[0]);
 
     int MAX_NAME_LEN = 512;
@@ -962,7 +962,8 @@ static int Get_state_var_types (Bmi *self, char ** types)
         "double*", "double*", "double*", "double*", \
         //---------------------------------------------------------
         "int", "int", "int", "int", "double", "int", \
-        "double", "double", "double", "double", "double", "double" };
+        "double", "double", "double", "double", "double", \
+        "double", "double", "double", "double", "double", "int", "double" };
         
     //int n_state_vars = sizeof(var_types) / sizeof(var_types[0]);
       
@@ -1057,10 +1058,10 @@ static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
         //---------------------------------------------------------------        
         //"num_sub_catchments", "max_atb_increments", \
         //"max_num_subcatchments", "max_time_delay_ordinates", "Qout", \
-        //"current_time_step", "sump", "sumae", "sumq", \
-        //"potential_et_m_per_s", "precip_rate", "dbl_arr_test" };
+        //"current_time_step", "sump", "sumae", "sumq", "sumrz", "sumuz" \
+        //"quz", "qb", "qof", "p", "ep", "stand_alone", "dbl_arr_test" };
         //---------------------------------------------------------------
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 };
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 };
 
     //int n_state_vars = sizeof(var_names) / sizeof(var_names[0]);
 
@@ -1152,9 +1153,15 @@ static int Get_state_var_ptrs (Bmi *self, void *ptr_list[])
     ptr_list[51] = &(state->sump);
     ptr_list[52] = &(state->sumae);
     ptr_list[53] = &(state->sumq);
-    ptr_list[54] = &(state->potential_et_m_per_s);
-    ptr_list[55] = &(state->precip_rate);
-    ptr_list[56] = &(state->dbl_arr_test);  // this is correct
+    ptr_list[54] = &(state->sumrz);
+    ptr_list[55] = &(state->sumuz);
+    ptr_list[56] = &(state->quz);
+    ptr_list[57] = &(state->qb);
+    ptr_list[58] = &(state->qof);
+    ptr_list[59] = &(state->p);
+    ptr_list[60] = &(state->ep);
+    ptr_list[61] = &(state->stand_alone);
+    ptr_list[62] = &(state->dbl_arr_test);  // this is correct
         
     return BMI_SUCCESS;
 }
@@ -1339,13 +1346,25 @@ static int Set_state_var (Bmi *self, void *src, int index)
     else if (index == 53){
         state->sumq = *(double *)src; }
     else if (index == 54){
-        state->potential_et_m_per_s = *(double *)src; }
+        state->sumrz = *(double *)src; }
     else if (index == 55){
-        state->precip_rate = *(double *)src; }
+        state->sumuz = *(double *)src; }
+    else if (index == 56){
+        state->quz = *(double *)src; }
+    else if (index == 57){
+        state->qb = *(double *)src; }
+    else if (index == 58){
+        state->qof = *(double *)src; }
+    else if (index == 59){
+        state->p = *(double *)src; }
+    else if (index == 60){
+        state->ep = *(double *)src; }
+    else if (index == 61){
+        state->stand_alone = *(int *)src; }
     //-------------------------------------
     // This is a double array for testing
     //-------------------------------------
-    else if (index == 56){
+    else if (index == 62){
         for (i=0; i<size; i++) {
             state->dbl_arr_test[i] = *(double *)(src + i); } }
 

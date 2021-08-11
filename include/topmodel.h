@@ -148,21 +148,19 @@ struct TopModel_Struct{
   double sumrz;  /* deficit_root_zone over the whole watershed */
   double sumuz;  /* stor_unsat_zone over the whole watershed */
 
-  /************** Get External Values **************/ 
-  double potential_et_m_per_s;
-  double precip_rate;
-  double dbl_arr_test[3];
-
-  /************** Framework vars **************/ 
-  int stand_alone;
-  //double obs_values;
-
   /************** Additional Output vars **************/ 
   double quz; /* flow from root zone to unsaturated zone*/
   double qb;  /* subsurface flow or baseflow*/
   double qof; /* flow from saturated area and infiltration excess flow*/
   double p;   /* adjusted rain*/
   double ep;  /* adjusted potential evaporation*/
+
+  /************** Framework vars **************/ 
+  int stand_alone;
+  //double obs_values;
+
+  /************** Test State **************/
+  double dbl_arr_test[3];
 
 };
 
