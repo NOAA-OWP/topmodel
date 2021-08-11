@@ -160,7 +160,7 @@ struct TopModel_Struct{
   //double obs_values;
 
   /************** Test State **************/
-  double dbl_arr_test[3];
+  //double dbl_arr_test[3];
 
 };
 
