@@ -6,7 +6,7 @@
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
-#define STATE_VAR_NAME_COUNT 63
+#define STATE_VAR_NAME_COUNT 62
 
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
@@ -912,7 +912,7 @@ static int Get_state_var_names (Bmi *self, char ** names)
         "num_sub_catchments", "max_atb_increments", \
         "max_num_subcatchments", "max_time_delay_ordinates", "Qout", \
         "current_time_step", "sump", "sumae", "sumq", "sumuz", "sumrz", \
-        "quz", "qb", "qof", "p", "ep", "stand_alone", "dbl_arr_test" };    
+        "quz", "qb", "qof", "p", "ep", "stand_alone"/*, "dbl_arr_test"*/ };    
     //int n_state_vars = sizeof(var_names) / sizeof(var_names[0]);
 
     int MAX_NAME_LEN = 512;
@@ -963,7 +963,7 @@ static int Get_state_var_types (Bmi *self, char ** types)
         //---------------------------------------------------------
         "int", "int", "int", "int", "double", "int", \
         "double", "double", "double", "double", "double", \
-        "double", "double", "double", "double", "double", "int", "double" };
+        "double", "double", "double", "double", "double", "int"/*, "double"*/ };
         
     //int n_state_vars = sizeof(var_types) / sizeof(var_types[0]);
       
@@ -1061,7 +1061,7 @@ static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
         //"current_time_step", "sump", "sumae", "sumq", "sumrz", "sumuz" \
         //"quz", "qb", "qof", "p", "ep", "stand_alone", "dbl_arr_test" };
         //---------------------------------------------------------------
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 };
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1/*, 3*/ };
 
     //int n_state_vars = sizeof(var_names) / sizeof(var_names[0]);
 
@@ -1089,10 +1089,10 @@ static int Get_state_var_ptrs (Bmi *self, void *ptr_list[])
     //--------------------------------------
     // Create a test array: dbl_array_test
     //--------------------------------------
-    double dbl_test_data[3] = {10.0, 20.0, 30.0};
+/*    double dbl_test_data[3] = {10.0, 20.0, 30.0};
     for (int j = 0; j < 3; j++) {
         state->dbl_arr_test[j] = dbl_test_data[j];
-    }    
+    } */   
 
     ptr_list[0]  = state->control_fptr;
     ptr_list[1]  = state->input_fptr;    
@@ -1161,7 +1161,7 @@ static int Get_state_var_ptrs (Bmi *self, void *ptr_list[])
     ptr_list[59] = &(state->p);
     ptr_list[60] = &(state->ep);
     ptr_list[61] = &(state->stand_alone);
-    ptr_list[62] = &(state->dbl_arr_test);  // this is correct
+    //ptr_list[62] = &(state->dbl_arr_test);  // this is correct
         
     return BMI_SUCCESS;
 }
@@ -1364,9 +1364,9 @@ static int Set_state_var (Bmi *self, void *src, int index)
     //-------------------------------------
     // This is a double array for testing
     //-------------------------------------
-    else if (index == 62){
+/*    else if (index == 62){
         for (i=0; i<size; i++) {
-            state->dbl_arr_test[i] = *(double *)(src + i); } }
+            state->dbl_arr_test[i] = *(double *)(src + i); } }*/
 
     return BMI_SUCCESS;
 }
