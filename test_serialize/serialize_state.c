@@ -5,17 +5,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>     // for strchr()
+#include <sys/stat.h>   // to get filesize
 #include <msgpack.h>
 #include "msgpack/fbuffer.h"        // See note above
 #include "../include/topmodel.h"
 #include "../include/bmi.h"
 #include "../include/bmi_topmodel.h"
 
-//-----------------------------------
-// Make sure these are large enough
-//-----------------------------------
-static const int BUFFER_SIZE = 65536;
-static const int UNPACKED_BUFFER_SIZE = 131072;
+//------------------------------------------------
+// Now computing these from filesize of ser_file
+//------------------------------------------------
+// static const int BUFFER_SIZE = 65536;
+// static const int UNPACKED_BUFFER_SIZE = 131072;
 // static const int BUFFER_SIZE = 1024;
 // static const int UNPACKED_BUFFER_SIZE = 2048;
 
@@ -49,13 +50,90 @@ https://blog.gypsyengineer.com/en/security/msgpack-fuzzing.html
 */
 
 //-----------------------------------------------------------------------
+int get_file_size(const char *ser_file, unsigned long int *file_size){
+
+    //-------------------------------------
+    // Get the file size, set BUFFER_SIZE
+    //-------------------------------------
+    struct stat st;
+    stat(ser_file, &st);
+    *file_size = st.st_size;
+    return 0;
+}
+
+//-----------------------------------------------------------------------
+// int get_buffer_size(Bmi* model1, unsigned int buffer_size){
+//
+//     //---------------------------------------------------------
+//     // We don't need this now.  Can just use get_file_size().
+//     //---------------------------------------------------------
+//     int n_state_vars;
+//     model1->get_state_var_count(model1, &n_state_vars);
+// 
+//     unsigned int size, sizes[ n_state_vars ], type_size;
+//     unsigned int unpacked_buffer_size = 0;
+//     int verbose = 1;
+//     int i;
+// 
+//     char *type;
+//     char **types = NULL;
+//     types = (char**) malloc (sizeof(char *) * n_state_vars);  
+//     for (i=0; i<n_state_vars; i++){
+//         types[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+//     }
+// 
+//     if (verbose){ puts("Calling BMI.get_state_var_types()..."); }
+//     model1->get_state_var_types(model1, types);
+// 
+//     if (verbose){ puts("Calling BMI.get_state_var_sizes()..."); }
+//     model1->get_state_var_sizes(model1, sizes); 
+// 
+//     for (i=0; i<n_state_vars; i++){
+//         type = types[i];
+//         size = sizes[i];
+//  
+// 		if (strcmp(type, "int") == 0){
+// 			type_size = sizeof( int );
+// 		} else if (strcmp(type, "float") == 0){
+// 			type_size = sizeof( float );
+// 		} else if (strcmp(type, "double") == 0){
+// 			type_size = sizeof( double );
+// 		} else if (strcmp(type, "string") == 0){
+// 			type_size = sizeof( char ); 
+// 		} else if (strcmp(type, "FILE") == 0){
+// 			type_size = sizeof( FILE );
+// 		} else{
+// 			printf("  WARNING: Unknown type = %s", types[i] );
+// 			type_size = 4;
+// 		}
+//                    
+//         unpacked_buffer_size += (size * type_size);
+//     }
+//    
+//     buffer_size = unpacked_buffer_size;
+//     
+//     //--------------------------------   
+//     // Free memory for string arrays
+//     //--------------------------------
+//     if (verbose){ puts("Freeing memory..."); }
+//     for (i=0; i<n_state_vars; i++){
+//         free (types[i]);
+//     }
+//     free (types);
+// 
+//     if (verbose){ puts("Finished computing buffer size."); puts(""); }
+//     return 0;
+//                  
+// } 
+
+//-----------------------------------------------------------------------
 int serialize(Bmi* model1, const char *ser_file) {
 
     int n_state_vars;
     model1->get_state_var_count(model1, &n_state_vars);
     
     FILE *fp = fopen(ser_file, "w+");
-    int i, j, n_bytes;  
+    int i, j, n_bytes;
     void *ptr_list[ n_state_vars ];
     unsigned int size, sizes[ n_state_vars ];
     int verbose = 1;
@@ -160,7 +238,7 @@ int serialize(Bmi* model1, const char *ser_file) {
                 // nil is an object pointer to nothing
                 msgpack_pack_nil(&pk);  // Need something; will this work?
             } else{
-                printf("  Unknown type = %s", types[i] );
+                printf("  WARNING: Unknown type = %s", types[i] );
                 msgpack_pack_nil(&pk);  // Need something; will this work?
             }
         } else{
@@ -203,7 +281,7 @@ int serialize(Bmi* model1, const char *ser_file) {
                     // nil is an object pointer to nothing
                      msgpack_pack_nil(&pk); } // Need something; will this work?
             } else{
-                printf("  Unknown type = %s", types[i] );
+                printf("  WARNING: Unknown type = %s", types[i] );
                 msgpack_pack_nil(&pk);  // Need something; will this work?
             }
         }
@@ -279,12 +357,27 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
     }
     model2->get_state_var_types(model2, types);
 
-    char inbuffer[BUFFER_SIZE]; 
+    //-------------------------------------
+    // Get the file size, set buffer_size
+    //-------------------------------------
+    unsigned long int file_size, buffer_size, unpacked_buffer_size;
+    get_file_size( ser_file, &file_size );
+    buffer_size = file_size;
+    unpacked_buffer_size = 2 * buffer_size;
+    char inbuffer[buffer_size];
+    char unpacked_buffer[unpacked_buffer_size]; 
+//     if (verbose){
+//         printf("Buffer_size = %lu\n", buffer_size);
+//         printf("Unpacked buffer_size = %lu\n", unpacked_buffer_size);
+//     }  
+    // char inbuffer[BUFFER_SIZE];
+    // char unpacked_buffer[UNPACKED_BUFFER_SIZE];
+        
     FILE *fp = fopen(ser_file, "rb");
     int i = 0;
     size_t off = 0;
     size_t len = 0;
-    char unpacked_buffer[UNPACKED_BUFFER_SIZE];
+
     msgpack_unpacked unpacked;
     msgpack_unpack_return ret;
     msgpack_unpacked_init(&unpacked);
@@ -301,7 +394,8 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
     // Online ref 1: "buf" = Online ref 2: "inbuffer"  ????
     // Online ref 1: "len" = Online ref 2: "read"
     //------------------------------------------------------------
-    len = fread(inbuffer, sizeof(char), BUFFER_SIZE, fp); 
+    // len = fread(inbuffer, sizeof(char), BUFFER_SIZE, fp); 
+    len = fread(inbuffer, sizeof(char), buffer_size, fp); 
     ret = msgpack_unpack_next(&unpacked, inbuffer, len, &off);
 
     while (ret == MSGPACK_UNPACK_SUCCESS) {
@@ -614,4 +708,5 @@ int compare_states(Bmi* model1, Bmi* model2){
 }
 
 //------------------------------------------------------------------------
+
 
