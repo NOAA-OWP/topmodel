@@ -6,7 +6,7 @@
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
-#define STATE_VAR_NAME_COUNT 57
+#define STATE_VAR_NAME_COUNT 63
 
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
