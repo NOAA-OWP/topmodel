@@ -65,6 +65,7 @@ static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
         "m h-1",
         "m h-1",
         "m h-1",
+        "m h-1",
         "m",
         "m h-1",
         "m",
