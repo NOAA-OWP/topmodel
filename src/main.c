@@ -39,10 +39,21 @@ int main(void)
   printf("\n Looping Update TOPMODEL BMI model\n");
 #endif
   
-  //Get number of timesteps
+  // Get number of timesteps
   topmodel_model *topmodel;
   topmodel = (topmodel_model *) model->data;
-  int n = topmodel->nstep;
+  int n;
+  
+  if (topmodel->stand_alone == TRUE){
+    // Gather number of steps from input file
+    // when in standalone mode.
+    n = topmodel->nstep;
+  }
+  else{
+    // Otherwise define loop here
+    // Note: this is a pseudo-framework
+    n = 720;
+  }
 
   for (int i=1;i<=n;i++){
     model->update(model);

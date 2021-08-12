@@ -7,13 +7,7 @@
 
 
 int
-main(int argc, const char *argv[]){
-
-    // Check for configuration file arg
-    if(argc<=1){
-        printf("\nmust include configuration file path...exiting\n\n");
-        exit(1);
-    }
+main(void){
 
     int status = BMI_SUCCESS;
     
@@ -28,7 +22,7 @@ main(int argc, const char *argv[]){
     register_bmi_topmodel(model);
 
     printf(" \ninitializing...");
-    const char *cfg_file = argv[1];
+    const char *cfg_file = "./data/topmod_100.run";
     printf(" configuration found: %s\n", cfg_file);
     model->initialize(model, cfg_file);
 
