@@ -238,20 +238,6 @@ int read_init_config(const char* config_file, topmodel_model* model) {
         //First, grab config last line for nstep and dt when running in framework;
         fscanf(model->control_fptr,"%d %lf",&model->nstep,&model->dt);
     }
-    /*
-    // vs. gathering inputs-nativeCode via dat file
-    else{
-
-#define INPUT_VAR_NAME_COUNT 0 // there are no true input
-
-    static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {};
-    static const char *input_var_types[INPUT_VAR_NAME_COUNT] = {};
-    static const char *input_var_units[INPUT_VAR_NAME_COUNT] = {};
-    static const int input_var_item_count[INPUT_VAR_NAME_COUNT] = {};
-    static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {};
-    static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {};
-    }*/
-
 
     fclose(model->control_fptr);
     // Note all individual input files closed in init_config(),
@@ -400,10 +386,10 @@ static int Update (Bmi *self)
 
     double current_time, end_time;
     self->get_current_time(self, &current_time);
-    self->get_end_time(self, &end_time);
+/*    self->get_end_time(self, &end_time);
     if (current_time >= end_time) {
         return BMI_FAILURE;
-    };
+    };*/
 
     topmodel->current_time_step += topmodel->dt;   
 
@@ -423,10 +409,10 @@ static int Update (Bmi *self)
     // This should be moved into the Finalize() method
     //--------------------------------------------------
     // results() 
-    // 1. generates hydrograph out file 
+    // 1. generates hydrograph out file (hyd.out)
     // 2. computes objective function stats
-    //        - print to console.
-    //        - print to main out file
+    //        - print to console
+    //        - print to main out file (topmod.out)
     // Logic for each is handled indiv w.i. funct,
     // but wouldn't hurt to check conditions here as framework
     // will likely not even need to jump into results()
@@ -483,7 +469,15 @@ static int Finalize (Bmi *self)
     //results(model->output_fptr,model->out_hyd_fptr,model->nstep, 
     //    model->Qobs, model->Q, 
     //    model->current_time_step, model->yes_print_output);
-            
+    
+    if (model->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){        
+        water_balance(model->output_fptr, 
+                model->yes_print_output,model->subcat,&model->bal,
+                &model->sbar,
+                &model->sump, &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
+    }
+
+
     if( model->Q != NULL )
         free(model->Q);
     if( model->Qobs != NULL )
