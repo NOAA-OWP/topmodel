@@ -274,11 +274,25 @@ int init_config(const char* config_file, topmodel_model* model)
     }
     else {
         /* allocate memory for "arrays" */
-        d_alloc(&model->rain,1);
+
+/*        d_alloc(&model->rain,1);
         d_alloc(&model->pe,1);
         d_alloc(&model->Qobs,1);   //TODO: Consider removing this all together when framework
         d_alloc(&model->Q,1);
         d_alloc(&model->contrib_area,1);
+
+        (model->rain)[1]=0.0;
+        (model->pe)[1]=0.0;
+        (model->Qobs)[1]=0.0;
+        (model->Q)[1]=0.0;
+        (model->contrib_area)[1]=0.0;*/
+
+        //model->nstep = 1;
+        d_alloc(&model->rain,model->nstep);
+        d_alloc(&model->pe,model->nstep);
+        d_alloc(&model->Qobs,model->nstep);   //TODO: Consider removing this all together when framework
+        d_alloc(&model->Q,model->nstep);
+        d_alloc(&model->contrib_area,model->nstep);
 
         (model->rain)[1]=0.0;
         (model->pe)[1]=0.0;
@@ -913,7 +927,15 @@ static int Get_state_var_names (Bmi *self, char ** names)
         "max_num_subcatchments", "max_time_delay_ordinates", "Qout", \
         "current_time_step", "sump", "sumae", "sumq", "sumuz", "sumrz", \
         "quz", "qb", "qof", "p", "ep", "stand_alone"/*, "dbl_arr_test"*/ };    
-    //int n_state_vars = sizeof(var_names) / sizeof(var_names[0]);
+    
+    //---------------------------------- 
+    // Error check on names array size
+    //----------------------------------
+    int n_array_vars = sizeof(var_names) / sizeof(var_names[0]);
+    if (n_array_vars != n_state_vars){
+        printf("**ERROR** in function Get_state_var_names\n");
+        printf("Number of state variables %i does not equal array size %i\n", n_state_vars, n_array_vars );
+    }
 
     int MAX_NAME_LEN = 512;
     //int MAX_NAME_LEN = BMI_MAX_VAR_NAME; 
@@ -965,7 +987,14 @@ static int Get_state_var_types (Bmi *self, char ** types)
         "double", "double", "double", "double", "double", \
         "double", "double", "double", "double", "double", "int"/*, "double"*/ };
         
-    //int n_state_vars = sizeof(var_types) / sizeof(var_types[0]);
+    //---------------------------------- 
+    // Error check on types array size
+    //----------------------------------
+    int n_array_vars = sizeof(var_types) / sizeof(var_types[0]);
+    if (n_array_vars != n_state_vars){
+        printf("**ERROR** in function Get_state_var_types\n");
+        printf("Number of state variables %i does not equal array size %i\n", n_state_vars, n_array_vars );
+    }
       
     int MAX_NAME_LEN = 512;
     //int MAX_NAME_LEN = BMI_MAX_VAR_NAME; 
@@ -1063,7 +1092,14 @@ static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
         //---------------------------------------------------------------
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1/*, 3*/ };
 
-    //int n_state_vars = sizeof(var_names) / sizeof(var_names[0]);
+    //---------------------------------- 
+    // Error check on types array size
+    //----------------------------------
+    int n_array_vars = sizeof(var_sizes) / sizeof(var_sizes[0]);
+    if (n_array_vars != n_state_vars){
+        printf("**ERROR** in function Get_state_var_sizes\n");
+        printf("Number of state variables %i does not equal array size %i\n", n_state_vars, n_array_vars );
+    }
 
     for (int i = 0; i < n_state_vars; i++) {
         size_list[i] = var_sizes[i];
