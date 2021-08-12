@@ -57,6 +57,11 @@ extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
                  int nstep, double *Qobs, double *Q, 
                  int current_time_step, int yes_print_output);
 
+extern void water_balance(FILE *output_fptr, 
+                int yes_print_output, char *subcat,double *bal,
+                double *sbar,
+                double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz);
+
 extern void itwo_alloc( int ***ptr, int x, int y);
 extern void dtwo_alloc( double ***ptr, int x, int y);
 extern void d_alloc(double **var,int size);

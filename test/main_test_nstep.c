@@ -42,7 +42,7 @@ int main(void)
   else{
     // Otherwise define loop here
     // Note: this is a pseudo-framework
-    n = 50;
+    n = 100;
   }
   
   printf(" topmodel->nstep: %i\n", topmodel->nstep);
