@@ -322,10 +322,13 @@ static int Get_start_time (Bmi *self, double * time)
 
 static int Get_end_time (Bmi *self, double * time)
 {
-  Get_start_time(self, time);
-  *time += (((topmodel_model *) self->data)->nstep * 
-            ((topmodel_model *) self->data)->dt);
-  return BMI_SUCCESS;
+    // JG_TODO: set this to some large float??
+    // https://bmi.readthedocs.io/en/latest/#get-end-time
+
+    Get_start_time(self, time);
+    *time += (((topmodel_model *) self->data)->nstep * 
+    ((topmodel_model *) self->data)->dt);
+    return BMI_SUCCESS;
 }
 
 static int Get_time_step (Bmi *self, double * dt)
