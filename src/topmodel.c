@@ -340,14 +340,16 @@ for(ia=1;ia<=num_topodex_values;ia++)
 
   }
 
-  //(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
+(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
+// TODO: Confirm these values are correct outside of initial value (validated-okay) 
+// and final (validated-okay)
 
 /*  BMI Adaption: Compute and print summary summations only at end of model run */
 /*  TODO: Find and replace line string in out file for any current_time_step? */
-if (current_time_step == nstep)
+/*if (current_time_step == 100)
   {
 
-  (*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
+  //(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
 
 #if TOPMODEL_DEBUG >=1  
   printf("\nWater Balance for Subcatchment: %s\n",subcat);
@@ -366,7 +368,34 @@ if (current_time_step == nstep)
            (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
     fprintf(output_fptr,"Maximum contributing area %12.5lf\n",max_contrib_area);
     }
-  }
+  }*/
+
+return;
+
+}
+
+extern void water_balance(FILE *output_fptr, 
+                int yes_print_output, char *subcat,double *bal, double *sbar,
+                double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz)
+{
+
+#if TOPMODEL_DEBUG >=1  
+  printf("\nWater Balance for Subcatchment: %s\n",subcat);
+  printf(
+  "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
+  printf("%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
+          (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
+#endif
+
+  if (yes_print_output==TRUE)
+    {
+    fprintf(output_fptr,"\nWater Balance for Subcatchment: %s\n",subcat);
+    fprintf(output_fptr,
+    "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
+    fprintf(output_fptr,"%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
+           (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
+    //fprintf(output_fptr,"Maximum contributing area %12.5lf\n",max_contrib_area);
+    }
 
 return;
 
