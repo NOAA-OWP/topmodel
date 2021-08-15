@@ -19,15 +19,15 @@
 
 /*** Function/subroutine prototypes ***/
 extern void init(FILE *in_param_fptr,FILE *output_fptr,char *subcat, 
-              int num_channels,int num_topodex_values,
-              int yes_print_output, double area,double **time_delay_histogram,
-              double *cum_dist_area_with_dist,double dt, double *szm, double *t0,
-              double tl, double *dist_from_outlet,double *td, double *srmax, 
-              double *Q0,double *sr0, int *infex, double *xk0, double *hf, 
-              double *dth,double **stor_unsat_zone,double **deficit_local,
-              double **deficit_root_zone,double *szq, double *Q,double *sbar,
-              int max_atb_increments, int max_time_delay_ordinates,
-              double *bal,int *num_time_delay_histo_ords, int *num_delay);
+                int num_channels,int num_topodex_values,
+                int yes_print_output, double area,double **time_delay_histogram,
+                double *cum_dist_area_with_dist,double dt, double *szm, double *t0,
+                double tl, double *dist_from_outlet,double *td, double *srmax, 
+                double *Q0,double *sr0, int *infex, double *xk0, double *hf, 
+                double *dth,double **stor_unsat_zone,double **deficit_local,
+                double **deficit_root_zone,double *szq, double *Q,double *sbar,
+                int max_atb_increments, int max_time_delay_ordinates,
+                double *bal,int *num_time_delay_histo_ords, int *num_delay);
                  
 extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
                 double **pe, double **Qobs, double **Q, double **contrib_area);
@@ -45,22 +45,21 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 double *quz, double *qb, double *qof, double *p, double *ep);
 
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
-               int *num_topodex_values,int *num_channels,double *area,
-               double **dist_area_lnaotb, double **lnaotb, int yes_print_output,
-               double **cum_dist_area_with_dist, double *tl, 
-               double **dist_from_outlet, int maxsubcatch, int maxincr);
+                int *num_topodex_values,int *num_channels,double *area,
+                double **dist_area_lnaotb, double **lnaotb, int yes_print_output,
+                double **cum_dist_area_with_dist, double *tl, 
+                double **dist_from_outlet, int maxsubcatch, int maxincr);
                   
 extern void expinf(int irof, int it, int rint, double df, double cumf,
-                   double dt,double xk0, double szm, double hf);                  
+                double dt,double xk0, double szm, double hf);                  
 
 extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
-                 int nstep, double *Qobs, double *Q, 
-                 int current_time_step, int yes_print_output);
+                int nstep, double *Qobs, double *Q, 
+                int current_time_step, int yes_print_output);
 
-extern void water_balance(FILE *output_fptr, 
-                int yes_print_output, char *subcat,double *bal,
-                double *sbar,
-                double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz);
+extern void water_balance(FILE *output_fptr, int yes_print_output,
+                char *subcat, double *bal, double *sbar, double *sump,
+                double *sumae, double *sumq, double *sumrz, double *sumuz);
 
 extern void itwo_alloc( int ***ptr, int x, int y);
 extern void dtwo_alloc( double ***ptr, int x, int y);

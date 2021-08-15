@@ -149,22 +149,19 @@ int read_init_config(const char* config_file, topmodel_model* model) {
         exit(-9);
     }
 
-    /* BMI Adaption: Include additional items in config
-    stand_alone (bool), & when FALSE/0
-    nstep (int); dt (double), otherwise gathered from inputs.dat */
+    /* BMI Adaption: Include stand_alone (bool) in config
 
-    /* Structure of config_file as follows: 
+    Structure of config_file as follows: 
     stand_alone
     title
     path/to/inputs.dat
     path/to/subcat.dat
     path/to/params.dat
     path/to/topmod.out
-    path/to/hyd.out 
-    nstep dt*/ //Note: needed only when stand_alone FALSE
+    path/to/hyd.out */
 
     //Read the stand_alone T/F
-    // note: newline is needed here!
+    //note: newline is needed here!
     fscanf(model->control_fptr,"%d\n",&model->stand_alone);
 
     //Read the title line, up to 255 characters, of the the file
@@ -232,13 +229,6 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     printf("This run: %s\n",model->title);
 #endif
 
-    // Now that stand_alone T/F known, setup bmi inputs accordingly...
-    if (model->stand_alone == FALSE){
-        
-        //First, grab config last line for nstep and dt when running in framework;
-        fscanf(model->control_fptr,"%d %lf",&model->nstep,&model->dt);
-    }
-
     fclose(model->control_fptr);
     // Note all individual input files closed in init_config(),
     // which calls this function read_init_config()
@@ -259,21 +249,12 @@ int init_config(const char* config_file, topmodel_model* model)
         fclose(model->input_fptr);
     }
     else {
+        
+        /* Set nstep and dt*/
+        model->nstep = 1;
+        model->dt = 1;
+
         /* allocate memory for "arrays" */
-
-/*        d_alloc(&model->rain,1);
-        d_alloc(&model->pe,1);
-        d_alloc(&model->Qobs,1);   //TODO: Consider removing this all together when framework
-        d_alloc(&model->Q,1);
-        d_alloc(&model->contrib_area,1);
-
-        (model->rain)[1]=0.0;
-        (model->pe)[1]=0.0;
-        (model->Qobs)[1]=0.0;
-        (model->Q)[1]=0.0;
-        (model->contrib_area)[1]=0.0;*/
-
-        //model->nstep = 1;
         d_alloc(&model->rain,model->nstep);
         d_alloc(&model->pe,model->nstep);
         d_alloc(&model->Qobs,model->nstep);   //TODO: Consider removing this all together when framework
@@ -474,12 +455,11 @@ static int Finalize (Bmi *self)
     //    model->current_time_step, model->yes_print_output);
     
     if (model->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){        
-        water_balance(model->output_fptr, 
-                model->yes_print_output,model->subcat,&model->bal,
-                &model->sbar,
-                &model->sump, &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
+        
+        water_balance(model->output_fptr, model->yes_print_output,
+            model->subcat,&model->bal, &model->sbar, &model->sump, 
+            &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
     }
-
 
     if( model->Q != NULL )
         free(model->Q);
