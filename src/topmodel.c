@@ -340,7 +340,7 @@ for(ia=1;ia<=num_topodex_values;ia++)
 
   }
 
-(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
+//(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
 // TODO: Confirm these values are correct outside of initial value (validated-okay) 
 // and final (validated-okay)
 
@@ -378,6 +378,8 @@ extern void water_balance(FILE *output_fptr, int yes_print_output,
                 char *subcat,double *bal, double *sbar, double *sump, 
                 double *sumae, double *sumq, double *sumrz, double *sumuz)
 {
+
+(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
 
 #if TOPMODEL_DEBUG >=1  
   printf("\nWater Balance for Subcatchment: %s\n",subcat);
