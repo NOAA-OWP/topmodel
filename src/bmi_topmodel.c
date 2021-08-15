@@ -306,10 +306,20 @@ static int Get_end_time (Bmi *self, double * time)
     // JG_TODO: set this to some large float??
     // https://bmi.readthedocs.io/en/latest/#get-end-time
 
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+
     Get_start_time(self, time);
-    *time += (((topmodel_model *) self->data)->nstep * 
-    ((topmodel_model *) self->data)->dt);
-    return BMI_SUCCESS;
+    // Standalone case gathers end_time via nstep dt
+    if (topmodel->stand_alone == TRUE){
+        *time += topmodel->nstep * topmodel->dt;
+        return BMI_SUCCESS;
+    // Otherwise, set to FLT_MAX macro via float.h
+    }
+    else {
+        *time += FLT_MAX;
+        return BMI_SUCCESS;
+    }
 }
 
 static int Get_time_step (Bmi *self, double * dt)
@@ -370,10 +380,10 @@ static int Update (Bmi *self)
 
     double current_time, end_time;
     self->get_current_time(self, &current_time);
-/*    self->get_end_time(self, &end_time);
+    self->get_end_time(self, &end_time);
     if (current_time >= end_time) {
         return BMI_FAILURE;
-    };*/
+    };
 
     topmodel->current_time_step += topmodel->dt;   
 
