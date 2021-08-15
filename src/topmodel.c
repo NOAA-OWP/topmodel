@@ -374,9 +374,9 @@ return;
 
 }
 
-extern void water_balance(FILE *output_fptr, 
-                int yes_print_output, char *subcat,double *bal, double *sbar,
-                double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz)
+extern void water_balance(FILE *output_fptr, int yes_print_output, 
+                char *subcat,double *bal, double *sbar, double *sump, 
+                double *sumae, double *sumq, double *sumrz, double *sumuz)
 {
 
 #if TOPMODEL_DEBUG >=1  
