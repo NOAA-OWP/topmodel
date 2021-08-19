@@ -912,7 +912,7 @@ static int Get_state_var_names (Bmi *self, char ** names)
         //---------------------------------------------------------------
         "num_sub_catchments", "max_atb_increments", \
         "max_num_subcatchments", "max_time_delay_ordinates", "Qout", \
-        "current_time_step", "sump", "sumae", "sumq", "sumuz", "sumrz", \
+        "current_time_step", "sump", "sumae", "sumq", "sumrz", "sumuz", \
         "quz", "qb", "qof", "p", "ep", "stand_alone"/*, "dbl_arr_test"*/ };    
     
     //---------------------------------- 
