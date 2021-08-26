@@ -17,20 +17,23 @@ This code:
  This code was tested in linux
 
 # Software Requirements:
- TauDEM (which requires gdal, mpiexec,... see https://github.com/dtarb/TauDEM)
- python if the TWI histogram per basin will be created. Anaconda distribution was used but is not a requirement. The following libraries are used in python: 
- 	- 
+1) TauDEM (which requires gdal, mpiexec,... see https://github.com/dtarb/TauDEM)
+2) Python if the TWI histogram per basin will be created. Anaconda distribution was used but is not a requirement. The following libraries are used in python: 
+ 	- osgeo (gdal,ogr)
+ 	- numpy
+ 	- agparse
+ 	- pandas
  	
- curl to download the data
+3) Curl to download the HAND DEM data
 
 ## Usage
-Edit the workflow_hand_twi_giuh.env file. This file contains all parameters for the runs, including HUC06, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
-Run: source workflow_hand_twi_giuh.sh 
+1) Edit the workflow_hand_twi_giuh.env file. This file contains all parameters for the runs, including HUC06, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
+2) Run: source workflow_hand_twi_giuh.sh 
 
 # Data Requirements:
 hydrofabrics if the TWI histogram per basin will be created
 The HUC06 of the area covered by the watershed
-If the polygons in the hydrofabric covers multiple HUC06, all HUC06 can be specified in the "env" file  
+If the polygons in the hydrofabric covers multiple HUC06, all HUC06 can be specified in the "workflow_hand_twi_giuh.env" file  
 
 ## Open source licensing info
 
