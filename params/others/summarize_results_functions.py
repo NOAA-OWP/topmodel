@@ -10,13 +10,10 @@ Created on Thu Feb 18 14:58:36 2021
 
 @author: lcunha
 """
-import os
-from osgeo import ogr
-from osgeo.gdalconst import GA_ReadOnly
+
 import matplotlib.pyplot as plt     
-import sys 
 import pandas as pd
-sys.path.append("/home/west/Projects/IUH_TWI/")
+import os
 
     
 def plot_twi(IDs,outputfolder_twi,outputfolder_summary,filename,xlim):

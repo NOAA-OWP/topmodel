@@ -13,10 +13,12 @@ import shutil
 import pandas as pd
 import matplotlib.pyplot as plt   
 import sys  
-sys.path.append("/home/west/git_repositories/twi/workflow/")
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd())))
+sys.path.append(BASE_DIR+"/params/src/")
 import summarize_results_functions as FC
 
-outputfolder_results="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params/data/TopModel_Results/"
+outputfolder_results=BASE_DIR+"/params/data/TopModel_Results/"
 if not os.path.exists(outputfolder_results): os.mkdir(outputfolder_results)
 
 run_flag=1
@@ -24,25 +26,30 @@ process_results_flag=1
 Resolution=30    
 #hydro_fabrics_input_dir="/home/west/Projects/hydrofabrics/20210511/"
 #outputfolder_twi="/home/west/Projects/hydrofabrics/20210511/TWI_"+str(Resolution)+"m/TOPMODEL_cat_file/"
-outputfolder_twi="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params/data/TOPMODEL_cat_file/"
-topmodel_folder="/home/west/git_repositories/topmodel/"
+outputfolder_twi=BASE_DIR+"/params/data/TOPMODEL_cat_file/"
+topmodel_folder=BASE_DIR
+topmodel=BASE_DIR+"/run_bmi"
 
-topmodel="/home/west/git_repositories/topmodel/run_bmi"
+if(not os.path.exists(topmodel)):
+    print ("build topmodel " + "see https://github.com/NOAA-OWP/topmodel/blob/master/INSTALL.md")
+
+
 cat_file_new=topmodel_folder+"/data/subcat.dat"
-out_hyd_file=topmodel_folder+"hyd.out"
-out_topmod_file=topmodel_folder+"topmod.out"
+out_hyd_file=topmodel_folder+"/hyd.out"
+out_topmod_file=topmodel_folder+"/topmod.out"
+
 list_of_files=glob.glob(outputfolder_twi+"*")
-
-
 hyd_df=pd.DataFrame()
 #Reference output
 
-obs_df=pd.read_csv(topmodel_folder+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[1].to_frame()
+obs_df=pd.read_csv(outputfolder_results+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[1].to_frame()
 obs_df=obs_df.rename(columns={1: "Obs"})
 
-hyd_ref=pd.read_csv(topmodel_folder+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[2].to_frame()
+hyd_ref=pd.read_csv(outputfolder_results+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[2].to_frame()
 hyd_ref=hyd_ref.rename(columns={2: "Ref"})
 
+# Change to directory with topmodel
+os.chdir(BASE_DIR) 
 for ifile in range(0,len(list_of_files)):
 
     cat_file=list_of_files[ifile]
@@ -92,7 +99,7 @@ Runoff_volume.to_csv(outputfolder_results+"Runoff_volume.csv")
 n_to_plot=10#int(nelem/20)
 #plot TWI and GIUH for lower and higher 10th percentile
 filename="HighPeak"
-outputfolder_summary="/home/west/Projects/hydrofabrics/20210511/summary/"
+outputfolder_summary=outputfolder_results
 IDs_high=Runoff_peak.iloc[nelem-n_to_plot:nelem].index
 FC.plot_twi(IDs_high,outputfolder_twi,outputfolder_summary,filename,50)
 FC.plot_width_function(IDs_high,outputfolder_twi,outputfolder_summary,filename,2000)
