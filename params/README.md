@@ -3,6 +3,7 @@
 
 **Description**:  
 Calculates the topographic wetness index (TWI) and width function for Topmodel (version 0)
+
 This code:
 1) Download data from http://web.corral.tacc.utexas.edu/nfiedata/HAND/ for the desired HUC06 of interest
 2) Allows the use of 10 or 30 meters DEM
@@ -11,6 +12,8 @@ This code:
 5) Calculates a raster with the distance to the outlet
 6) For each sub-basin in the HUC06, calculate the Width Function with 500 meters increament to a maximum of 2500 meteres 
 7) Generates the subcat.dat file needed to run topmodel - the file name contains the ID of the sub-basin. 
+
+The "others" folder contains functions to plot the outputs, and to run topmodel for all catchments the data was generated for. 
 
 # Dependencies
 
@@ -27,7 +30,7 @@ This code:
 3) Curl to download the HAND DEM data
 
 ## Usage
-1) Edit the workflow_hand_twi_giuh.env file. This file contains all parameters for the runs, including HUC06, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
+1) Edit the workflow_hand_twi_giuh.env file. This file contains all parameters for the runs, including the HUC06 number, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
 2) Run: source workflow_hand_twi_giuh.sh 
 
 # Data Requirements:
