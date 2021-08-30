@@ -24,7 +24,7 @@ optional arguments:
 from osgeo import gdal, ogr
 from osgeo.gdalconst import *
 import numpy as np
-#import sys
+import sys
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -56,6 +56,7 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                     nodata_value=None,
                     global_src_extent=False,
                     buffer_distance=0):
+
 
     outputfolder_twi_param_file=outputfolder_twi+"/TOPMODEL_param/"
     if not os.path.exists(outputfolder_twi_param_file): os.mkdir(outputfolder_twi_param_file)
@@ -366,7 +367,6 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
     # with open(os.path.join(outputfolder_twi,namestr+'TWI.json'), 'w') as outfile:
     #         json.dump(CatIDdict, outfile)
             
-
     vds = None
     rds = None
     rds2 = None
@@ -411,21 +411,5 @@ if __name__ == "__main__":
                     output_flag = args.output,                    
                     )
 
-
-#Test
-namest='010100'
-catchments='/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params/data/hydrofabrics/20210511/catchments_wgs84.geojson'
-twi_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params/data/HAND_30m/"+namest+"/"+namest+"_30mtwi_cr.tif"
-slope_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params/data/HAND_30m/"+namest+"/"+namest+"_30mslp_cr.tif"
-dist_to_outlet_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params/data/HAND_30m/"+namest+"/"+namest+"_30mdsave_noweight_cr.tif"
-outputfolder_twi="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params/data/"
-
-nodata_value = -999
-buffer_distance = 0.001
-output_flag = 1
-global_src_extent = 0
-
-generate_twi_per_basin(namest,catchments, twi_raster, slope_raster, dist_to_outlet_raster, outputfolder_twi,
-                    nodata_value = nodata_value,global_src_extent = 0,buffer_distance = 0.001,output_flag = 1)
 
    
