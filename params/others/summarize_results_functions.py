@@ -23,6 +23,7 @@ def plot_twi(IDs,outputfolder_twi,outputfolder_summary,filename,xlim):
     for cat in IDs:     
         DatFile=os.path.join(outputfolder_twi,"cat-"+str(cat)+".dat")
         catAr.append(cat)
+        DatFile=DatFile.replace("cat-cat","cat")
         if os.path.exists(DatFile): 
             TWI=pd.read_csv(DatFile, sep=' ',skiprows=3,skipfooter=3,header=None,engine='python')    
             TWI=TWI.rename(columns={TWI.columns[0]: "Freq",TWI.columns[1]: "TWI"})
@@ -34,7 +35,7 @@ def plot_twi(IDs,outputfolder_twi,outputfolder_summary,filename,xlim):
         else:
             NoFiles.append(cat)
             ncolsAr.append(-9)
-            print ("File does not exist " + str(cat))
+            #print ("File does not exist " + str(cat))
     
     plt.xlabel('TWI')
     plt.ylabel('CDF')
@@ -53,6 +54,7 @@ def plot_width_function(IDs,outputfolder_twi,outputfolder_summary,filename,xlim)
     for cat in IDs:            
         DatFile=os.path.join(outputfolder_twi,"cat-"+str(cat)+".dat")
         catAr.append(cat)
+        DatFile=DatFile.replace("cat-cat","cat")
         if os.path.exists(DatFile): 
             f = open(DatFile, "r")
             lines = list(f)
@@ -71,7 +73,7 @@ def plot_width_function(IDs,outputfolder_twi,outputfolder_summary,filename,xlim)
         else:
             NoFiles.append(cat)
             ncolsAr.append(-9)
-            print ("File does not exist " + str(cat))
+            #print ("File does not exist " + str(cat))
     
     plt.xlabel('Distance to outlet (m)')
     plt.ylabel('CDF')
@@ -91,7 +93,10 @@ def plot_giuh(IDs,outputfolder_giuh,outputfolder_summary,filename,xlim):
     for cat in IDs:              
         DatFile=os.path.join(outputfolder_giuh,"cat-"+str(cat)+"_bmi_config_cfe_pass.txt")
         catAr.append(cat)
+        DatFile=DatFile.replace("cat-cat","cat")
+
         if os.path.exists(DatFile): 
+
             #print (DatFile)
             # TWI=pd.read_csv(DatFile, sep=' ',skiprows=3,skipfooter=3,header=None,engine='python')    
             # TWI=TWI.rename(columns={TWI.columns[0]: "Freq",TWI.columns[1]: "TWI"})

@@ -31,7 +31,7 @@ topmodel_folder=BASE_DIR
 topmodel=BASE_DIR+"/run_bmi"
 
 if(not os.path.exists(topmodel)):
-    print ("build topmodel " + "see https://github.com/NOAA-OWP/topmodel/blob/master/INSTALL.md")
+    print ("You need to build topmodel first" + "see https://github.com/NOAA-OWP/topmodel/blob/master/INSTALL.md")
 
 
 cat_file_new=topmodel_folder+"/data/subcat.dat"
@@ -68,7 +68,7 @@ for ifile in range(0,len(list_of_files)):
         # Run topmodel     
         p = subprocess.Popen(topmodel, stdout=subprocess.PIPE)
         output = p.communicate()[0]
-        print(output)
+        
     
         # Copy outputs                  
         shutil.copy(out_hyd_file, out_hyd_file_new)            
