@@ -89,6 +89,18 @@ test/topmod.out
 test/run_bmi_test
 test/z_trash_test
 
+# Output from GIUH - python functions #
+###################################
+params/data/plots
+params/data/TOPMODEL_cat_file/
+params/data/HAND_30m/
+params/data/HAND_DEM/
+params/data/hydrofabrics/releases/beta/01a/TWI_30m/
+params/data/hydrofabrics/releases/beta/01a/GIUH_30m_1/
+params/data/hydrofabrics/releases/beta/01a/GIUH_30m_2/
+params/data/hydrofabrics/releases/beta/01a/GIUH_30m_3/
+params/data/TopModel_Results/
+
 # Misc #
 ########
 make_and_run_bmi.sh
