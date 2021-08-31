@@ -1,5 +1,5 @@
 
-# Project Title
+# TWI and Width Function Generation
 
 **Description**:  
 Calculates the topographic wetness index (TWI) and width function for Topmodel (version 0)
