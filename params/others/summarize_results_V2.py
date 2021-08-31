@@ -32,7 +32,6 @@ if not os.path.exists(outputfolder_summary): os.mkdir(outputfolder_summary)
 input_giuh=BASE_DIR+"/params/data/hydrofabrics/releases/beta/01a/GIUH_30m_1/CFE_config_file/"
 outputfolder_summary=BASE_DIR+"/params/data/plots/"
 if not os.path.exists(outputfolder_summary): os.mkdir(outputfolder_summary)
-# FOR CFE - GIUUH outputfolder_giuh="/home/west/Projects/hydrofabrics/20210511/GIUH_"+str(Resolution)+"m_"+str(method)+"/CFE_config_file/"
 
 catchments = os.path.join(hydro_fabrics_input_dir, 'catchments.geojson')
 
