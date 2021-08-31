@@ -24,8 +24,7 @@ if not os.path.exists(outputfolder_results): os.mkdir(outputfolder_results)
 run_flag=1
 process_results_flag=1
 Resolution=30    
-#hydro_fabrics_input_dir="/home/west/Projects/hydrofabrics/20210511/"
-#outputfolder_twi="/home/west/Projects/hydrofabrics/20210511/TWI_"+str(Resolution)+"m/TOPMODEL_cat_file/"
+
 outputfolder_twi=BASE_DIR+"/params/data/TOPMODEL_cat_file/"
 topmodel_folder=BASE_DIR
 topmodel=BASE_DIR+"/run_bmi"
