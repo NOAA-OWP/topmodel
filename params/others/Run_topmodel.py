@@ -25,7 +25,7 @@ run_flag=1
 process_results_flag=1
 Resolution=30    
 
-outputfolder_twi=BASE_DIR+"/params/data/TOPMODEL_cat_file/"
+outputfolder_twi=BASE_DIR+"/params/data/hydrofabrics/releases/beta/01a/TWI_30m/TOPMODEL_cat_file/"
 topmodel_folder=BASE_DIR
 topmodel=BASE_DIR+"/run_bmi"
 
@@ -41,11 +41,11 @@ list_of_files=glob.glob(outputfolder_twi+"*")
 hyd_df=pd.DataFrame()
 #Reference output
 
-obs_df=pd.read_csv(outputfolder_results+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[1].to_frame()
-obs_df=obs_df.rename(columns={1: "Obs"})
+# obs_df=pd.read_csv(outputfolder_results+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[1].to_frame()
+# obs_df=obs_df.rename(columns={1: "Obs"})
 
-hyd_ref=pd.read_csv(outputfolder_results+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[2].to_frame()
-hyd_ref=hyd_ref.rename(columns={2: "Ref"})
+# hyd_ref=pd.read_csv(outputfolder_results+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[2].to_frame()
+# hyd_ref=hyd_ref.rename(columns={2: "Ref"})
 
 # Change to directory with topmodel
 os.chdir(BASE_DIR) 
@@ -66,8 +66,9 @@ for ifile in range(0,len(list_of_files)):
     
         # Run topmodel     
         p = subprocess.Popen(topmodel, stdout=subprocess.PIPE)
-        output = p.communicate()[0]
-        
+        stdout, stderr  = p.communicate()
+        if stderr:
+            print(f'[stderr]\n{stderr.decode()}')
     
         # Copy outputs                  
         shutil.copy(out_hyd_file, out_hyd_file_new)            
