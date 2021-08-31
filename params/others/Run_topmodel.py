@@ -3,7 +3,7 @@
 """
 Created on Fri Aug 13 12:51:06 2021
 
-@author: west
+@author: lcunha
 """
 
 import subprocess

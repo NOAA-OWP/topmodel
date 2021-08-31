@@ -50,15 +50,6 @@ def bbox_to_pixel_offsets(gt, bbox):
     ysize = y2 - y1
     return (x1, y1, xsize, ysize)
 
-# namest='020302'
-# catchments='/home/west/Projects/hydrofabrics/20210511/catchments_wgs84.geojson'
-# time_to_stream_raster='/home/west/Projects/IUH_TWI/HAND_10m//020302/020302dsave1_cr.tif'
-# outputfolder_giuh='/home/west/Projects/hydrofabrics/20210511//GIUH_10m_1/'
-# nodata_value = -999
-# buffer_distance = 0.001
-# output_flag = 1
-# global_src_extent = 0
-
 
 
 def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_params_file, GW_params_file, outputfolder_giuh,
