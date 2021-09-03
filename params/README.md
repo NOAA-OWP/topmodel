@@ -21,17 +21,21 @@ The "others" folder contains functions to plot the outputs, and to run topmodel 
 
 # Software Requirements:
 1) TauDEM (which requires gdal, mpiexec,... see https://github.com/dtarb/TauDEM)
-2) Python if the TWI histogram per basin will be created. Anaconda distribution was used but is not a requirement. The following libraries are used in python: 
- 	- osgeo (gdal,ogr)
- 	- numpy
- 	- agparse
- 	- pandas
+2) Python is required to generate TWI histogram and the width function per basin. Running this model requires python and the libraries listed in the environment file: environment.yml. To create an environment in anaconda, open the console and run the 
+
+conda env create --file environment.yml
+conda activate params
+
  	
+Anaconda is not required, as long as all requirements listed in environment.yml are available in the python installation. 
+
 3) Curl to download the HAND DEM data
 
 ## Usage
 1) Edit the workflow_hand_twi_giuh.env file. This file contains all parameters for the runs, including the HUC06 number, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
-2) Run: source workflow_hand_twi_giuh.sh 
+2) Run: 
+conda activate params
+source workflow_hand_twi_giuh.sh 
 
 # Data Requirements:
 hydrofabrics if the TWI histogram per basin will be created

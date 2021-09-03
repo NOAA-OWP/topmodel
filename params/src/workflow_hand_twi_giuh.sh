@@ -94,7 +94,7 @@ for val in  ${HUC[@]}; do
 		if test -f ${Outdir}${file_name}fel.tif; then
 			echo "${Outdir}${file_name}fel.tif exists"
 		else
-			mpiexec -np $nproc pitremove -z ${Outdir}${file_name}.tif -fel ${Outdir}${FelPath}
+			mpiexec -np $nproc pitremove -z ${Outdir}${file_name}.tif -fel ${FelPath}
 		fi 	
 		
 		#-----------------------------------------------

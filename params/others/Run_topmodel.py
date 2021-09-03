@@ -30,8 +30,9 @@ topmodel_folder=BASE_DIR
 topmodel=BASE_DIR+"/run_bmi"
 
 if(not os.path.exists(topmodel)):
-    print ("You need to build topmodel first" + "see https://github.com/NOAA-OWP/topmodel/blob/master/INSTALL.md")
-
+    print (topmodel + " DOES NOT EXIST")
+    print ("Please install and compile topmodel first" + "see https://github.com/NOAA-OWP/topmodel/blob/master/INSTALL.md")
+    exit()
 
 cat_file_new=topmodel_folder+"/data/subcat.dat"
 out_hyd_file=topmodel_folder+"/hyd.out"
@@ -39,8 +40,10 @@ out_topmod_file=topmodel_folder+"/topmod.out"
 
 list_of_files=glob.glob(outputfolder_twi+"*")
 hyd_df=pd.DataFrame()
-#Reference output
 
+#Reference output - this should only be included if running with original topmodel forcing.
+#It can be used to check if TWI and Width Function generate reasonable values of runoff compared to the original topmodel
+#To use copy the hyd.out to the output file and change the name to hyd_ori. Then remove uncomment lines 47 to 51, and 90 to 91
 # obs_df=pd.read_csv(outputfolder_results+"hyd_ori.out", delimiter = " ",header=None,index_col=0)[1].to_frame()
 # obs_df=obs_df.rename(columns={1: "Obs"})
 
@@ -84,8 +87,8 @@ for ifile in range(0,len(list_of_files)):
         
 plt.figure()   
 plt.plot(hyd_df)
-plt.plot(hyd_ref,'b')
-plt.plot(obs_df,'r')
+#plt.plot(hyd_ref,'b')
+#plt.plot(obs_df,'r')
 plt.xlabel('Time(hours)')
 plt.ylabel('Runoff(m)')
 plt.savefig(outputfolder_results+"hyd.png",bbox_inches='tight')

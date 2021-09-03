@@ -1,0 +1,10 @@
+---
+name: params
+channels:
+  - conda-forge
+  - esmvalgroup
+  - defaults
+dependencies:
+  - python>=3.7
+  - esmvaltool-python>=2.3.0
+  - esmpy!=8.1.0
