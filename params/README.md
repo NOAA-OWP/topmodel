@@ -21,7 +21,7 @@ The "others" folder contains functions to plot the outputs, and to run topmodel 
 
 # Software Requirements:
 1) TauDEM (which requires gdal, mpiexec,... see https://github.com/dtarb/TauDEM)
-2) Python is required to generate TWI histogram and the width function per basin. Running this model requires python and the libraries listed in the environment file: environment.yml. To create an environment in anaconda, open the console and run the 
+2) Python is required to generate TWI histogram and the width function per basin. Running this model requires python and the libraries listed in the environment file: environment.yml. To install anaconda see https://docs.anaconda.com/. To create an environment in anaconda, open the anaconda console and run: 
 
 conda env create --file environment.yml
 conda activate params
@@ -33,14 +33,15 @@ Anaconda is not required, as long as all requirements listed in environment.yml 
 
 ## Usage
 1) Edit the workflow_hand_twi_giuh.env file. This file contains all parameters for the runs, including the HUC06 number, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
-2) Run: 
+2) In command prompt: 
+
 conda activate params
 source workflow_hand_twi_giuh.sh 
 
 # Data Requirements:
-hydrofabrics if the TWI histogram per basin will be created
+hydrofabrics if the TWI and width function histogram per basin will be created
 The HUC06 of the area covered by the watershed
-If the polygons in the hydrofabric covers multiple HUC06, all HUC06 can be specified in the "workflow_hand_twi_giuh.env" file  
+If the polygons in the hydrofabric covers multiple HUC06, all HUC06 should be specified in the "workflow_hand_twi_giuh.env" file  
 
 ## Open source licensing info
 
