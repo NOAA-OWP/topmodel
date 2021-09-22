@@ -144,6 +144,7 @@ def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_para
         soil_params['slope_Time=1']= soil_params['slope_Time=1'].replace(np.nan,1.0)
         soil_params['smcmax_soil_layers_stag=1_Time=1']= soil_params['smcmax_soil_layers_stag=1_Time=1'].fillna(0.439)
         soil_params['smcwlt_soil_layers_stag=1_Time=1']= soil_params['smcwlt_soil_layers_stag=1_Time=1'].fillna(0.066)
+        soil_params['refkdt_Time=1']= soil_params['refkdt_Time=1'].fillna(3.0)
         GW_params['Zmax'] = GW_params['Zmax'].fillna(16.0)
         GW_params['Coeff'] = GW_params['Coeff'].fillna(0.01)
         GW_params['Expon'] = GW_params['Expon'].fillna(6.0)
@@ -167,6 +168,7 @@ def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_para
         soil_params['slope_Time=1']= 1.0
         soil_params['smcmax_soil_layers_stag=1_Time=1']= 0.439
         soil_params['smcwlt_soil_layers_stag=1_Time=1']= 0.066
+        soil_params['refkdt_Time=1']=3.0
         GW_params['Zmax']= 16.0
         GW_params['Coeff'] = 0.01
         GW_params['Expon'] = 6.0
@@ -300,14 +302,17 @@ def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_para
                     
                     f.write("%s" %("forcing_file=BMI\n"))
                     f.write("%s" %("soil_params.depth=2.0\n"))
-                    f.write("%s" %("soil_params.b="+str(soil_params.loc[cat]['bexp_soil_layers_stag=1_Time=1'])+"\n"))                    
+                    f.write("%s" %("soil_params.b="+str(soil_params.loc[cat]['bexp_soil_layers_stag=1_Time=1'])+"\n"))
+                    # This parameter (LKSATFAC) needs to be added when the file Fulldom_CONUS_FullRouting.csv is added to the hydrofabrics               
                     f.write("%s" %("soil_params.mult=1000.0\n"))
                     f.write("%s" %("soil_params.satdk="+str(soil_params.loc[cat]['dksat_soil_layers_stag=1_Time=1'])+"\n"))
                     f.write("%s" %("soil_params.satpsi="+str(soil_params.loc[cat]['psisat_soil_layers_stag=1_Time=1'])+"\n"))
                     f.write("%s" %("soil_params.slop="+str(soil_params.loc[cat]['slope_Time=1'])+"\n"))
                     f.write("%s" %("soil_params.smcmax="+str(soil_params.loc[cat]['smcmax_soil_layers_stag=1_Time=1'])+"\n"))
                     f.write("%s" %("soil_params.wltsmc="+str(soil_params.loc[cat]['smcwlt_soil_layers_stag=1_Time=1'])+"\n"))
+                    f.write("%s" %("refkdt"+str(soil_params.loc[cat]['refkdt_Time=1'])+"\n"))
                     f.write("%s" %("max_gw_storage="+str(GW_params.loc[cat]['Zmax'])+"\n"))
+                   
                     f.write("%s" %("Cgw="+str(GW_params.loc[cat]['Coeff'])+"\n"))
                     f.write("%s" %("expon="+str(GW_params.loc[cat]['Expon'])+"\n"))
                     f.write("%s" %("gw_storage=50%\n"))

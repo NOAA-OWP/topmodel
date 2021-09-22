@@ -11,6 +11,7 @@ positional arguments:
   twi_raster            Twi Raster file - generated with workflow_hand_twi_giuh.sh
   slope_raster          Slope Raster file - generated with workflow_hand_twi_giuh.sh
   dist_to_outlet_raster          Distance to Outlet Raster file - generated with workflow_hand_twi_giuh.sh
+  soil_params_file      CSV file with soil parameters from NWM 2.1 - part of the hydrofabric released in 08/2021  
   outputfolder_twi      Output folder
 
 optional arguments:
@@ -51,7 +52,7 @@ def bbox_to_pixel_offsets(gt, bbox):
 
 
 
-def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_outlet_raster,outputfolder_twi,
+def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_outlet_raster, soil_params_file,outputfolder_twi,
                     output_flag=1,
                     nodata_value=None,
                     global_src_extent=False,
@@ -60,10 +61,31 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
 
     outputfolder_twi_param_file=outputfolder_twi+"/TOPMODEL_param/"
     if not os.path.exists(outputfolder_twi_param_file): os.mkdir(outputfolder_twi_param_file)
-    if(output_flag==1): 
+    if not os.path.exists(soil_params_file):  print ("does not exist "  + soil_params_file)
+        
+    if(output_flag==1) & (os.path.isfile(soil_params_file)) & (os.path.isfile(soil_params_file)): 
+        soil_params=pd.read_csv(soil_params_file,index_col=0)
+        if(not "cat-" in str(soil_params.index[0])): soil_params.index = 'cat-' + soil_params.index.astype(str)
+        soil_params['dksat_soil_layers_stag=1_Time=1']= soil_params['dksat_soil_layers_stag=1_Time=1'].fillna(1)
+        
         outputfolder_twi_config_file=outputfolder_twi+"/TOPMODEL_cat_file/"
         if not os.path.exists(outputfolder_twi_config_file): os.mkdir(outputfolder_twi_config_file)
+    else:
         
+        skippednulgeoms = False
+        total = vlyr.GetFeatureCount(force = 0)
+        vlyr.ResetReading()
+        count = 0
+        feat = vlyr.GetNextFeature()
+        IDAr=[]
+        while feat is not None:
+            cat = feat.GetField('ID')
+            IDAr.append(cat)
+            feat = vlyr.GetNextFeature()        
+        soil_params=pd.DataFrame(index=IDAr)
+
+        soil_params['dksat_soil_layers_stag=1_Time=1']= 1.0                    
+    
     rds = gdal.Open(twi_raster, GA_ReadOnly)
     assert rds, "Could not open twi raster"
     twi = rds.GetRasterBand(1) #previous rb
@@ -329,10 +351,19 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                 CDF_D2O.to_csv(DatFile)                  
                 
                 if(output_flag==1):
-                #DirCat=os.path.join(outputfolder_twi, str(cat))
+                    
+                    DatFile=os.path.join(outputfolder_twi_config_file,"params_"+str(cat)+".dat")
+                    #DatFile=DatFile.replace("cat-cat-","cat-")
+                    f= open(DatFile, "w")
+                    
+                    f.write("%s" %("Extracted study basin: "+str(cat)+"\n")) 
+                    strparam="0.032  5.0  50.  3600.0  3600.0  0.05  0.0000328  0.002  0  "+str(soil_params.loc[cat]['dksat_soil_layers_stag=1_Time=1'])+"  0.02  0.1\n"
+                    f.write("%s" %(strparam))  
+                    f.close()
+                    #DirCat=os.path.join(outputfolder_twi, str(cat))
                 #if not os.path.exists(DirCat): os.mkdir(DirCat)
-                    DatFile=os.path.join(outputfolder_twi_config_file,"cat-"+str(cat)+".dat")
-                    DatFile=DatFile.replace("cat-cat-","cat-")
+                    DatFile=os.path.join(outputfolder_twi_config_file,"subcat_"+str(cat)+".dat")
+                    #DatFile=DatFile.replace("cat-cat-cat","cat-cat")
                     f= open(DatFile, "w")
                     f.write("1  1  1\n")
                     f.write("%s" %("Extracted study basin: " + str(cat) +"\n"))
@@ -389,7 +420,8 @@ if __name__ == "__main__":
                         help=" Slope file")
     parser.add_argument("dist_to_outlet_raster",
                         help=" distance to outlet")
-    
+    parser.add_argument("soil_params_file",
+                        help="CSV file with NWM 2.1 soil params")    
     
     parser.add_argument("outputfolder_twi",
                         help="Output folder")
@@ -404,7 +436,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    generate_twi_per_basin(args.namest,args.catchments, args.twi_raster, args.slope_raster, args.dist_to_outlet_raster, args.outputfolder_twi,
+    generate_twi_per_basin(args.namest,args.catchments, args.twi_raster, args.slope_raster, args.dist_to_outlet_raster, args.soil_params_file, args.outputfolder_twi,
                     nodata_value = args.nodata,
                     global_src_extent = args.preload,
                     buffer_distance = args.buffer,

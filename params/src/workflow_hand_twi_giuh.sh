@@ -266,7 +266,7 @@ for val in  ${HUC[@]}; do
 		#generate TWI per basin - need to modify to also generate width function
 		
 
-		python generate_twi_per_basin.py ${hucid} ${Dir}${hydrofabrics_directory}catchments_wgs84.json ${Outdir}${file_name}twi_cr.tif ${Outdir}${file_name}slp_cr.tif ${Outdir}${file_name}dsave_noweight.tif ${Dir}$out_dir_twi --output 1 --buffer 0.001 --nodata -999
+		python generate_twi_per_basin.py ${hucid} ${Dir}${hydrofabrics_directory}catchments_wgs84.json ${Outdir}${file_name}twi_cr.tif ${Outdir}${file_name}slp_cr.tif ${Outdir}${file_name}dsave_noweight.tif ${Dir}$soil_param_file ${Dir}$out_dir_twi --output 1 --buffer 0.001 --nodata -999
 		
 	fi	
 
