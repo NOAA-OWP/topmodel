@@ -1,5 +1,5 @@
 # BMI Unit Testing
-Make and GCC compliler are required for unit testing.
+Make and GCC compiler are required for unit testing.
 - [Component](#component)
 - [Comparison](#comparison)
 # Component 
@@ -41,10 +41,12 @@ The two output files, `topmod.out` and `hyd.out` are identical to those produced
 The results are a 1-1 match, as shown in the plot below.
 Instructions on how to run original TOPMODEL can be
 found [here](../refs/original_code_c/README.1ST). See [source code](../refs/original_code_c/tmod9502.c) for more information about output variable names and units.
+
 ![image](https://user-images.githubusercontent.com/30940444/127345662-aa083fe7-d2d6-47a4-8c68-0a16686016c6.png)
 
 ## Stand Alone Flag
-A Boolean toggle introduced to the main [configuration file](./data/topmod_unit_test.run) indicates whether the model will be run in a `stand_alone` setting.
-The first line of the `topmod.run` file should be set to `1` (`TRUE`) if the model is to be configured for a stand-alone scenario and `0` (`FALSE`) if being run within a model-coupling framework.  
+A Boolean toggle introduced to the main [configuration file](./data/topmod_unit_test.run) indicates if the model will be run in a `stand_alone` setting.
+The first line of the `topmod.run` file should be set to `1` (`TRUE`) if the model is to be configured for a stand-alone scenario and `0` (`FALSE`) if being run within a model-coupling framework.
+
 Note that BMI core control functions will always be used to run the model whether or not it is in `stand_alone` mode.
 In this mode, the model will read required input data from files on its own and produce output files as seen from original source code.
