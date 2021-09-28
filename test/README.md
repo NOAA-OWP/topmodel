@@ -19,6 +19,8 @@ $ cd test/
 $ make clean; make
 $ ./run_bmi_unit_test
 ``` 
+Note: Older compilers may require you to first run `module load gnu` prior to running `make`.
+
 To fully test the depth of all BMI functions, we are using a `stand_alone` value of `FALSE` (`0`).  See note on [`stand_alone`](#stand-alone-flag).
 Recall that BMI guides interoperability for model-coupling, where model components (i.e. inputs and outputs) are easily shared amongst each other.
 When testing outside of a true framework, we consider the behavior of BMI function definitions, rather than any expected values they produce. 
