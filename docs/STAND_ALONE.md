@@ -36,10 +36,18 @@ else {
   (model->Q)[1]=0.0;
   (model->contrib_area)[1]=0.0;
 }
-```    
+```
+  
 ## Outputs
 `Qout` remains the main output varible for the model, regardless of `stand_alone` mode.
-However, output files, `topmod.out` and `hyd.out` are only generated when `stand_alone = TRUE`.  
+However, output files, `topmod.out` and `hyd.out` are only considered when `stand_alone = TRUE`.
+```
+if (topmodel->stand_alone == TRUE){
+  results(topmodel->output_fptr, topmodel->out_hyd_fptr, topmodel->nstep, 
+    topmodel->Qobs, topmodel->Q, 
+    topmodel->current_time_step, topmodel->yes_print_output);
+}
+```
 
 Once a model is BMI-enabled, its BMI model control functions will be used to run it whether or not it is in `stand_alone` mode.  
 Simple if-then-else statements condition the model's behavior based on this toggle
