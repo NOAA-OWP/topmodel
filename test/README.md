@@ -52,3 +52,5 @@ The first line of the `topmod.run` file should be set to `1` (`TRUE`) if the mod
 
 Note that BMI core control functions will always be used to run the model whether or not it is in `stand_alone` mode.
 In this mode, the model will read required input data from files on its own and produce output files as seen from original source code.
+
+See [STAND_ALONE](../docs/STAND_ALONE.md) for more details. 
