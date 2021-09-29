@@ -1,6 +1,6 @@
 # Stand Alone Mode
 
-A toggle or flag (Boolean) has been added to the model’s primary configuration file [`topmod.run`](./data/topmod.run) that indicates whether it will be run in `stand_alone` mode. 
+A toggle or flag (Boolean) has been added to the model’s primary configuration file [`topmod.run`](../data/topmod.run) that indicates whether it will be run in `stand_alone` mode. 
 The first line should be set to `1` (`TRUE`) if the model is to be configured for a stand-alone scenario and `0` (`FALSE`) if being run within a model-coupling framework.
 
 ## Inputs
