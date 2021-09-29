@@ -59,8 +59,8 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                     buffer_distance=0):
 
 
-    outputfolder_twi_param_file=outputfolder_twi+"/TOPMODEL_param/"
-    if not os.path.exists(outputfolder_twi_param_file): os.mkdir(outputfolder_twi_param_file)
+    #outputfolder_twi_param_file=outputfolder_twi+"/TOPMODEL_param/"
+    #if not os.path.exists(outputfolder_twi_param_file): os.mkdir(outputfolder_twi_param_file)
     if not os.path.exists(soil_params_file):  print ("does not exist "  + soil_params_file)
         
     if(output_flag==1) & (os.path.isfile(soil_params_file)) & (os.path.isfile(soil_params_file)): 
@@ -294,8 +294,8 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                 #Scatter plot of CDF
                 #CDF.to_csv(os.path.join(outputfolder_twi, "CDF_" + str(cat) + '.csv'), index=False)
                 #CDFplot = CDF.plot(kind='scatter',x='TWI',y='AccumFreq',color='blue').get_figure()
-                DatFile=os.path.join(outputfolder_twi_param_file,"cat-"+str(cat)+"_twi.csv")
-                CDF.to_csv(DatFile)     
+                #DatFile=os.path.join(outputfolder_twi_param_file,"cat-"+str(cat)+"_twi.csv")
+                #CDF.to_csv(DatFile)     
                 
                 # 2 - Second calculate the width function
     
@@ -346,13 +346,28 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                 #Scatter plot of CDF
                 #CDF.to_csv(os.path.join(outputfolder_twi, "CDF_" + str(cat) + '.csv'), index=False)
                 #CDFplot = CDF.plot(kind='scatter',x='TWI',y='AccumFreq',color='blue').get_figure()
-                DatFile=os.path.join(outputfolder_twi_param_file,"cat-"+str(cat)+"_d2o.csv")
-                DatFile=DatFile.replace("cat-cat-","cat-")
-                CDF_D2O.to_csv(DatFile)                  
+                #DatFile=os.path.join(outputfolder_twi_param_file,"cat-"+str(cat)+"_d2o.csv")
+                #DatFile=DatFile.replace("cat-cat-","cat-")
+                #CDF_D2O.to_csv(DatFile)                  
                 
                 if(output_flag==1):
                     
-                    DatFile=os.path.join(outputfolder_twi_config_file,"params_"+str(cat)+".dat")
+                    # Topmodel requires one directory per catchment since topmod.run needs to have the same name
+                    outputfolder_data = outputfolder_twi_config_file+"/"+ str(cat) +"/"
+                    if not os.path.exists(outputfolder_data): os.mkdir(outputfolder_data)
+                    
+                    RunTop_File=os.path.join(outputfolder_data,"topmod.run")
+                    f= open(RunTop_File, "w")                    
+                    f.write("%s" %("1\n"))  
+                    f.write("%s" %(str(cat)+"\n")) 
+                    f.write("%s" %("input/"+str(cat)+"/"+str(cat)+".csv\n")) 
+                    f.write("%s" %("data/"+str(cat)+"/"+"subcat_"+str(cat)+".dat\n")) 
+                    f.write("%s" %("data/"+str(cat)+"/"+"params_"+str(cat)+".dat\n")) 
+                    f.write("%s" %("output/topmod_"+str(cat)+".out\n")) 
+                    f.write("%s" %("output/hyd_"+str(cat)+".out\n")) 
+                    f.close()
+                    
+                    DatFile=os.path.join(outputfolder_data,"params_"+str(cat)+".dat")
                     #DatFile=DatFile.replace("cat-cat-","cat-")
                     f= open(DatFile, "w")
                     
@@ -362,7 +377,7 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                     f.close()
                     #DirCat=os.path.join(outputfolder_twi, str(cat))
                 #if not os.path.exists(DirCat): os.mkdir(DirCat)
-                    DatFile=os.path.join(outputfolder_twi_config_file,"subcat_"+str(cat)+".dat")
+                    DatFile=os.path.join(outputfolder_data,"subcat_"+str(cat)+".dat")
                     #DatFile=DatFile.replace("cat-cat-cat","cat-cat")
                     f= open(DatFile, "w")
                     f.write("1  1  1\n")
@@ -443,5 +458,19 @@ if __name__ == "__main__":
                     output_flag = args.output,                    
                     )
 
+namest='010100' 
+catchments='/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/hydrofabrics/releases/beta/01a/catchments_wgs84.json' 
+twi_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/HAND_30m//010100/010100_30mtwi_cr.tif"
+slope_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/HAND_30m//010100/010100_30mslp_cr.tif"
+dist_to_outlet_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/HAND_30m//010100/010100_30mdsave_noweight.tif"
+outputfolder_twi="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/hydrofabrics/releases/beta/01a/TWI_30m/"
+soil_params_file='/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/hydrofabrics/releases/beta/01a/soil-properties-fullrouting.csv'
 
-   
+nodata_value = -999
+buffer_distance = 0.001
+output_flag = 1
+global_src_extent = 0
+
+generate_twi_per_basin(namest,catchments, twi_raster, slope_raster, dist_to_outlet_raster, soil_params_file, outputfolder_twi,
+                     nodata_value = nodata_value,global_src_extent = 0,buffer_distance = 0.001,output_flag = 1)
+
