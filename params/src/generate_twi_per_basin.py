@@ -360,7 +360,7 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                     f= open(RunTop_File, "w")                    
                     f.write("%s" %("1\n"))  
                     f.write("%s" %(str(cat)+"\n")) 
-                    f.write("%s" %("input/"+str(cat)+"/"+str(cat)+".csv\n")) 
+                    f.write("%s" %("forcing/"+str(cat)+".csv\n")) 
                     f.write("%s" %("data/"+str(cat)+"/"+"subcat_"+str(cat)+".dat\n")) 
                     f.write("%s" %("data/"+str(cat)+"/"+"params_"+str(cat)+".dat\n")) 
                     f.write("%s" %("output/topmod_"+str(cat)+".out\n")) 
@@ -458,19 +458,4 @@ if __name__ == "__main__":
                     output_flag = args.output,                    
                     )
 
-namest='010100' 
-catchments='/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/hydrofabrics/releases/beta/01a/catchments_wgs84.json' 
-twi_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/HAND_30m//010100/010100_30mtwi_cr.tif"
-slope_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/HAND_30m//010100/010100_30mslp_cr.tif"
-dist_to_outlet_raster="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/HAND_30m//010100/010100_30mdsave_noweight.tif"
-outputfolder_twi="/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/hydrofabrics/releases/beta/01a/TWI_30m/"
-soil_params_file='/home/west/git_repositories/topmodel_fork_NOAA/topmodel/params//data/hydrofabrics/releases/beta/01a/soil-properties-fullrouting.csv'
-
-nodata_value = -999
-buffer_distance = 0.001
-output_flag = 1
-global_src_extent = 0
-
-generate_twi_per_basin(namest,catchments, twi_raster, slope_raster, dist_to_outlet_raster, soil_params_file, outputfolder_twi,
-                     nodata_value = nodata_value,global_src_extent = 0,buffer_distance = 0.001,output_flag = 1)
 
