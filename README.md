@@ -17,9 +17,9 @@ originally developed by
 [Beven & Kirby (1979)](https://www.tandfonline.com/doi/abs/10.1080/02626667909491834).
 
 ### Links and Documention
-- [INSTALL.md](./INSTALL.md)
-- [BMI_ADAPTION.md](./docs/BMI_ADAPTION.md): Details of how TOPMODEL source code was adapted and extented to BMI
-- [STAND_ALONE.md](./docs/STAND_ALONE.md): A new Boolean toogle introduced
+- [INSTALL](./INSTALL.md)
+- [BMI_ADAPTION](./docs/BMI_ADAPTION.md): Details of how TOPMODEL source code was adapted and extended to BMI
+- [STAND_ALONE](./docs/STAND_ALONE.md): A new Boolean toggle introduced
 - [OUTPUT_FILES_EXPLAINED](./docs/OUTPUT_FILES_EXPLAINED.md)
 - [BMI_UNIT_TEST](./test/README.md)
 - [SERIALIZATION](./test_serialize/README.md): Core BMI extended to support serialization and deserialization
