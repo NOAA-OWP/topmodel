@@ -16,7 +16,7 @@ and have the potential to produce saturation overland flow. TOPMODEL was
 originally developed by
 [Beven & Kirby (1979)](https://www.tandfonline.com/doi/abs/10.1080/02626667909491834).
 
-### Links and Documention
+### Links and Documentation
 - [INSTALL](./INSTALL.md)
 - [BMI_ADAPTION](./docs/BMI_ADAPTION.md): Details of how TOPMODEL source code was adapted and extended to BMI
 - [STAND_ALONE](./docs/STAND_ALONE.md): A new Boolean toggle introduced
