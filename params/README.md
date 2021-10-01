@@ -1,5 +1,4 @@
-
-# Project Title
+# Parameter Generation Workflow
 
 **Description**:  
 Calculates the topographic wetness index (TWI) and width function for Topmodel (version 0)
@@ -13,11 +12,10 @@ This code:
 6) For each sub-basin in the HUC06, calculate the Width Function with 500 meters increament to a maximum of 2500 meteres 
 7) Generates the subcat.dat file needed to run topmodel - the file name contains the ID of the sub-basin. 
 
-The "others" folder contains functions to plot the outputs, and to run topmodel for all catchments the data was generated for. 
+The [others](./others) folder contains functions to plot the outputs, and to run topmodel for all catchments the data was generated for. 
 
 # Dependencies
-
- This code was tested in linux
+This code was tested in linux
 
 # Software Requirements:
 1) TauDEM (which requires gdal, mpiexec,... see https://github.com/dtarb/TauDEM)
@@ -30,17 +28,13 @@ The "others" folder contains functions to plot the outputs, and to run topmodel 
 3) Curl to download the HAND DEM data
 
 ## Usage
-1) Edit the workflow_hand_twi_giuh.env file. This file contains all parameters for the runs, including the HUC06 number, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
-2) Run: source workflow_hand_twi_giuh.sh 
+1) Edit the [workflow_hand_twi_giuh.env](./src/workflow_hand_twi_giuh.env) file. This file contains all parameters for the runs, including the HUC06 number, path to the hydrofabrics, and environmental variabels for TAUDEM and gdal
+2) Run: source [workflow_hand_twi_giuh.sh](./src/workflow_hand_twi_giuh.sh) 
 
 # Data Requirements:
-hydrofabrics if the TWI histogram per basin will be created
-The HUC06 of the area covered by the watershed
-If the polygons in the hydrofabric covers multiple HUC06, all HUC06 can be specified in the "workflow_hand_twi_giuh.env" file  
+- hydrofabrics if the TWI histogram per basin will be created
+- The HUC06 of the area covered by the watershed
+- If the polygons in the hydrofabric covers multiple HUC06, all HUC06 can be specified in the "workflow_hand_twi_giuh.env" file  
 
-## Open source licensing info
-
-
-## Credits and references
 
 
