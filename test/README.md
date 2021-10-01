@@ -41,8 +41,9 @@ $ ./run_bmi
 The executable is configured for a `stand_alone` scenario and reads-in information the same as the previous source code for TOPMODEL.
 The two output files, `topmod.out` and `hyd.out` are identical to those produced by the original source code, prior to any BMI implementation.
 The results are a 1-1 match, as shown in the plot below.
-Instructions on how to run original TOPMODEL can be
-found [here](../refs/original_code_c/README.1ST). See [source code](../refs/original_code_c/tmod9502.c) for more information about output variable names and units.
+Instructions on how to run original TOPMODEL can be found [here](../refs/original_code_c/README.1ST).
+See [OUTPUT_FILES_EXPLAINED](../docs/OUTPUT_FILES_EXPLAINED.md) or [source code](../refs/original_code_c/tmod9502.c) for more information about output variable names and units.
+The header file [`topmodel.h`](../include/topmodel.h) also includes comments of each variable, both input and output.  
 
 ![image](https://user-images.githubusercontent.com/30940444/127345662-aa083fe7-d2d6-47a4-8c68-0a16686016c6.png)
 
