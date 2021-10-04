@@ -416,8 +416,9 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
 
         if (size == 1){
             //--------------------------------------------
-            // Note:  This does not work, even though we
-            //        typecast in set_state_var().
+            // Note: The 2 lines commented here do not
+            //       work, even though we typecast in
+            //       set_state_var().
             //--------------------------------------------
             // ptr = &obj;
             // model2->set_state_var(model2, ptr, i );
@@ -426,7 +427,7 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
                 i_val = (int)obj.via.i64;
                 model2->set_state_var(model2, &i_val, i );
             } else if (strcmp(type, "long") == 0){        
-                li_val = (int)obj.via.i64;
+                li_val = (long)obj.via.i64;
                 model2->set_state_var(model2, &li_val, i );
             } else if (strcmp(type, "float") == 0){        
                 f_val = (float)obj.via.f64;
