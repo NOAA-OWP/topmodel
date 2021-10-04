@@ -59,8 +59,8 @@ along with a small shell script called
 
 **Note:** In ```serialize_state.c```, there are constants called
 ```BUFFER_SIZE``` and ```UNPACKED_BUFFER_SIZE``` that must be big
-enough to accommodate all state variables.  If the model's nsteps
-is increased, these constants may also need to be increased.
+enough to accommodate all state variables.  These are now set
+dynamically using the filesize of the serialized state.
 
 **Note:** To print and inspect the values of all state variables after
 they have been deserialized (usually from a file), you should change the

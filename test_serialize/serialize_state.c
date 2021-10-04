@@ -269,7 +269,7 @@ int serialize(Bmi* model1, const char *ser_file) {
             } else if (strcmp(type, "long") == 0){
                 for (j=0; j<size; j++){
                     li_val = *( ((long *)ptr_list[i]) + j);
-                    msgpack_pack_long(&pk, li_val); }    //#####################
+                    msgpack_pack_long(&pk, li_val); }    //##############
             } else if (strcmp(type, "float") == 0){
                 for (j=0; j<size; j++){
                     f_val = *( ((float *)ptr_list[i]) + j);
