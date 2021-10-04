@@ -8,9 +8,7 @@
 #include <sys/stat.h>   // to get filesize
 #include <msgpack.h>
 #include "msgpack/fbuffer.h"        // See note above
-#include "../include/topmodel.h"
 #include "../include/bmi.h"
-#include "../include/bmi_topmodel.h"
 
 //------------------------------------------------
 // Now computing these from filesize of ser_file
@@ -138,6 +136,7 @@ int serialize(Bmi* model1, const char *ser_file) {
     unsigned int size, sizes[ n_state_vars ];
     int verbose = 1;
     int    i_val;
+    long   li_val;
     float  f_val;
     double d_val;
   
@@ -227,6 +226,8 @@ int serialize(Bmi* model1, const char *ser_file) {
         if (size == 1){
             if (strcmp(type, "int") == 0){
                 msgpack_pack_int(&pk, *(int *)ptr_list[i]);
+            } else if (strcmp(type, "long") == 0){
+                msgpack_pack_long(&pk, *(long *)ptr_list[i]);    //#############
             } else if (strcmp(type, "float") == 0){
                 msgpack_pack_float(&pk, *(float *)ptr_list[i]);  
             } else if (strcmp(type, "double") == 0){
@@ -265,6 +266,10 @@ int serialize(Bmi* model1, const char *ser_file) {
                 for (j=0; j<size; j++){
                     i_val = *( ((int *)ptr_list[i]) + j);
                         msgpack_pack_int(&pk, i_val); }
+            } else if (strcmp(type, "long") == 0){
+                for (j=0; j<size; j++){
+                    li_val = *( ((long *)ptr_list[i]) + j);
+                    msgpack_pack_long(&pk, li_val); }    //#####################
             } else if (strcmp(type, "float") == 0){
                 for (j=0; j<size; j++){
                     f_val = *( ((float *)ptr_list[i]) + j);
@@ -345,6 +350,7 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
     unsigned int sizes[ n_state_vars ], size;
     model2->get_state_var_sizes(model2, sizes);
     int     i_val, *i_arr, j;
+    long    li_val, *li_arr;
     float   f_val, *f_arr;
     double  d_val, *d_arr;
     void    *ptr;
@@ -419,6 +425,9 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
             if (strcmp(type, "int") == 0){
                 i_val = (int)obj.via.i64;
                 model2->set_state_var(model2, &i_val, i );
+            } else if (strcmp(type, "long") == 0){        
+                li_val = (int)obj.via.i64;
+                model2->set_state_var(model2, &li_val, i );
             } else if (strcmp(type, "float") == 0){        
                 f_val = (float)obj.via.f64;
                 model2->set_state_var(model2, &f_val, i );
@@ -459,6 +468,12 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
                     i_arr[j] = obj.via.array.ptr[j].via.i64; }
                 model2->set_state_var(model2, i_arr, i );
                 free(i_arr);
+            } else if (strcmp(type, "long") == 0){
+                li_arr = (long*) malloc(size * sizeof( long ));   //##########
+                for (int j=0; j<size; j++){
+                    li_arr[j] = obj.via.array.ptr[j].via.i64; }
+                model2->set_state_var(model2, li_arr, i );
+                free(li_arr);
             } else if (strcmp(type, "float") == 0){
                 f_arr = (float*) malloc(size * sizeof( float ));
                 for (int j=0; j<size; j++){
@@ -564,7 +579,8 @@ int compare_states(Bmi* model1, Bmi* model2){
     int    i, j, match, n_state_vars;
     int    err_count = 0;
     int    i_val1, i_val2;
-   float  f_val1, f_val2;
+    long   li_val1, li_val2;
+    float  f_val1, f_val2;
     double d_val1, d_val2;
     char   c_val1, c_val2;
 
@@ -644,7 +660,17 @@ int compare_states(Bmi* model1, Bmi* model2){
                     printf("i_val1 = %d, i_val2 = %d\n", i_val1, i_val2);
                     printf("var_name = %s\n\n", names[i]);
                     match = 0;}
-              }
+            }
+        } else if (strcmp(type, "long") == 0){      //################
+            for (j=0; j<size; j++){
+                li_val1 = *( ((long *)ptr_list1[i]) + j);
+                li_val2 = *( ((long *)ptr_list2[i]) + j);
+                if (li_val1 != li_val2){
+                    printf("Mismatch: i = %d, j = %d\n", i, j);
+                    printf("li_val1 = %ld, li_val2 = %ld\n", li_val1, li_val2);
+                    printf("var_name = %s\n\n", names[i]);
+                    match = 0; }
+            }
         } else if (strcmp(type, "float") == 0){
             for (j=0; j<size; j++){
                 f_val1 = *( ((float *)ptr_list1[i]) + j);
@@ -692,7 +718,7 @@ int compare_states(Bmi* model1, Bmi* model2){
     //--------------------------------   
     // Free memory for string arrays
     //--------------------------------
-    if (verbose){ puts("Freeing memory...");}
+    if (verbose){ puts("\nFreeing memory...");}
     for (i=0; i<n_state_vars; i++){
         free (names[i]);
         free (types[i]);
