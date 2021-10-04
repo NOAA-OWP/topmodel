@@ -57,7 +57,7 @@ int print_some(void *ptr_list[]){
   printf("ptr_list[50] = cur_tstep = %d\n", *(int *)ptr_list[50]);
   printf("ptr_list[51] = sump   = %f\n", *(double *)ptr_list[51]);
   printf("ptr_list[53] = sumq   = %f\n", *(double *)ptr_list[53]);
-  //printf("ptr_list[56] = dbl_arr_test = %f, %f, %f\n", a[0], a[1], a[2]);
+  printf("ptr_list[56] = dbl_arr_test = %f, %f, %f\n", a[0], a[1], a[2]);
   puts("");    // newline is added
 
   return 0;
