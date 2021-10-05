@@ -6,8 +6,111 @@
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
-#define STATE_VAR_NAME_COUNT 62
+#define STATE_VAR_NAME_COUNT 62   // must match var_info array size
 
+//----------------------------------------------
+// Put variable info into a struct to simplify
+// BMI implementation and avoid errors.
+//----------------------------------------------
+// Should we add "/0" after each string here?
+// Everything works without it.
+//---------------------------------------------- 
+Variable var_info[] = {
+    //-------------------------------------
+    // File pointers.  For reference only
+    //-------------------------------------
+	{ 0,  "control_fptr", "FILE", 1 },
+	{ 1,  "input_fptr",   "FILE", 1 },
+	{ 2,  "subcat_fptr",  "FILE", 1 },
+	{ 3,  "params_fptr",  "FILE", 1 },
+	{ 4,  "output_fptr",  "FILE", 1 },
+	{ 5,  "out_hyd_fptr", "FILE", 1 },
+    //----------------------------------------------
+    // String vars.  Will replace 1 w/ title_size.
+    //----------------------------------------------
+	{ 6,  "title",  "string", 1 },
+	{ 7,  "subcat", "string", 1 },   
+    //-----------------------
+    // Variable definitions
+    //-----------------------
+	{ 8,  "dt",                 "double", 1 },
+	{ 9,  "nstep",              "int",    1 },
+	{ 10, "yes_print_output",   "int",    1 },
+	{ 11, "imap",               "int",    1 },
+	{ 12, "num_channels",       "int",    1 },
+	{ 13, "num_topodex_values", "int",    1 },
+	{ 14, "infex",              "int",    1 },			  
+    //-------------------------------------
+    // Model parameters and input scalars
+    //-------------------------------------
+	{ 15,  "szm",        "double", 1 },
+	{ 16,  "t0",         "double", 1 },
+	{ 17,  "td",         "double", 1 },
+	{ 18,  "srmax",      "double", 1 },
+	{ 19,  "Q0",         "double", 1 },
+	{ 20,  "sr0",        "double", 1 },
+	{ 21,  "xk0",        "double", 1 },
+	{ 22,  "hf",         "double", 1 },
+	{ 23,  "dth",        "double", 1 },
+	{ 24,  "area",       "double", 1 },
+	{ 25,  "num_delay",  "int", 1 },
+	{ 26,  "num_time_delay_hist_ords",  "int", 1 },
+	{ 27,  "szq",              "double", 1 },
+	{ 28,  "tl",               "double", 1 },
+	{ 29,  "max_contrib_area", "double", 1 },
+	{ 30,  "bal",              "double", 1 },
+	{ 31,  "sbar",             "double", 1 },
+    //------------------------------------------------
+    // Pointers to dynamically dimensioned 1D arrays
+    // Will replace size of 1 with size in comment
+    // once those vars are defined.
+    //------------------------------------------------
+    // A trailing asterisk indicates that the var
+    // is actually a pointer to the given type.
+    //------------------------------------------------ 
+	{ 32,  "Q",                        "double*", 1 },  // n_steps
+	{ 33,  "Qobs",                     "double*", 1 },  // n_steps
+	{ 34,  "rain",                     "double*", 1 },  // n_steps
+	{ 35,  "pe",                       "double*", 1 },  // n_steps
+	{ 36,  "contrib_area",             "double*", 1 },  // n_steps
+	{ 37,  "stor_unsat_zone",          "double*", 1 },  // max_atb_incs
+	{ 38,  "deficit_root_zone",        "double*", 1 },  // max_atb_incs
+	{ 39,  "deficit_local",            "double*", 1 },  // max_atb_incs
+	{ 40,  "time_delay_histogram",     "double*", 1 },  // max_td_ords
+	{ 41,  "dist_area_lnaotb",         "double*", 1 },  // max_n_incs
+	{ 42,  "lnaotb",                   "double*", 1 },  // max_n_incs
+	{ 43,  "cum_dist_area_with_dist",  "double*", 1 },  // max_n_subcats
+	{ 44,  "dist_from_outlet",         "double*", 1 },  // max_n_subcats	
+    //---------------------- 
+    // Other internal vars
+    //----------------------
+	{ 45,  "num_sub_catchments",       "int", 1 },
+	{ 46,  "max_atb_increments",       "int", 1 },
+	{ 47,  "max_num_subcatchments",    "int", 1 },
+	{ 48,  "max_time_delay_ordinates", "int", 1 },
+	{ 49,  "Qout",                     "double", 1 }, // Output var  
+	{ 50,  "current_time_step",        "int", 1 },    // BMI var
+    //-----------------
+    // State var sums
+    //-----------------
+	{ 51,  "sump",  "double", 1 },
+	{ 52,  "sumae", "double", 1 },
+	{ 53,  "sumq",  "double", 1 },
+	{ 54,  "sumrz", "double", 1 },
+	{ 55,  "sumuz", "double", 1 },
+    //----------------------    
+    // External/forcing vars
+    //----------------------
+    { 56, "quz",         "double", 1 },
+    { 57, "qb",          "double", 1 },
+    { 58, "q0f",         "double", 1 },
+    { 59, "p",           "double", 1 },
+    { 60, "ep",          "double", 1 },
+    { 61, "stand_alone", "int",    1 }
+    // { 62, "obs_values",      "double", 1 },    
+    // { 63, "double_arr_test", "double", 3 }             
+};
+  
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
         "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",   //p
@@ -885,55 +988,33 @@ static int Get_state_var_count (Bmi *self, int * count)
 //--------------------------------------------------------------------------
 static int Get_state_var_names (Bmi *self, char ** names)
 {
-    //-----------------------------------------------
-    // Return string array of state variable names,
-    // in same order as defined in state struct
-    //-----------------------------------------------
+    //---------------------------------------------------
+    // Note: This pulls information from the var_info
+    // structure defined at the top, which helps to
+    // prevent implementation errors.
+    //---------------------------------------------------
+    // This is used for model state serialization, and
+    // returns a string array of all state variable
+    // names, in same order as defined in state struct.
+    // These names can simply be internal vs. standard
+    // names because they are not used for coupling.
+    //---------------------------------------------------
     if (!self){
         return BMI_FAILURE;   
     }
 
     int n_state_vars = STATE_VAR_NAME_COUNT;
-      
-    const char *var_names[] = {
-        "control_fptr", "input_fptr", "subcat_fptr", "params_fptr", \
-        "output_fptr", "out_hyd_fptr", \
-        //---------------------------------------------------------------
-        "title", "subcat", "dt", "nstep", "yes_print_output", \
-        "imap", "num_channels", "num_topodex_values", "infex", \
-        "szm", "t0", "td", "srmax", "Q0", "sr0", "xk0", "hf", "dth", \
-        "area", "num_delay", "num_time_delay_histo_ords", \
-        "szq", "tl", "max_contrib_area", "bal", "sbar", \
-        //---------------------------------------------------------------
-        "Q", "Qobs", "rain", "pe", "contrib_area", "stor_unsat_zone", \
-        "deficit_root_zone", "deficit_local", "time_delay_histogram", \
-        "dist_area_lnaotb", "lnaotb", "cum_dist_area_with_dist", \
-        "dist_from_outlet", \
-        //---------------------------------------------------------------
-        "num_sub_catchments", "max_atb_increments", \
-        "max_num_subcatchments", "max_time_delay_ordinates", "Qout", \
-        "current_time_step", "sump", "sumae", "sumq", "sumrz", "sumuz", \
-        "quz", "qb", "qof", "p", "ep", "stand_alone"/*, "dbl_arr_test"*/ };    
-    
-    //---------------------------------- 
-    // Error check on names array size
-    //----------------------------------
-    int n_array_vars = sizeof(var_names) / sizeof(var_names[0]);
-    if (n_array_vars != n_state_vars){
-        printf("**ERROR** in function Get_state_var_names\n");
-        printf("Number of state variables %i does not equal array size %i\n", n_state_vars, n_array_vars );
-    }
-
     int MAX_NAME_LEN = 512;
-    //int MAX_NAME_LEN = BMI_MAX_VAR_NAME; 
+    //int MAX_NAME_LEN = BMI_MAX_VAR_NAME;
+
     for (int i = 0; i < n_state_vars; i++) {
-        strncpy(names[i], var_names[i], MAX_NAME_LEN);
+        strncpy(names[i], var_info[i].name, MAX_NAME_LEN);
 
         //--------------------------------  
         // Option to print all the names
         //--------------------------------
         // if (i==0) printf(" State variable names:");
-        // printf(" var name[%d] = %s\n", i, var_names[i]);
+        // printf(" var name[%d] = %s\n", i, names[i]);
     }
         
     return BMI_SUCCESS;
@@ -942,56 +1023,33 @@ static int Get_state_var_names (Bmi *self, char ** names)
 //--------------------------------------------------------------------------
 static int Get_state_var_types (Bmi *self, char ** types)
 {
-    //-----------------------------------------------
-    // Return string array of state variable types,
-    // in same order as defined in state struct
-    //-----------------------------------------------
+    //---------------------------------------------------
+    // Note: This pulls information from the var_info
+    // structure defined at the top, which helps to 
+    // prevent implementation errors.   
+    //---------------------------------------------------
+    // This is used for model state serialization, and
+    // returns a string array of all state variable
+    // types, in same order as defined in state struct.
+    // Later, bmi.get_var_type() may be extended to
+    // get more than input & output variable types.
+    //---------------------------------------------------
     if (!self){
         return BMI_FAILURE;   
     }
 
-    int n_state_vars = STATE_VAR_NAME_COUNT;
-
-    //----------------------------------------------------------      
-    // Note: A trailing asterisk indicates that the variable
-    //       is actually a pointer to the given type.
-    //       However, this info doesn't seem to be needed yet.
-    //---------------------------------------------------------- 
-    const char *var_types[] = {
-        "FILE", "FILE", "FILE", "FILE", \
-        "FILE", "FILE", \
-        "string", "string", "double", "int", "int", \
-        "int", "int", "int", "int", \
-        "double", "double", "double", "double", "double", "double", \
-        "double", "double", "double", "double", "int", "int", \
-        "double", "double", "double", "double", "double", \
-        //---------------------------------------------------------
-        "double*", "double*", "double*", "double*", "double*", \
-        "double*", "double*", "double*", "double*", \
-        "double*", "double*", "double*", "double*", \
-        //---------------------------------------------------------
-        "int", "int", "int", "int", "double", "int", \
-        "double", "double", "double", "double", "double", \
-        "double", "double", "double", "double", "double", "int"/*, "double"*/ };
-        
-    //---------------------------------- 
-    // Error check on types array size
-    //----------------------------------
-    int n_array_vars = sizeof(var_types) / sizeof(var_types[0]);
-    if (n_array_vars != n_state_vars){
-        printf("**ERROR** in function Get_state_var_types\n");
-        printf("Number of state variables %i does not equal array size %i\n", n_state_vars, n_array_vars );
-    }
-      
+    int n_state_vars = STATE_VAR_NAME_COUNT;    
     int MAX_NAME_LEN = 512;
-    //int MAX_NAME_LEN = BMI_MAX_VAR_NAME; 
+    //int MAX_NAME_LEN = BMI_MAX_VAR_NAME;
+ 
     for (int i = 0; i < n_state_vars; i++) {
-        strncpy(types[i], var_types[i], MAX_NAME_LEN);
+        strncpy(types[i], var_info[i].type, MAX_NAME_LEN);
+        
         //--------------------------------  
         // Option to print all the types
         //--------------------------------
         // if (i==0) printf(" State var_types:");
-        // printf(" var type[%d] = %s\n", i, var_type[i]);
+        // printf(" var type[%d] = %s\n", i, types[i]);
     }
         
     return BMI_SUCCESS;
@@ -1000,11 +1058,17 @@ static int Get_state_var_types (Bmi *self, char ** types)
 //--------------------------------------------------------------------------
 static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
 {
-    //------------------------------------------------
-    // Return string array of state variable sizes,
-    // in same order as defined in state struct.
+    //---------------------------------------------------
+    // Note: This pulls information from the var_info
+    // structure defined at the top, which helps to 
+    // prevent implementation errors.   
+    //---------------------------------------------------
+    // This is used for model state serialization, and
+    // returns a string array of all state variable
+    // sizes, in same order as defined in state struct.
     // Size is number of array elements (not bytes).
-    //------------------------------------------------
+    // Just number of elements, even for n-dim arrays.
+    //---------------------------------------------------
     if (!self){
         return BMI_FAILURE;   
     }
@@ -1023,7 +1087,11 @@ static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
     //        and then loop counts start at 1 not 0.
     //        Also, d_alloc() is often called with a +1.
     //        So we need to add 1 to all of these.
-    //-----------------------------------------------------  
+    //-----------------------------------------------------
+    // What about:  num_channels, num_topodex_values, num_delay,
+    //   num_time_delay_histo_ords ??
+    // num_topodex_values = max_atb_increments ??  ##########
+    //------------------------------------------------------------ 
     unsigned int title_size = 257;   // see topmodel.h; char array
     unsigned int n_steps       = state->nstep+1;
     unsigned int max_n_subcats = state->max_num_subcatchments+1;
@@ -1038,58 +1106,29 @@ static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
     //printf("  max_atb_incs  = %d\n", max_atb_incs);
     //printf("  max_td_ords   = %d\n", max_td_ords);
     //printf("");
-          
-    //------------------------------------------------------------   
-    // NOTE:  These are number of elements, not number of bytes.
-    //        Just number of elements, even for n-dim arrays.
-    //------------------------------------------------------------
-    // What about:  num_channels, num_topodex_values, num_delay,
-    //   num_time_delay_histo_ords ??
-    // num_topodex_values = max_atb_increments ??  ##########
-    //------------------------------------------------------------        
-    unsigned int var_sizes[] = {
-        // 6 file pointers
-        1, 1, 1, 1, 1, 1, \
-        //---------------------------------------------------------------
-        title_size, title_size, \
-        // 24 double or int scalars
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  \
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  \
-        //---------------------------------------------------------------
-        // This block has pointers to dynamically-dimensioned arrays.
-        // We need to return their correct sizes.
-        // Search for d_alloc() calls in topmodel.c.
-        //---------------------------------------------------------------
-        //"Q", "Qobs", "rain", "pe", "contrib_area", \
-        //"stor_unsat_zone", "deficit_root_zone", "deficit_local", \
-        //"time_delay_histogram", \
-        //"dist_area_lnaotb", "lnaotb",
-        //"cum_dist_area_with_dist", "dist_from_outlet", \
-        //---------------------------------------------------------------
-        n_steps, n_steps, n_steps, n_steps, n_steps, \
-        max_atb_incs, max_atb_incs, max_atb_incs, \
-        max_td_ords, \
-        max_n_incs, max_n_incs, \
-        max_n_subcats, max_n_subcats, \
-        //---------------------------------------------------------------        
-        //"num_sub_catchments", "max_atb_increments", \
-        //"max_num_subcatchments", "max_time_delay_ordinates", "Qout", \
-        //"current_time_step", "sump", "sumae", "sumq", "sumrz", "sumuz" \
-        //"quz", "qb", "qof", "p", "ep", "stand_alone", "dbl_arr_test" };
-        //---------------------------------------------------------------
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1/*, 3*/ };
 
-    //---------------------------------- 
-    // Error check on types array size
-    //----------------------------------
-    int n_array_vars = sizeof(var_sizes) / sizeof(var_sizes[0]);
-    if (n_array_vars != n_state_vars){
-        printf("**ERROR** in function Get_state_var_sizes\n");
-        printf("Number of state variables %i does not equal array size %i\n", n_state_vars, n_array_vars );
-    }
-
+    //-------------------------------------------------
+    // Overwrite the sizes that are not 1 (now known)
+    //-------------------------------------------------
+    var_info[6].size  = title_size;     // title
+    var_info[7].size  = title_size;     // subcat
+    //---------------------------------------------    
+    var_info[32].size = n_steps;        // Q
+    var_info[33].size = n_steps;        // Qobs
+    var_info[34].size = n_steps;        // rain
+    var_info[35].size = n_steps;        // pe
+    var_info[36].size = n_steps;        // contrib_area
+    var_info[37].size = max_atb_incs;   // stor_unsat_zone
+    var_info[38].size = max_atb_incs;   // deficit_root_zone
+    var_info[39].size = max_atb_incs;   // deficit_local
+    var_info[40].size = max_td_ords;    // time_delay_histogram
+    var_info[41].size = max_n_incs;     // dist_area_lnaotb
+    var_info[42].size = max_n_incs;     // lnaotb
+    var_info[43].size = max_n_subcats;  // cum_dist_area_with_dist
+    var_info[44].size = max_n_subcats;  // dist_from_outlet
+       
     for (int i = 0; i < n_state_vars; i++) {
-        size_list[i] = var_sizes[i];
+        size_list[i] = var_info[i].size;
     }
   
     return BMI_SUCCESS;
@@ -1112,7 +1151,7 @@ static int Get_state_var_ptrs (Bmi *self, void *ptr_list[])
     //--------------------------------------
     // Create a test array: dbl_array_test
     //--------------------------------------
-/*    double dbl_test_data[3] = {10.0, 20.0, 30.0};
+    /* double dbl_test_data[3] = {10.0, 20.0, 30.0};
     for (int j = 0; j < 3; j++) {
         state->dbl_arr_test[j] = dbl_test_data[j];
     } */   
@@ -1188,7 +1227,7 @@ static int Get_state_var_ptrs (Bmi *self, void *ptr_list[])
         
     return BMI_SUCCESS;
 }
-
+ 
 //-----------------------------------------------------------------------
 static int Set_state_var (Bmi *self, void *src, int index)
 {

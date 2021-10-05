@@ -41,13 +41,17 @@ int print_some(void *ptr_list[]){
   //       Careful with order of operations.
   //------------------------------------------------
   puts("Printing some selected variables ...");
-  double a[3];
-  a[0] = *( (double *)ptr_list[56]);
-  a[1] = *( (double *)ptr_list[56] + 1);
-  a[2] = *( (double *)ptr_list[56] + 2);
+
+  //--------------------------------------------  
+  // Only used for the "dbl_arr_test" variable
+  //--------------------------------------------
+  // double a[3];
+  // a[0] = *( (double *)ptr_list[62]);
+  // a[1] = *( (double *)ptr_list[62] + 1);
+  // a[2] = *( (double *)ptr_list[62] + 2);
   
-  // a[1] = *(double *)(ptr_list[56] + 1);  // This is wrong.
-  // a[2] = *(double *)(ptr_list[56] + 2);
+  // // a[1] = *(double *)(ptr_list[62] + 1);  // This is wrong.
+  // // a[2] = *(double *)(ptr_list[62] + 2);
   
   printf("ptr_list[6]  = title  = %s", ptr_list[6]);   
   printf("ptr_list[8]  = dt     = %f\n", *(double *)ptr_list[8]);
@@ -56,13 +60,16 @@ int print_some(void *ptr_list[]){
   printf("ptr_list[42] = lnaotb = %f\n", *(double *)ptr_list[42]);
   printf("ptr_list[50] = cur_tstep = %d\n", *(int *)ptr_list[50]);
   printf("ptr_list[51] = sump   = %f\n", *(double *)ptr_list[51]);
+  printf("ptr_list[52] = sumae  = %f\n", *(double *)ptr_list[52]);
   printf("ptr_list[53] = sumq   = %f\n", *(double *)ptr_list[53]);
-  //printf("ptr_list[56] = dbl_arr_test = %f, %f, %f\n", a[0], a[1], a[2]);
+  printf("ptr_list[54] = sumrz  = %f\n", *(double *)ptr_list[54]);
+  printf("ptr_list[55] = sumuz  = %f\n", *(double *)ptr_list[55]);  
+  // printf("ptr_list[62] = dbl_arr_test = %f, %f, %f\n", a[0], a[1], a[2]);
   puts("");    // newline is added
 
   return 0;
 }
-
+        
 //------------------------------------------------------------------------
 int main(void)
 {
