@@ -7,6 +7,7 @@
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 62   // must match var_info array size
+#define VAR_NAME_COUNT 62   // NEW BMI EXTENTION 
 
 //----------------------------------------------
 // Put variable info into a struct to simplify
@@ -15,51 +16,54 @@
 // Should we add "/0" after each string here?
 // Everything works without it.
 //---------------------------------------------- 
+// {idx, name, type, size, role, units, grid, location}
+// role: input, ouput, param, state, or option
+//---------------------------------------------- 
 Variable var_info[] = {
     //-------------------------------------
     // File pointers.  For reference only
     //-------------------------------------
-	{ 0,  "control_fptr", "FILE", 1 },
-	{ 1,  "input_fptr",   "FILE", 1 },
-	{ 2,  "subcat_fptr",  "FILE", 1 },
-	{ 3,  "params_fptr",  "FILE", 1 },
-	{ 4,  "output_fptr",  "FILE", 1 },
-	{ 5,  "out_hyd_fptr", "FILE", 1 },
+    { 0,  "control_fptr", "FILE", 1, "param", "none", 0, "node" },
+    { 1,  "input_fptr",   "FILE", 1, "param", "none", 0, "node" },
+    { 2,  "subcat_fptr",  "FILE", 1, "param", "none", 0, "node" },
+    { 3,  "params_fptr",  "FILE", 1, "param", "none", 0, "node" },
+    { 4,  "output_fptr",  "FILE", 1, "param", "none", 0, "node" },
+    { 5,  "out_hyd_fptr", "FILE", 1, "param", "none", 0, "node" },
     //----------------------------------------------
     // String vars.  Will replace 1 w/ title_size.
     //----------------------------------------------
-	{ 6,  "title",  "string", 1 },
-	{ 7,  "subcat", "string", 1 },   
+    { 6,  "title",  "string", 1, "param", "none", 0, "node" },
+    { 7,  "subcat", "string", 1, "param", "none", 0, "node" },   
     //-----------------------
     // Variable definitions
     //-----------------------
-	{ 8,  "dt",                 "double", 1 },
-	{ 9,  "nstep",              "int",    1 },
-	{ 10, "yes_print_output",   "int",    1 },
-	{ 11, "imap",               "int",    1 },
-	{ 12, "num_channels",       "int",    1 },
-	{ 13, "num_topodex_values", "int",    1 },
-	{ 14, "infex",              "int",    1 },			  
+    { 8,  "dt",                 "double", 1, "param", "h-1", 0, "node" },
+    { 9,  "nstep",              "int",    1, "param", "none", 0, "node" },
+    { 10, "yes_print_output",   "int",    1, "param", "none", 0, "node" },
+    { 11, "imap",               "int",    1, "param", "none", 0, "node" },
+    { 12, "num_channels",       "int",    1, "param", "none", 0, "node" },
+    { 13, "num_topodex_values", "int",    1, "param", "none", 0, "node" },
+    { 14, "infex",              "int",    1, "param", "none", 0, "node" },            
     //-------------------------------------
     // Model parameters and input scalars
     //-------------------------------------
-	{ 15,  "szm",        "double", 1 },
-	{ 16,  "t0",         "double", 1 },
-	{ 17,  "td",         "double", 1 },
-	{ 18,  "srmax",      "double", 1 },
-	{ 19,  "Q0",         "double", 1 },
-	{ 20,  "sr0",        "double", 1 },
-	{ 21,  "xk0",        "double", 1 },
-	{ 22,  "hf",         "double", 1 },
-	{ 23,  "dth",        "double", 1 },
-	{ 24,  "area",       "double", 1 },
-	{ 25,  "num_delay",  "int", 1 },
-	{ 26,  "num_time_delay_hist_ords",  "int", 1 },
-	{ 27,  "szq",              "double", 1 },
-	{ 28,  "tl",               "double", 1 },
-	{ 29,  "max_contrib_area", "double", 1 },
-	{ 30,  "bal",              "double", 1 },
-	{ 31,  "sbar",             "double", 1 },
+    { 15,  "szm",        "double", 1, "param", "m", 0, "node" },
+    { 16,  "t0",         "double", 1, "param", "m-2", 0, "node" },
+    { 17,  "td",         "double", 1, "param", "h-1", 0, "node" },
+    { 18,  "srmax",      "double", 1, "param", "m", 0, "node" },
+    { 19,  "Q0",         "double", 1, "param", "m h-1", 0, "node" },
+    { 20,  "sr0",        "double", 1, "param", "m", 0, "node" },
+    { 21,  "xk0",        "double", 1, "param", "m h-1", 0, "node" },
+    { 22,  "hf",         "double", 1, "param", "m", 0, "node" },
+    { 23,  "dth",        "double", 1, "param", "none", 0, "node" },
+    { 24,  "area",       "double", 1, "param", "none", 0, "node" },
+    { 25,  "num_delay",  "int", 1, "param", "none", 0, "node" },
+    { 26,  "num_time_delay_hist_ords",  "int", 1, "param", "none", 0, "node"},
+    { 27,  "szq",              "double", 1, "param", "m h-1", 0, "node" },
+    { 28,  "tl",               "double", 1, "param", "m h-1", 0, "node" },
+    { 29,  "max_contrib_area", "double", 1, "param", "m-2", 0, "node" },
+    { 30,  "bal",              "double", 1, "output", "m", 0, "node" },
+    { 31,  "sbar",             "double", 1, "output", "m", 0, "node" },
     //------------------------------------------------
     // Pointers to dynamically dimensioned 1D arrays
     // Will replace size of 1 with size in comment
@@ -68,50 +72,51 @@ Variable var_info[] = {
     // A trailing asterisk indicates that the var
     // is actually a pointer to the given type.
     //------------------------------------------------ 
-	{ 32,  "Q",                        "double*", 1 },  // n_steps
-	{ 33,  "Qobs",                     "double*", 1 },  // n_steps
-	{ 34,  "rain",                     "double*", 1 },  // n_steps
-	{ 35,  "pe",                       "double*", 1 },  // n_steps
-	{ 36,  "contrib_area",             "double*", 1 },  // n_steps
-	{ 37,  "stor_unsat_zone",          "double*", 1 },  // max_atb_incs
-	{ 38,  "deficit_root_zone",        "double*", 1 },  // max_atb_incs
-	{ 39,  "deficit_local",            "double*", 1 },  // max_atb_incs
-	{ 40,  "time_delay_histogram",     "double*", 1 },  // max_td_ords
-	{ 41,  "dist_area_lnaotb",         "double*", 1 },  // max_n_incs
-	{ 42,  "lnaotb",                   "double*", 1 },  // max_n_incs
-	{ 43,  "cum_dist_area_with_dist",  "double*", 1 },  // max_n_subcats
-	{ 44,  "dist_from_outlet",         "double*", 1 },  // max_n_subcats	
+    { 32,  "Q",                        "double*", 1, "output", "m h-1", 0, "node" }, // n_steps
+    { 33,  "Qobs",                     "double*", 1, "state", "m h-1", 0, "node" },  // n_steps
+    // TODO: confirm Qobs role
+    { 34,  "rain",                     "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
+    { 35,  "pe",                       "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
+    { 36,  "contrib_area",             "double*", 1, "state", "m-2", 0, "node" },    // n_steps
+    { 37,  "stor_unsat_zone",          "double*", 1, "state", "donno", 0, "node" },  // max_atb_incs
+    { 38,  "deficit_root_zone",        "double*", 1, "state", "donno", 0, "node" },  // max_atb_incs
+    { 39,  "deficit_local",            "double*", 1, "state", "donno", 0, "node" },  // max_atb_incs
+    { 40,  "time_delay_histogram",     "double*", 1, "state", "donno", 0, "node" },  // max_td_ords
+    { 41,  "dist_area_lnaotb",         "double*", 1, "state", "donno", 0, "node" },  // max_n_incs
+    { 42,  "lnaotb",                   "double*", 1, "state", "donno", 0, "node" },  // max_n_incs
+    { 43,  "cum_dist_area_with_dist",  "double*", 1, "state", "donno", 0, "node" },  // max_n_subcats
+    { 44,  "dist_from_outlet",         "double*", 1, "state", "m", 0, "node" },      // max_n_subcats   
     //---------------------- 
     // Other internal vars
     //----------------------
-	{ 45,  "num_sub_catchments",       "int", 1 },
-	{ 46,  "max_atb_increments",       "int", 1 },
-	{ 47,  "max_num_subcatchments",    "int", 1 },
-	{ 48,  "max_time_delay_ordinates", "int", 1 },
-	{ 49,  "Qout",                     "double", 1 }, // Output var  
-	{ 50,  "current_time_step",        "int", 1 },    // BMI var
+    { 45,  "num_sub_catchments",       "int", 1, "param", "none", 0, "node" },
+    { 46,  "max_atb_increments",       "int", 1, "param", "none", 0, "node" },
+    { 47,  "max_num_subcatchments",    "int", 1, "param", "none", 0, "node" },
+    { 48,  "max_time_delay_ordinates", "int", 1, "param", "none", 0, "node" },
+    { 49,  "Qout",                     "double", 1, "output", "m h-1", 0, "node" }, // Output var  
+    { 50,  "current_time_step",        "int", 1, "state", "none", 0, "node" },    // BMI var
     //-----------------
     // State var sums
     //-----------------
-	{ 51,  "sump",  "double", 1 },
-	{ 52,  "sumae", "double", 1 },
-	{ 53,  "sumq",  "double", 1 },
-	{ 54,  "sumrz", "double", 1 },
-	{ 55,  "sumuz", "double", 1 },
+    { 51,  "sump",  "double", 1, "output", "m", 0, "node" },
+    { 52,  "sumae", "double", 1, "output", "m", 0, "node" },
+    { 53,  "sumq",  "double", 1, "output", "m", 0, "node" },
+    { 54,  "sumrz", "double", 1, "output", "m", 0, "node" },
+    { 55,  "sumuz", "double", 1, "output", "m", 0, "node" },
     //----------------------    
     // External/forcing vars
     //----------------------
-    { 56, "quz",         "double", 1 },
-    { 57, "qb",          "double", 1 },
-    { 58, "q0f",         "double", 1 },
-    { 59, "p",           "double", 1 },
-    { 60, "ep",          "double", 1 },
-    { 61, "stand_alone", "int",    1 }
+    { 56, "quz",         "double", 1, "output", "m", 0, "node" },
+    { 57, "qb",          "double", 1, "output", "m", 0, "node" },
+    { 58, "qof",         "double", 1, "output", "m h-1", 0, "node" },
+    { 59, "p",           "double", 1, "output", "m h-1", 0, "node" },
+    { 60, "ep",          "double", 1, "output", "m h-1", 0, "node" },
+    { 61, "stand_alone", "int",    1, "param", "none", 0, "node" }
     // { 62, "obs_values",      "double", 1 },    
     // { 63, "double_arr_test", "double", 3 }             
 };
   
-static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
+/*static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
         "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",   //p
         "land_surface_water__potential_evaporation_volume_flux",            //ep
@@ -241,7 +246,7 @@ static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {
 static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
         "node",
         "node"
-};
+};*/
 
 int read_init_config(const char* config_file, topmodel_model* model) {
     
@@ -619,7 +624,7 @@ static int Finalize (Bmi *self)
 
 static int Get_var_type (Bmi *self, const char *name, char * type)
 {
-    // Check to see if in output array first
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             strncpy(type, output_var_types[i], BMI_MAX_TYPE_NAME);
@@ -632,7 +637,16 @@ static int Get_var_type (Bmi *self, const char *name, char * type)
             strncpy(type, input_var_types[i], BMI_MAX_TYPE_NAME);
             return BMI_SUCCESS;
         }
+    }*/
+
+    // NEW BMI EXTENTION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(type, var_info[i].type, BMI_MAX_TYPE_NAME);
+            return BMI_SUCCESS;
+        }    
     }
+    
     // If we get here, it means the variable name wasn't recognized
     type[0] = '\0';
     return BMI_FAILURE;
@@ -641,7 +655,7 @@ static int Get_var_type (Bmi *self, const char *name, char * type)
 static int Get_var_grid(Bmi *self, const char *name, int *grid)
 {
 
-    // Check to see if in output array first
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             *grid = output_var_grids[i];
@@ -654,7 +668,16 @@ static int Get_var_grid(Bmi *self, const char *name, int *grid)
             *grid = input_var_grids[i];
             return BMI_SUCCESS;
         }
+    }*/
+    
+    // NEW BMI EXTENTION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            *grid = var_info[i].grid;
+            return BMI_SUCCESS;
+        }    
     }
+
     // If we get here, it means the variable name wasn't recognized
     grid[0] = '\0';
     return BMI_FAILURE;
@@ -696,7 +719,7 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
 
 static int Get_var_location (Bmi *self, const char *name, char * location)
 {
-    // Check to see if in output array first
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             strncpy(location, output_var_locations[i], BMI_MAX_LOCATION_NAME);
@@ -709,7 +732,16 @@ static int Get_var_location (Bmi *self, const char *name, char * location)
             strncpy(location, input_var_locations[i], BMI_MAX_LOCATION_NAME);
             return BMI_SUCCESS;
         }
+    }*/
+
+    // NEW BMI EXTENTION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(location, var_info[i].location, BMI_MAX_TYPE_NAME);
+            return BMI_SUCCESS;
+        }    
     }
+    
     // If we get here, it means the variable name wasn't recognized
     location[0] = '\0';
     return BMI_FAILURE;
@@ -717,7 +749,7 @@ static int Get_var_location (Bmi *self, const char *name, char * location)
 
 static int Get_var_units (Bmi *self, const char *name, char * units)
 {
-    // Check to see if in output array first
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             strncpy(units, output_var_units[i], BMI_MAX_UNITS_NAME);
@@ -730,7 +762,16 @@ static int Get_var_units (Bmi *self, const char *name, char * units)
             strncpy(units, input_var_units[i], BMI_MAX_UNITS_NAME);
             return BMI_SUCCESS;
         }
+    }*/
+
+    // NEW BMI EXTENTION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(units, var_info[i].units, BMI_MAX_UNITS_NAME);
+            return BMI_SUCCESS;
+        }    
     }
+
     // If we get here, it means the variable name wasn't recognized
     units[0] = '\0';
     return BMI_FAILURE;
@@ -743,7 +784,7 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
     if (item_size_result != BMI_SUCCESS) {
         return BMI_FAILURE;
     }
-    int item_count = -1;
+/*    int item_count = -1;
     for (int i = 0; i < INPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, input_var_names[i]) == 0) {
             item_count = input_var_item_count[i];
@@ -759,7 +800,16 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
         }
     }
     if (item_count < 1)
-        item_count = ((topmodel_model *) self->data)->nstep;
+        item_count = ((topmodel_model *) self->data)->nstep;*/
+
+    // NEW BMI EXTENTION
+    int item_count;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            item_count = var_info[i].size;
+            return BMI_SUCCESS;
+        }    
+    }
 
     *nbytes = item_size * item_count;
     return BMI_SUCCESS;
@@ -1452,9 +1502,18 @@ static int Get_input_item_count (Bmi *self, int * count)
 
 static int Get_input_var_names (Bmi *self, char ** names)
 {
-    for (int i = 0; i < INPUT_VAR_NAME_COUNT; i++) {
+/*    for (int i = 0; i < INPUT_VAR_NAME_COUNT; i++) {
         strncpy (names[i], input_var_names[i], BMI_MAX_VAR_NAME);
     }
+    return BMI_SUCCESS;*/
+
+    // NEW BMI EXTENTION 
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("input", var_info[i].role) == 0){
+            strncpy (names[i], var_info[i].name, BMI_MAX_VAR_NAME);
+        }
+    }    
+
     return BMI_SUCCESS;
 }
 
@@ -1466,9 +1525,17 @@ static int Get_output_item_count (Bmi *self, int * count)
 
 static int Get_output_var_names (Bmi *self, char ** names)
 {
-    for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
+/*    for (int i = 0; i < VAR_NAME_COUNT; i++) {
         strncpy (names[i], output_var_names[i], BMI_MAX_VAR_NAME);
-    }
+    }*/
+    
+    // NEW BMI EXTENTION 
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("input", var_info[i].role) == 0){
+            strncpy (names[i], var_info[i].name, BMI_MAX_VAR_NAME);
+        }
+    } 
+
     return BMI_SUCCESS;
 }
 
