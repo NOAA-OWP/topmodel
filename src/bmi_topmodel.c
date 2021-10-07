@@ -715,6 +715,7 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         *size = 0;
         return BMI_FAILURE;
     }
+    // TODO: Now pulling from var_info  
 }
 
 static int Get_var_location (Bmi *self, const char *name, char * location)
@@ -1539,6 +1540,21 @@ static int Get_output_var_names (Bmi *self, char ** names)
     return BMI_SUCCESS;
 }
 
+// NEW BMI EXTENTION
+static int Get_var_role (Bmi *self, const char *name, char * role)
+{
+
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(role, var_info[i].role, BMI_MAX_ROLE_NAME);
+            return BMI_SUCCESS;
+        }    
+    }
+    
+    // If we get here, it means the variable name wasn't recognized
+    role[0] = '\0';
+    return BMI_FAILURE;
+}
 
 // ***********************************************************
 // **************** BMI: MODEL GRID FUNCTIONS ****************
@@ -1695,6 +1711,8 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->get_var_units = Get_var_units;
         model->get_var_nbytes = Get_var_nbytes;
         model->get_var_location = Get_var_location;
+
+        model->get_var_role       = Get_var_role;
 
         model->get_current_time = Get_current_time;
         model->get_start_time = Get_start_time;

@@ -111,6 +111,7 @@ main(void){
     char type[BMI_MAX_TYPE_NAME];
     char location[BMI_MAX_LOCATION_NAME];
     char units[BMI_MAX_UNITS_NAME];
+    char role[BMI_MAX_ROLE_NAME];
 
     // Loop through both input and output variables and call get_var_*()
     for (i=0; i<count_all; i++){
@@ -150,6 +151,11 @@ main(void){
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( "  nbytes: %i\n", nbytes);
         }*/
+        { // Test get_var_role()
+            status = model->get_var_role(model, var_name, role);
+            if (status == BMI_FAILURE) return BMI_FAILURE;
+            printf( "  role: %s\n", role);
+        }
     }
 
     // Test BMI: MODEL GRID FUNCTIONS

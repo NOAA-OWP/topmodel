@@ -82,6 +82,8 @@ typedef struct Bmi {
 
     int (*get_var_location)(struct Bmi *self, const char *name, char *location);
 
+    int (*get_var_role)(struct Bmi *self, const char *name, char *role);
+
     /* Time information */
     int (*get_current_time)(struct Bmi *self, double *time);
 
