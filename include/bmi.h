@@ -69,6 +69,11 @@ typedef struct Bmi {
 
     int (*get_output_var_names)(struct Bmi *self, char **names);
 
+    /* OWP Custom - BMI Enhancements */
+    int (*get_model_var_roles)(struct Bmi *self, char **roles);
+    int (*get_model_var_count)(struct Bmi *self, int *count, char *role);
+    //int (*get_model_var_names)(struct Bmi *self, char **names, char *role);      
+
     /* Variable information */
     int (*get_var_grid)(struct Bmi *self, const char *name, int *grid);
 
@@ -82,7 +87,8 @@ typedef struct Bmi {
 
     int (*get_var_location)(struct Bmi *self, const char *name, char *location);
 
-    int (*get_var_role)(struct Bmi *self, const char *name, char *role);
+    /* OWP Custom - BMI Enhancements */
+    int (*get_var_role)(struct Bmi *self, const char *name, char *role);  
 
     /* Time information */
     int (*get_current_time)(struct Bmi *self, double *time);

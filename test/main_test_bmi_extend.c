@@ -37,10 +37,8 @@ main(void){
     char name[BMI_MAX_COMPONENT_NAME];
     int count_in = 0;
     int count_out = 0;
-    int count_all = 0;
     char **names_in = NULL;
     char **names_out = NULL;
-    char **names_all = NULL;
     int i;
 
     // Test get_component_name()
@@ -50,17 +48,13 @@ main(void){
         printf(" component name: %s\n", name);
     }
     // Test get_input_item_count()
-/*    {
+    {
         status = model->get_input_item_count(model, &count_in);
         if (status == BMI_FAILURE ) return BMI_FAILURE;
         printf(" input item count: %i\n", count_in);
-    }*/
-    // Test get_input_item_count()
-    {
-        status = model->get_state_var_count(model, &count_all);
-        if (status == BMI_FAILURE ) return BMI_FAILURE;
-        printf(" state var count: %i\n", count_all);
     }
+    
+
     // Test get_input_var_names()
 /*    { 
         names_in = (char**) malloc (sizeof(char *) * count_in);
@@ -74,18 +68,6 @@ main(void){
         //free(names_in);
     }*/
     
-    // Test get_state_var_names()
-    { 
-        names_all = (char**) malloc (sizeof(char *) * count_all);
-        for (i=0; i<count_all; i++)
-            names_all[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-        status = model->get_state_var_names(model, names_all);
-        if (status == BMI_FAILURE) return BMI_FAILURE;
-        printf( " state variable names:\n");
-        for (i=0; i<count_all; i++)
-            printf("  %i %s\n", i, names_all[i]);
-        //free(names_all);
-    }
 /*    // Test get_output_item_count()
     {
         status = model->get_output_item_count(model, &count_out);
@@ -105,6 +87,63 @@ main(void){
         //free(names_out);
     }
 */
+
+    // Test BMI: NEW ENHANCEMENTS
+    printf("\nTEST BMI NEW ENHANCEMENTS\n*************************\n");
+    int count_all = 0; //state
+    int count_model_var = 0;
+    int count_model_var_roles = 5;
+    char **names_all = NULL; //state
+    char **names_model_var = NULL;
+    char **names_model_var_roles = NULL;
+    int j;
+    // Test get_model_var_roles()
+    { 
+        names_model_var_roles = (char**) malloc (sizeof(char *) * count_model_var_roles);
+        for (j=0; j<count_model_var_roles; j++)
+            names_model_var_roles[j] = (char*) malloc (sizeof(char) * BMI_MAX_ROLE_NAME);
+        status = model->get_model_var_roles(model, names_model_var_roles);
+        if (status == BMI_FAILURE) return BMI_FAILURE;
+        printf( " model variable roles:\n");
+        for (j=0; j<count_model_var_roles; j++)
+            printf("  %s\n", names_model_var_roles [j]);
+    }
+    // Test get_model_var_count(some_role)
+    for (j=0; j<count_model_var_roles; j++){
+        {
+            status = model->get_model_var_count(model, &count_model_var, names_model_var_roles [j]);
+            if (status == BMI_FAILURE ) return BMI_FAILURE;
+            printf(" model (%s) var count: %i\n", names_model_var_roles [j], count_model_var);
+        }
+    }
+    // Check get_model_var_count("") when null string passed
+    {
+        status = model->get_model_var_count(model, &count_model_var, "");
+        if (status == BMI_FAILURE ) return BMI_FAILURE;
+        printf(" model (all) var count: %i\n", count_model_var);
+    }
+
+/*    // Test get_state_var_count()
+    {
+        status = model->get_state_var_count(model, &count_all);
+        if (status == BMI_FAILURE ) return BMI_FAILURE;
+        printf(" state var count: %i\n", count_all);
+    }
+    // Test get_state_var_names()
+    { 
+        names_all = (char**) malloc (sizeof(char *) * count_all);
+        for (i=0; i<count_all; i++)
+            names_all[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+        status = model->get_state_var_names(model, names_all);
+        if (status == BMI_FAILURE) return BMI_FAILURE;
+        printf( " state variable names:\n");
+        for (i=0; i<count_all; i++)
+            printf("  %i %s\n", i, names_all[i]);
+        //free(names_all);
+    }*/
+
+    free(names_model_var_roles);
+
     // Test BMI: VARIABLE INFORMATION FUNCTIONS
     printf("\nTEST BMI VARIABLE INFORMATION FUNCTIONS\n*****************************************\n");
     int grid, itemsize, nbytes;
@@ -124,11 +163,11 @@ main(void){
             printf( "  grid: %i\n", grid);
         }
         // Test get_var_itemsize()
-/*        {
+        {
             status = model->get_var_itemsize(model, var_name, &itemsize);
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( "  itemsize: %i\n", itemsize);
-        }*/
+        }
         { // Test get_var_location()
             status = model->get_var_location(model, var_name, location);
             if (status == BMI_FAILURE) return BMI_FAILURE;
@@ -146,11 +185,11 @@ main(void){
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( "  type: %s\n", type);
         }
-/*        { // get_var_nbytes()
+        { // get_var_nbytes()
             status = model->get_var_nbytes(model, var_name, &nbytes);
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( "  nbytes: %i\n", nbytes);
-        }*/
+        }
         { // Test get_var_role()
             status = model->get_var_role(model, var_name, role);
             if (status == BMI_FAILURE) return BMI_FAILURE;

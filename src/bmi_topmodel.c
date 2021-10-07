@@ -8,6 +8,7 @@
 #define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 62   // must match var_info array size
 #define VAR_NAME_COUNT 62   // NEW BMI EXTENTION 
+#define VAR_ROLE_COUNT 5   // NEW BMI EXTENTION 
 
 //----------------------------------------------
 // Put variable info into a struct to simplify
@@ -114,6 +115,14 @@ Variable var_info[] = {
     { 61, "stand_alone", "int",    1, "param", "none", 0, "node" }
     // { 62, "obs_values",      "double", 1 },    
     // { 63, "double_arr_test", "double", 3 }             
+};
+
+static const char *model_var_roles[VAR_ROLE_COUNT] = {
+    "input",
+    "output",
+    "state",
+    "param",
+    "option"
 };
   
 /*static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
@@ -624,6 +633,8 @@ static int Finalize (Bmi *self)
 
 static int Get_var_type (Bmi *self, const char *name, char * type)
 {
+    // JG 10.07.21: DONE
+
 /*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
@@ -654,6 +665,7 @@ static int Get_var_type (Bmi *self, const char *name, char * type)
 
 static int Get_var_grid(Bmi *self, const char *name, int *grid)
 {
+    // JG 10.07.21: DONE
 
 /*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
@@ -691,7 +703,8 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         return BMI_FAILURE;
     }
 
-    if (strcmp (type, "double") == 0) {
+    // NEW BMI EXTENTION
+    if ((strcmp (type, "double") == 0) | (strcmp (type, "double*") == 0)) {
         *size = sizeof(double);
         return BMI_SUCCESS;
     }
@@ -711,15 +724,23 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         *size = sizeof(long);
         return BMI_SUCCESS;
     }
+    // NEW BMI EXTENTION
+    // TODO: This returns sizeof 1.  NEEDS UPDATING
+    else if ((strcmp (type, "FILE") == 0) | (strcmp (type, "string") == 0)) {
+        *size = sizeof(char);
+        return BMI_SUCCESS;
+    }
     else {
         *size = 0;
         return BMI_FAILURE;
     }
-    // TODO: Now pulling from var_info  
+ 
 }
 
 static int Get_var_location (Bmi *self, const char *name, char * location)
 {
+    // JG 10.07.21: DONE
+
 /*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
@@ -738,7 +759,7 @@ static int Get_var_location (Bmi *self, const char *name, char * location)
     // NEW BMI EXTENTION
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
-            strncpy(location, var_info[i].location, BMI_MAX_TYPE_NAME);
+            strncpy(location, var_info[i].location, BMI_MAX_LOCATION_NAME);
             return BMI_SUCCESS;
         }    
     }
@@ -750,6 +771,8 @@ static int Get_var_location (Bmi *self, const char *name, char * location)
 
 static int Get_var_units (Bmi *self, const char *name, char * units)
 {
+    // JG 10.07.21: DONE
+
 /*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
@@ -780,6 +803,8 @@ static int Get_var_units (Bmi *self, const char *name, char * units)
 
 static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
 {
+    // JG 10.07.21: Not 100% on this one, why condition < 1?
+
     int item_size;
     int item_size_result = Get_var_itemsize(self, name, &item_size);
     if (item_size_result != BMI_SUCCESS) {
@@ -808,14 +833,29 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
             item_count = var_info[i].size;
+            *nbytes = item_size * item_count;
             return BMI_SUCCESS;
         }    
     }
 
-    *nbytes = item_size * item_count;
-    return BMI_SUCCESS;
+    return BMI_FAILURE;
 }
 
+/* OWP Custom BMI Enhancements */
+static int Get_var_role (Bmi *self, const char *name, char * role)
+{
+
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(role, var_info[i].role, BMI_MAX_ROLE_NAME);
+            return BMI_SUCCESS;
+        }    
+    }
+    
+    // If we get here, it means the variable name wasn't recognized
+    role[0] = '\0';
+    return BMI_FAILURE;
+}
 
 // ***********************************************************
 // ********* BMI: VARIABLE GETTER & SETTER FUNCTIONS *********
@@ -1495,9 +1535,76 @@ static int Get_component_name (Bmi *self, char * name)
     return BMI_SUCCESS;
 }
 
+static int Get_model_var_roles (Bmi *self, char ** roles)
+{
+    for (int i = 0; i < VAR_ROLE_COUNT; i++) {
+        strncpy (roles[i], model_var_roles[i], BMI_MAX_ROLE_NAME);
+    }
+    return BMI_SUCCESS;
+}
+static int Get_model_var_count (Bmi *self, int * count, char *role)
+{
+    
+    // If role is blank, don't filter just return VAR_NAME_COUNT
+    if (strcmp(role, "") == 0) {
+        *count = VAR_NAME_COUNT;
+        return BMI_SUCCESS;
+    }    
+
+    int is_role = 0;
+    // Otherise, check if role is valid first
+    // Get_model_var_roles would be "cleanest"?
+    
+    // Setup array size...
+    char **role_list = NULL;
+    role_list = (char**) malloc (sizeof(char *) * VAR_ROLE_COUNT);
+    
+    // Setup array element size... sigh
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        role_list[i] = (char*) malloc (sizeof(char) * BMI_MAX_ROLE_NAME);
+    }
+    
+    // Check if get_model_var_roles is okay
+    int status = Get_model_var_roles(self, role_list);
+    if (status == BMI_FAILURE){
+        free(role_list);
+        return BMI_FAILURE;
+    }
+
+    // Now finally, check if role exists yey
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        if (strcmp(role, role_list[i]) == 0){
+            is_role = 1;
+        }
+    }
+
+    free(role_list);
+    // Loop thru and count vars with this role
+    if (is_role == 1){
+        int this_count = 0;
+        for (int i = 0; i < VAR_NAME_COUNT; i++) {
+            if (strcmp(role, var_info[i].role) == 0) {
+                this_count++;
+            }    
+        }
+        *count = this_count;
+        return BMI_SUCCESS;
+    }
+        
+    // If we get here, it means the role wasn't recognized
+    count[0] = '\0';
+    return BMI_FAILURE;
+
+}
+
 static int Get_input_item_count (Bmi *self, int * count)
 {
-    *count = INPUT_VAR_NAME_COUNT;
+    int input_count;
+    int input_count_result = Get_model_var_count(self, &input_count, "input");
+    if (input_count_result != BMI_SUCCESS) {
+        return BMI_FAILURE;
+    }
+    *count = input_count;
     return BMI_SUCCESS;
 }
 
@@ -1540,21 +1647,6 @@ static int Get_output_var_names (Bmi *self, char ** names)
     return BMI_SUCCESS;
 }
 
-// NEW BMI EXTENTION
-static int Get_var_role (Bmi *self, const char *name, char * role)
-{
-
-    for (int i = 0; i < VAR_NAME_COUNT; i++) {
-        if (strcmp(name, var_info[i].name) == 0) {
-            strncpy(role, var_info[i].role, BMI_MAX_ROLE_NAME);
-            return BMI_SUCCESS;
-        }    
-    }
-    
-    // If we get here, it means the variable name wasn't recognized
-    role[0] = '\0';
-    return BMI_FAILURE;
-}
 
 // ***********************************************************
 // **************** BMI: MODEL GRID FUNCTIONS ****************
@@ -1700,6 +1792,8 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->finalize = Finalize;
 
         model->get_component_name = Get_component_name;
+        model->get_model_var_count = Get_model_var_count;
+        model->get_model_var_roles = Get_model_var_roles;
         model->get_input_item_count = Get_input_item_count;
         model->get_output_item_count = Get_output_item_count;
         model->get_input_var_names = Get_input_var_names;
