@@ -68,14 +68,14 @@ main(void){
         //free(names_in);
     }*/
     
-/*    // Test get_output_item_count()
+    // Test get_output_item_count()
     {
         status = model->get_output_item_count(model, &count_out);
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf(" output item count: %i\n", count_out);
     }
     // Test get_output_var_names()
-    {
+/*    {
         names_out = (char**) malloc (sizeof(char *) * count_out);
         for (i=0; i<count_out; i++)
           names_out[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
@@ -85,8 +85,8 @@ main(void){
         for (i=0; i<count_out; i++)
             printf("   %s\n", names_out[i]);
         //free(names_out);
-    }
-*/
+    }*/
+
 
     // Test BMI: NEW ENHANCEMENTS
     printf("\nTEST BMI NEW ENHANCEMENTS\n*************************\n");
@@ -142,6 +142,31 @@ main(void){
         //free(names_all);
     }*/
 
+    // Test get_model_var_names()
+    { 
+        names_model_var = (char**) malloc (sizeof(char *) * count_model_var);
+        for (i=0; i<count_model_var; i++)
+            names_model_var[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+        status = model->get_model_var_names(model, names_model_var, "");
+        if (status == BMI_FAILURE) return BMI_FAILURE;
+        printf( " model (all) variable names:\n");
+        for (i=0; i<count_model_var; i++)
+            printf("  %i %s\n", i, names_model_var[i]);
+        //free(names_all);
+    }
+/*    // Test get_model_var_names(input)
+    { 
+        names_in = (char**) malloc (sizeof(char *) * count_in);
+        for (i=0; i<count_in; i++)
+            names_in[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+        status = model->get_model_var_names(model, names_in, "input");
+        if (status == BMI_FAILURE) return BMI_FAILURE;
+        printf( " model (input) variable names:\n");
+        for (i=0; i<count_in; i++)
+            printf("  %i %s\n", i, names_in[i]);
+        //free(names_all);
+    }*/
+
     free(names_model_var_roles);
 
     // Test BMI: VARIABLE INFORMATION FUNCTIONS
@@ -153,8 +178,8 @@ main(void){
     char role[BMI_MAX_ROLE_NAME];
 
     // Loop through both input and output variables and call get_var_*()
-    for (i=0; i<count_all; i++){
-        const char *var_name = names_all[i];
+    for (i=28; i<37; i++){
+        const char *var_name = names_model_var[i];
         printf( " %s\n", var_name);
         // Test get_var_grid()
         { 
@@ -198,7 +223,7 @@ main(void){
     }
 
     // Test BMI: MODEL GRID FUNCTIONS
-    printf("\nTEST BMI GRID FUNCTIONS\n***********************\n");
+/*    printf("\nTEST BMI GRID FUNCTIONS\n***********************\n");
     int grid_id = 0; //TODO: impliment for multiple grids, for now we know 0
     int grid_rank, grid_size;
     char grid_type[BMI_MAX_COMPONENT_NAME];
@@ -221,14 +246,14 @@ main(void){
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf ("  type: %s\n",grid_type);
     }
-    
+    */
     // Test BMI: TIME FUNCTIONS
-    printf("\nTEST BMI TIME FUNCTIONS\n***********************\n");
+/*    printf("\nTEST BMI TIME FUNCTIONS\n***********************\n");
     double time = 0.0;
     double dt = 0.0;
     char units_time[BMI_MAX_UNITS_NAME];
     // Test get_start_time()
-    {
+    {   
         status = model->get_start_time(model, &time);
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf(" start time: %f\n", time);
@@ -256,7 +281,7 @@ main(void){
         status = model->get_current_time(model, &time);
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf(" current time: %f\n", time);
-    }
+    }*/
 
 /*    // Test BMI: GET VALUE FUNCTIONS
     printf("\nTEST BMI GETTER SETTER FUNCTIONS\n********************************\n"); */

@@ -1535,6 +1535,7 @@ static int Get_component_name (Bmi *self, char * name)
     return BMI_SUCCESS;
 }
 
+// NEW BMI EXTENTION 
 static int Get_model_var_roles (Bmi *self, char ** roles)
 {
     for (int i = 0; i < VAR_ROLE_COUNT; i++) {
@@ -1597,6 +1598,86 @@ static int Get_model_var_count (Bmi *self, int * count, char *role)
 
 }
 
+static int Get_model_var_names (Bmi *self, char **names, char *role)
+{
+    
+    // If role is blank, don't filter just return all
+    if (strcmp(role, "") == 0) {
+        for (int i=0; i<VAR_NAME_COUNT; i++){
+            strncpy(names[i], var_info[i].name, BMI_MAX_VAR_NAME);
+        }
+    return BMI_SUCCESS;      
+    }
+
+    // role is "input"
+    else if (strcmp(role, "input") == 0) {
+
+        // first get role "input" count
+        int count_in;
+        int status =Get_model_var_count (self, &count_in, "input");
+        if (status == BMI_FAILURE){
+            return BMI_FAILURE;
+        }
+
+        // now loop thru all inputs
+        for (int i=0; i<count_in; i++){
+            strncpy(names[i], var_info[i].name, BMI_MAX_VAR_NAME);
+        }
+        return BMI_SUCCESS;      
+    }
+
+    else {
+        return BMI_FAILURE;
+    }
+
+
+}      
+
+/*    int is_role = 0;
+    // Otherise, check if role is valid first
+    // Get_model_var_roles would be "cleanest"?
+    
+    // Setup array size...
+    char **role_list = NULL;
+    role_list = (char**) malloc (sizeof(char *) * VAR_ROLE_COUNT);
+    
+    // Setup array element size... sigh
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        role_list[i] = (char*) malloc (sizeof(char) * BMI_MAX_ROLE_NAME);
+    }
+    
+    // Check if get_model_var_roles is okay
+    int status = Get_model_var_roles(self, role_list);
+    if (status == BMI_FAILURE){
+        free(role_list);
+        return BMI_FAILURE;
+    }
+
+    // Now finally, check if role exists yey
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        if (strcmp(role, role_list[i]) == 0){
+            is_role = 1;
+        }
+    }
+
+    free(role_list);
+    // Loop thru and get vars with this role
+    if (is_role == 1){
+        int this_count = 0;
+        for (int i = 0; i < VAR_NAME_COUNT; i++) {
+            if (strcmp(role, var_info[i].role) == 0) {
+                this_count++;
+            }    
+        }
+        *count = this_count;
+        return BMI_SUCCESS;
+    }
+        
+    // If we get here, it means the role wasn't recognized
+    count[0] = '\0';
+    return BMI_FAILURE;*/
+
+// This is now a special case of get_model_var_count()
 static int Get_input_item_count (Bmi *self, int * count)
 {
     int input_count;
@@ -1625,9 +1706,15 @@ static int Get_input_var_names (Bmi *self, char ** names)
     return BMI_SUCCESS;
 }
 
+// This is now a special case of get_model_var_count()
 static int Get_output_item_count (Bmi *self, int * count)
 {
-    *count = OUTPUT_VAR_NAME_COUNT;
+    int output_count;
+    int output_count_result = Get_model_var_count(self, &output_count, "output");
+    if (output_count_result != BMI_SUCCESS) {
+        return BMI_FAILURE;
+    }
+    *count = output_count;
     return BMI_SUCCESS;
 }
 
@@ -1794,6 +1881,7 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->get_component_name = Get_component_name;
         model->get_model_var_count = Get_model_var_count;
         model->get_model_var_roles = Get_model_var_roles;
+        model->get_model_var_names = Get_model_var_names;
         model->get_input_item_count = Get_input_item_count;
         model->get_output_item_count = Get_output_item_count;
         model->get_input_var_names = Get_input_var_names;
