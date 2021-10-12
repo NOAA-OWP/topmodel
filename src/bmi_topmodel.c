@@ -1673,8 +1673,22 @@ static int Get_input_var_names (Bmi *self, char ** names)
     return BMI_SUCCESS;*/
 
     // NEW BMI EXTENTION 
+/*    char * input_names;
+    int input_names_result = Get_model_var_names(self, &&input_names, "input");
+    if (input_names_result != BMI_SUCCESS) {
+        return BMI_FAILURE;
+    }
+    **names = input_names;
+    return BMI_SUCCESS; 
+*/
+
+    // NEEDS TLC, THIS IS TEMP
+
+    // NEW BMI EXTENTION
+    int idx = -1; 
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp("input", var_info[i].role) == 0){
+            idx++;
             strncpy (names[i], var_info[i].name, BMI_MAX_VAR_NAME);
         }
     }    
