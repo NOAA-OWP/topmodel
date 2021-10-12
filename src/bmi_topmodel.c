@@ -1609,33 +1609,8 @@ static int Get_model_var_names (Bmi *self, char **names, char *role)
     return BMI_SUCCESS;      
     }
 
-    // role is "input"
-    else if (strcmp(role, "input") == 0) {
-
-        // first get role "input" count
-        int count_in;
-        int status =Get_model_var_count (self, &count_in, "input");
-        if (status == BMI_FAILURE){
-            return BMI_FAILURE;
-        }
-
-        // now loop thru all inputs
-        for (int i=0; i<count_in; i++){
-            strncpy(names[i], var_info[i].name, BMI_MAX_VAR_NAME);
-        }
-        return BMI_SUCCESS;      
-    }
-
-    else {
-        return BMI_FAILURE;
-    }
-
-
-}      
-
-/*    int is_role = 0;
+    int is_role = 0;
     // Otherise, check if role is valid first
-    // Get_model_var_roles would be "cleanest"?
     
     // Setup array size...
     char **role_list = NULL;
@@ -1660,22 +1635,23 @@ static int Get_model_var_names (Bmi *self, char **names, char *role)
         }
     }
 
-    free(role_list);
-    // Loop thru and get vars with this role
+    // Loop thru and get var names with this role
     if (is_role == 1){
-        int this_count = 0;
+        int this_index = -1;
         for (int i = 0; i < VAR_NAME_COUNT; i++) {
             if (strcmp(role, var_info[i].role) == 0) {
-                this_count++;
+                this_index++;
+                strncpy (names[this_index], var_info[i].name, BMI_MAX_VAR_NAME);   
             }    
         }
-        *count = this_count;
         return BMI_SUCCESS;
     }
         
     // If we get here, it means the role wasn't recognized
-    count[0] = '\0';
-    return BMI_FAILURE;*/
+    return BMI_FAILURE;
+
+}      
+
 
 // This is now a special case of get_model_var_count()
 static int Get_input_item_count (Bmi *self, int * count)

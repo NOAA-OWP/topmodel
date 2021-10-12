@@ -154,7 +154,7 @@ main(void){
             printf("  %i %s\n", i, names_model_var[i]);
         //free(names_all);
     }
-/*    // Test get_model_var_names(input)
+    // Test get_model_var_names(input)
     { 
         names_in = (char**) malloc (sizeof(char *) * count_in);
         for (i=0; i<count_in; i++)
@@ -165,7 +165,7 @@ main(void){
         for (i=0; i<count_in; i++)
             printf("  %i %s\n", i, names_in[i]);
         //free(names_all);
-    }*/
+    }
 
     free(names_model_var_roles);
 
