@@ -8,7 +8,8 @@
 #define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 62   // must match var_info array size
 #define VAR_NAME_COUNT 62   // NEW BMI EXTENTION 
-#define VAR_ROLE_COUNT 5   // NEW BMI EXTENTION 
+// int size = sizeof(arr)/sizeof(arr[0]);
+#define VAR_ROLE_COUNT 9   // NEW BMI EXTENTION 
 
 //----------------------------------------------
 // Put variable info into a struct to simplify
@@ -24,24 +25,24 @@ Variable var_info[] = {
     //-------------------------------------
     // File pointers.  For reference only
     //-------------------------------------
-    { 0,  "control_fptr", "FILE", 1, "param", "none", 0, "node" },
-    { 1,  "input_fptr",   "FILE", 1, "param", "none", 0, "node" },
-    { 2,  "subcat_fptr",  "FILE", 1, "param", "none", 0, "node" },
-    { 3,  "params_fptr",  "FILE", 1, "param", "none", 0, "node" },
-    { 4,  "output_fptr",  "FILE", 1, "param", "none", 0, "node" },
-    { 5,  "out_hyd_fptr", "FILE", 1, "param", "none", 0, "node" },
+    { 0,  "control_fptr", "FILE", 1, "filename", "none", 0, "node" },
+    { 1,  "input_fptr",   "FILE", 1, "filename", "none", 0, "node" },
+    { 2,  "subcat_fptr",  "FILE", 1, "filename", "none", 0, "node" },
+    { 3,  "params_fptr",  "FILE", 1, "filename", "none", 0, "node" },
+    { 4,  "output_fptr",  "FILE", 1, "filename", "none", 0, "node" },
+    { 5,  "out_hyd_fptr", "FILE", 1, "filename", "none", 0, "node" },
     //----------------------------------------------
     // String vars.  Will replace 1 w/ title_size.
     //----------------------------------------------
-    { 6,  "title",  "string", 1, "param", "none", 0, "node" },
-    { 7,  "subcat", "string", 1, "param", "none", 0, "node" },   
+    { 6,  "title",  "string", 1, "description", "none", 0, "node" },
+    { 7,  "subcat", "string", 1, "description", "none", 0, "node" },   
     //-----------------------
     // Variable definitions
     //-----------------------
-    { 8,  "dt",                 "double", 1, "param", "h-1", 0, "node" },
-    { 9,  "nstep",              "int",    1, "param", "none", 0, "node" },
-    { 10, "yes_print_output",   "int",    1, "param", "none", 0, "node" },
-    { 11, "imap",               "int",    1, "param", "none", 0, "node" },
+    { 8,  "dt",                 "double", 1, "core", "h-1", 0, "node" },
+    { 9,  "nstep",              "int",    1, "core", "none", 0, "node" },
+    { 10, "yes_print_output",   "int",    1, "option", "none", 0, "node" },
+    { 11, "imap",               "int",    1, "option", "none", 0, "node" },
     { 12, "num_channels",       "int",    1, "param", "none", 0, "node" },
     { 13, "num_topodex_values", "int",    1, "param", "none", 0, "node" },
     { 14, "infex",              "int",    1, "param", "none", 0, "node" },            
@@ -74,7 +75,7 @@ Variable var_info[] = {
     // is actually a pointer to the given type.
     //------------------------------------------------ 
     { 32,  "Q",                        "double*", 1, "output", "m h-1", 0, "node" }, // n_steps
-    { 33,  "Qobs",                     "double*", 1, "state", "m h-1", 0, "node" },  // n_steps
+    { 33,  "Qobs",                     "double*", 1, "observation", "m h-1", 0, "node" },  // n_steps
     // TODO: confirm Qobs role
     { 34,  "rain",                     "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
     { 35,  "pe",                       "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
@@ -112,7 +113,7 @@ Variable var_info[] = {
     { 58, "qof",         "double", 1, "output", "m h-1", 0, "node" },
     { 59, "p",           "double", 1, "output", "m h-1", 0, "node" },
     { 60, "ep",          "double", 1, "output", "m h-1", 0, "node" },
-    { 61, "stand_alone", "int",    1, "param", "none", 0, "node" }
+    { 61, "stand_alone", "int",    1, "option", "none", 0, "node" }
     // { 62, "obs_values",      "double", 1 },    
     // { 63, "double_arr_test", "double", 3 }             
 };
@@ -122,7 +123,11 @@ static const char *model_var_roles[VAR_ROLE_COUNT] = {
     "output",
     "state",
     "param",
-    "option"
+    "option",
+    "filename",
+    "description",
+    "observation",
+    "core"
 };
   
 /*static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
@@ -863,6 +868,11 @@ static int Get_var_role (Bmi *self, const char *name, char * role)
 
 static int Get_value_ptr (Bmi *self, const char *name, void **dest)
 {
+/*        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;*/
+
+    // CSDMS standard names group together ONLY INPUT OUPUT
+
     // Qout
     if (strcmp (name, "Qout") == 0) {
         topmodel_model *topmodel;
@@ -1672,7 +1682,7 @@ static int Get_input_var_names (Bmi *self, char ** names)
     }
     return BMI_SUCCESS;*/
 
-    // NEW BMI EXTENTION 
+    // NEW BMI EXTENTION - this uses new get_model_var
 /*    char * input_names;
     int input_names_result = Get_model_var_names(self, &&input_names, "input");
     if (input_names_result != BMI_SUCCESS) {
@@ -1682,7 +1692,6 @@ static int Get_input_var_names (Bmi *self, char ** names)
     return BMI_SUCCESS; 
 */
 
-    // NEEDS TLC, THIS IS TEMP
 
     // NEW BMI EXTENTION
     int idx = -1; 

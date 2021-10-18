@@ -59,6 +59,8 @@ typedef struct Bmi {
     int (*finalize)(struct Bmi *self);
 
     /* Exchange items */
+    // char? float? (*get_bmi_version) returns: owp-noaa
+
     int (*get_component_name)(struct Bmi *self, char *name);
 
     int (*get_input_item_count)(struct Bmi *self, int *count);
@@ -70,6 +72,7 @@ typedef struct Bmi {
     int (*get_output_var_names)(struct Bmi *self, char **names);
 
     /* OWP Custom - BMI Enhancements */
+    // TODO JG change these names
     int (*get_model_var_roles)(struct Bmi *self, char **roles);
     int (*get_model_var_count)(struct Bmi *self, int *count, char *role);
     int (*get_model_var_names)(struct Bmi *self, char **names, char *role);      
