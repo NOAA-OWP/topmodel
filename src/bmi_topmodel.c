@@ -19,8 +19,18 @@
 // Everything works without it.
 //---------------------------------------------- 
 // {idx, name, type, size, role, units, grid, location}
-// role: input, ouput, param, state, or option
-//---------------------------------------------- 
+//----------------------------------------------
+// valid role options via 'model_var_roles' 
+//    "input",
+//    "output",
+//    "state",
+//    "param",
+//    "option",
+//    "filename",
+//    "description",
+//    "observation",
+//    "core"
+//----------------------------------------------
 Variable var_info[] = {
     //-------------------------------------
     // File pointers.  For reference only
@@ -41,31 +51,32 @@ Variable var_info[] = {
     //-----------------------
     { 8,  "dt",                 "double", 1, "core", "h-1", 0, "node" },    //inputs.dat
     { 9,  "nstep",              "int",    1, "core", "none", 0, "node" },   //inputs.dat
-    { 10, "yes_print_output",   "int",    1, "option", "none", 0, "node" },
-    { 11, "imap",               "int",    1, "option", "none", 0, "node" },
-    { 12, "num_channels",       "int",    1, "param", "none", 0, "node" },
-    { 13, "num_topodex_values", "int",    1, "param", "none", 0, "node" },
-    { 14, "infex",              "int",    1, "option", "none", 0, "node" },            
+    { 10, "yes_print_output",   "int",    1, "option", "none", 0, "node" }, //subcat.dat
+    { 11, "imap",               "int",    1, "option", "none", 0, "node" }, //subcat.dat
+    { 12, "num_channels",       "int",    1, "param", "none", 0, "node" },  //subcat.dat
+    { 13, "num_topodex_values", "int",    1, "param", "none", 0, "node" },  //subcat.dat
+    { 14, "infex",              "int",    1, "option", "none", 0, "node" }, //infiltration           
     //-------------------------------------
     // Model parameters and input scalars
     //-------------------------------------
     { 15,  "szm",        "double", 1, "param", "m", 0, "node" },
-    { 16,  "t0",         "double", 1, "param", "m-2", 0, "node" },
-    { 17,  "td",         "double", 1, "param", "h-1", 0, "node" },
-    { 18,  "srmax",      "double", 1, "param", "m", 0, "node" },
-    { 19,  "Q0",         "double", 1, "param", "m h-1", 0, "node" },
-    { 20,  "sr0",        "double", 1, "param", "m", 0, "node" },
-    { 21,  "xk0",        "double", 1, "param", "m h-1", 0, "node" },
-    { 22,  "hf",         "double", 1, "param", "m", 0, "node" },
-    { 23,  "dth",        "double", 1, "param", "none", 0, "node" },
-    { 24,  "area",       "double", 1, "param", "none", 0, "node" },
-    { 25,  "num_delay",  "int",    1, "param", "none", 0, "node" },
-    { 26,  "num_time_delay_hist_ords",  "int", 1, "param", "none", 0, "node"},
+    { 16,  "t0",         "double", 1, "param", "m-2", 0, "node" }, //areal average of ln(a/tanB
+    { 17,  "td",         "double", 1, "param", "h-1", 0, "node" }, //unsaturated zome time delay per unit storage deficit
+    { 18,  "srmax",      "double", 1, "param", "m", 0, "node" },   //maximum root zone storage deficit
+    { 19,  "Q0",         "double", 1, "param", "m h-1", 0, "node" }, //initial subsurface flow per unit area
+    { 20,  "sr0",        "double", 1, "param", "m", 0, "node" }, //initial root zone storage deficit
+    { 21,  "xk0",        "double", 1, "param", "m h-1", 0, "node" }, //surface soil hydraulic conductivity
+    { 22,  "hf",         "double", 1, "param", "m", 0, "node" }, //wetting front suction for G&A soln.
+    { 23,  "dth",        "double", 1, "param", "none", 0, "node" }, //water content change across the wetting front
+    { 24,  "area",       "double", 1, "param", "none", 0, "node" }, //subcat.dat
+    { 25,  "num_delay",  "int",    1, "param", "none", 0, "node" }, //number of time steps lag (delay) in channel within catchment to outlet 
+    { 26,  "num_time_delay_hist_ords",  "int", 1, "param", "none", 0, "node"}, //number of time delay histogram ordinates */
+
     { 27,  "szq",              "double", 1, "param", "m h-1", 0, "node" },
     { 28,  "tl",               "double", 1, "param", "m h-1", 0, "node" },
     { 29,  "max_contrib_area", "double", 1, "param", "m-2", 0, "node" },
-    { 30,  "land_surface_water__water_balance_volume", "double", 1, "output", "m", 0, "node" },
-    { 31,  "soil_water__domain_volume_deficit",        "double", 1, "output", "m", 0, "node" },
+    { 30,  "land_surface_water__water_balance_volume", "double", 1, "output", "m", 0, "node" }, //bal //residual of the water balance
+    { 31,  "soil_water__domain_volume_deficit",        "double", 1, "output", "m", 0, "node" }, //sbar //catchment average soil moisture deficit
     //------------------------------------------------
     // Pointers to dynamically dimensioned 1D arrays
     // Will replace size of 1 with size in comment
@@ -74,11 +85,10 @@ Variable var_info[] = {
     // A trailing asterisk indicates that the var
     // is actually a pointer to the given type.
     //------------------------------------------------ 
-    { 32,  "land_surface_water__runoff_mass_flux", "double*", 1, "output", "m h-1", 0, "node" }, // n_steps
+    { 32,  "land_surface_water__runoff_mass_flux", "double*", 1, "output", "m h-1", 0, "node" }, // n_steps //Q //simulated discharge
     { 33,  "Qobs",                     "double*", 1, "observation", "m h-1", 0, "node" },  // n_steps
-    // TODO: confirm Qobs role
-    { 34,  "atmosphere_water__liquid_equivalent_precipitation_rate", "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
-    { 35,  "water_potential_evaporation_flux",                       "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
+    { 34,  "atmosphere_water__liquid_equivalent_precipitation_rate", "double*", 1, "input", "m h-1", 0, "node" },  // n_steps //rain //inputs.dat
+    { 35,  "water_potential_evaporation_flux",                       "double*", 1, "input", "m h-1", 0, "node" },  // n_steps //pe //inputs.dat
     { 36,  "contrib_area",             "double*", 1, "state", "m-2", 0, "node" },    // n_steps
     { 37,  "stor_unsat_zone",          "double*", 1, "state", "donno", 0, "node" },  // max_atb_incs
     { 38,  "deficit_root_zone",        "double*", 1, "state", "donno", 0, "node" },  // max_atb_incs
@@ -91,11 +101,14 @@ Variable var_info[] = {
     //---------------------- 
     // Other internal vars
     //----------------------
-    { 45,  "num_sub_catchments",       "int", 1, "param", "none", 0, "node" },
+    { 45,  "num_sub_catchments",       "int", 1, "param", "none", 0, "node" }, //subcat.dat
     { 46,  "max_atb_increments",       "int", 1, "param", "none", 0, "node" },
     { 47,  "max_num_subcatchments",    "int", 1, "param", "none", 0, "node" },
     { 48,  "max_time_delay_ordinates", "int", 1, "param", "none", 0, "node" },
     { 49,  "Qout",                     "double", 1, "output", "m h-1", 0, "node" }, // Output var  
+    //---------------------- 
+    // BMI vars
+    //----------------------    
     { 50,  "current_time_step",        "int", 1, "state", "none", 0, "node" },    // BMI var
     //-----------------
     // State var sums
