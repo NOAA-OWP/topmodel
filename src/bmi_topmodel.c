@@ -1741,7 +1741,7 @@ static int Get_input_var_names (Bmi *self, char ** names)
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp("input", var_info[i].role) == 0){
             idx++;
-            strncpy (names[i], var_info[i].name, BMI_MAX_VAR_NAME);
+            strncpy (names[idx], var_info[i].name, BMI_MAX_VAR_NAME);
         }
     }    
 
@@ -1782,7 +1782,7 @@ static int Get_output_var_names (Bmi *self, char ** names)
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp("output", var_info[i].role) == 0){
             idx++;
-            strncpy (names[i], var_info[i].name, BMI_MAX_VAR_NAME);
+            strncpy (names[idx], var_info[i].name, BMI_MAX_VAR_NAME);
         }
     }  
 

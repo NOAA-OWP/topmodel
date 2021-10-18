@@ -56,7 +56,7 @@ main(void){
     
 
     // Test get_input_var_names()
-/*    { 
+    { 
         names_in = (char**) malloc (sizeof(char *) * count_in);
         for (i=0; i<count_in; i++)
             names_in[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
@@ -66,7 +66,7 @@ main(void){
         for (i=0; i<count_in; i++)
             printf("   %s\n", names_in[i]);
         //free(names_in);
-    }*/
+    }
     
     // Test get_output_item_count()
     {
@@ -75,7 +75,7 @@ main(void){
         printf(" output item count: %i\n", count_out);
     }
     // Test get_output_var_names()
-/*    {
+    {
         names_out = (char**) malloc (sizeof(char *) * count_out);
         for (i=0; i<count_out; i++)
           names_out[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
@@ -85,7 +85,7 @@ main(void){
         for (i=0; i<count_out; i++)
             printf("   %s\n", names_out[i]);
         //free(names_out);
-    }*/
+    }
 
 
     // Test BMI: NEW ENHANCEMENTS
