@@ -315,7 +315,7 @@ main(void){
     }*/
 
     // Test BMI: GET VALUE FUNCTIONS
-    printf("\nTEST BMI GETTER SETTER FUNCTIONS\n********************************\n"); 
+/*    printf("\nTEST BMI GETTER SETTER FUNCTIONS\n********************************\n"); 
     int test_nstep=1;
     double now;
     printf(" updating... timesteps in test loop: %i\n", test_nstep);
@@ -461,7 +461,7 @@ main(void){
         }
     }
     free(names_out);
-    free(names_in); 
+    free(names_in); */
 
 /*    // Test BMI: GET VALUE FUNCTIONS
     printf("\nTEST BMI GETTER SETTER FUNCTIONS\n********************************\n"); 
@@ -550,7 +550,7 @@ main(void){
     free(names_model_var);*/
     
     // Test BMI: CONTROL FUNCTION update_until()
-    {
+/*    {
         int added_nstep=5;
         int total_nstep= added_nstep + test_nstep;
         printf("\n updating until... new total timesteps in test loop: %i\n", total_nstep);
@@ -559,7 +559,7 @@ main(void){
         // confirm updated current time
         model->get_current_time(model, &now);
         printf(" current time: %f\n", now);
-    }
+    }*/
     // Test BMI: CONTROL FUNCTION finalize()
     {
         printf("\n finalizing...\n");

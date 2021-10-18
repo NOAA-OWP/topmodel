@@ -7,9 +7,8 @@
 //#define OUTPUT_VAR_NAME_COUNT 14
 //#define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 62   // must match var_info array size
-#define VAR_NAME_COUNT 62   // NEW BMI EXTENTION 
-// int size = sizeof(arr)/sizeof(arr[0]);
-#define VAR_ROLE_COUNT 9   // NEW BMI EXTENTION 
+//#define VAR_NAME_COUNT 62   // NEW BMI EXTENTION 
+//#define VAR_ROLE_COUNT 9   // NEW BMI EXTENTION 
 
 //----------------------------------------------
 // Put variable info into a struct to simplify
@@ -131,7 +130,7 @@ Variable var_info[] = {
     // { 63, "double_arr_test", "double", 3 }             
 };
 
-static const char *model_var_roles[VAR_ROLE_COUNT] = {
+static const char *model_var_roles[] = {
     "input",
     "output",
     "state",
@@ -142,6 +141,10 @@ static const char *model_var_roles[VAR_ROLE_COUNT] = {
     "observation",
     "core"
 };
+
+// These replace hard-coded #DEFINE so you don't have to keep updating, yey
+int VAR_NAME_COUNT = sizeof(var_info)/sizeof(var_info[0]);
+int VAR_ROLE_COUNT = sizeof(model_var_roles)/sizeof(model_var_roles[0]);
   
 /*static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
