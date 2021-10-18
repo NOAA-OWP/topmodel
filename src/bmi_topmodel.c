@@ -39,13 +39,13 @@ Variable var_info[] = {
     //-----------------------
     // Variable definitions
     //-----------------------
-    { 8,  "dt",                 "double", 1, "core", "h-1", 0, "node" },
-    { 9,  "nstep",              "int",    1, "core", "none", 0, "node" },
+    { 8,  "dt",                 "double", 1, "core", "h-1", 0, "node" },    //inputs.dat
+    { 9,  "nstep",              "int",    1, "core", "none", 0, "node" },   //inputs.dat
     { 10, "yes_print_output",   "int",    1, "option", "none", 0, "node" },
     { 11, "imap",               "int",    1, "option", "none", 0, "node" },
     { 12, "num_channels",       "int",    1, "param", "none", 0, "node" },
     { 13, "num_topodex_values", "int",    1, "param", "none", 0, "node" },
-    { 14, "infex",              "int",    1, "param", "none", 0, "node" },            
+    { 14, "infex",              "int",    1, "option", "none", 0, "node" },            
     //-------------------------------------
     // Model parameters and input scalars
     //-------------------------------------
@@ -59,13 +59,13 @@ Variable var_info[] = {
     { 22,  "hf",         "double", 1, "param", "m", 0, "node" },
     { 23,  "dth",        "double", 1, "param", "none", 0, "node" },
     { 24,  "area",       "double", 1, "param", "none", 0, "node" },
-    { 25,  "num_delay",  "int", 1, "param", "none", 0, "node" },
+    { 25,  "num_delay",  "int",    1, "param", "none", 0, "node" },
     { 26,  "num_time_delay_hist_ords",  "int", 1, "param", "none", 0, "node"},
     { 27,  "szq",              "double", 1, "param", "m h-1", 0, "node" },
     { 28,  "tl",               "double", 1, "param", "m h-1", 0, "node" },
     { 29,  "max_contrib_area", "double", 1, "param", "m-2", 0, "node" },
-    { 30,  "bal",              "double", 1, "output", "m", 0, "node" },
-    { 31,  "sbar",             "double", 1, "output", "m", 0, "node" },
+    { 30,  "land_surface_water__water_balance_volume", "double", 1, "output", "m", 0, "node" },
+    { 31,  "soil_water__domain_volume_deficit",        "double", 1, "output", "m", 0, "node" },
     //------------------------------------------------
     // Pointers to dynamically dimensioned 1D arrays
     // Will replace size of 1 with size in comment
@@ -74,11 +74,11 @@ Variable var_info[] = {
     // A trailing asterisk indicates that the var
     // is actually a pointer to the given type.
     //------------------------------------------------ 
-    { 32,  "Q",                        "double*", 1, "output", "m h-1", 0, "node" }, // n_steps
+    { 32,  "land_surface_water__runoff_mass_flux", "double*", 1, "output", "m h-1", 0, "node" }, // n_steps
     { 33,  "Qobs",                     "double*", 1, "observation", "m h-1", 0, "node" },  // n_steps
     // TODO: confirm Qobs role
-    { 34,  "rain",                     "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
-    { 35,  "pe",                       "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
+    { 34,  "atmosphere_water__liquid_equivalent_precipitation_rate", "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
+    { 35,  "water_potential_evaporation_flux",                       "double*", 1, "input", "m h-1", 0, "node" },  // n_steps
     { 36,  "contrib_area",             "double*", 1, "state", "m-2", 0, "node" },    // n_steps
     { 37,  "stor_unsat_zone",          "double*", 1, "state", "donno", 0, "node" },  // max_atb_incs
     { 38,  "deficit_root_zone",        "double*", 1, "state", "donno", 0, "node" },  // max_atb_incs
@@ -100,19 +100,19 @@ Variable var_info[] = {
     //-----------------
     // State var sums
     //-----------------
-    { 51,  "sump",  "double", 1, "output", "m", 0, "node" },
-    { 52,  "sumae", "double", 1, "output", "m", 0, "node" },
-    { 53,  "sumq",  "double", 1, "output", "m", 0, "node" },
-    { 54,  "sumrz", "double", 1, "output", "m", 0, "node" },
-    { 55,  "sumuz", "double", 1, "output", "m", 0, "node" },
+    { 51,  "land_surface_water__domain_time_integral_of_precipitation_volume_flux", "double", 1, "output", "m", 0, "node" },
+    { 52,  "land_surface_water__domain_time_integral_of_evaporation_volume_flux",   "double", 1, "output", "m", 0, "node" },
+    { 53,  "land_surface_water__domain_time_integral_of_runoff_volume_flux",        "double", 1, "output", "m", 0, "node" },
+    { 54,  "soil_water__domain_root-zone_volume_deficit",                           "double", 1, "output", "m", 0, "node" },
+    { 55,  "soil_water__domain_unsaturated-zone_volume",                            "double", 1, "output", "m", 0, "node" },
     //----------------------    
     // External/forcing vars
     //----------------------
-    { 56, "quz",         "double", 1, "output", "m", 0, "node" },
-    { 57, "qb",          "double", 1, "output", "m", 0, "node" },
-    { 58, "qof",         "double", 1, "output", "m h-1", 0, "node" },
-    { 59, "p",           "double", 1, "output", "m h-1", 0, "node" },
-    { 60, "ep",          "double", 1, "output", "m h-1", 0, "node" },
+    { 56, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",             "double", 1, "output", "m", 0, "node" },
+    { 57, "land_surface_water__baseflow_volume_flux",                              "double", 1, "output", "m", 0, "node" },
+    { 58, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux", "double", 1, "output", "m h-1", 0, "node" },
+    { 59, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",        "double", 1, "output", "m h-1", 0, "node" },
+    { 60, "land_surface_water__potential_evaporation_volume_flux",                 "double", 1, "output", "m h-1", 0, "node" },
     { 61, "stand_alone", "int",    1, "option", "none", 0, "node" }
     // { 62, "obs_values",      "double", 1 },    
     // { 63, "double_arr_test", "double", 3 }             
@@ -868,105 +868,77 @@ static int Get_var_role (Bmi *self, const char *name, char * role)
 
 static int Get_value_ptr (Bmi *self, const char *name, void **dest)
 {
-/*        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;*/
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
 
     // CSDMS standard names group together ONLY INPUT OUPUT
 
     // Qout
     if (strcmp (name, "Qout") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> Qout;
         return BMI_SUCCESS;
     }
     // p
     if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> p;
         return BMI_SUCCESS;
     // ep    
     }
     if (strcmp (name, "land_surface_water__potential_evaporation_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> ep;
         return BMI_SUCCESS;
     }
     // Q[it]
     if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> Q[1];
         return BMI_SUCCESS;
     }
     // quz
     if (strcmp (name, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> quz;
         return BMI_SUCCESS;
     }
     // qb
     if (strcmp (name, "land_surface_water__baseflow_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> qb;
         return BMI_SUCCESS;
     }
     // sbar
     if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sbar;
         return BMI_SUCCESS;
     }
     // qof
     if (strcmp (name, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> qof;
         return BMI_SUCCESS;
     }
     // sump
     if (strcmp (name, "land_surface_water__domain_time_integral_of_precipitation_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sump;
         return BMI_SUCCESS;
     }
     // sumae
     if (strcmp (name, "land_surface_water__domain_time_integral_of_evaporation_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sumae;
         return BMI_SUCCESS;
     }// sumq
     if (strcmp (name, "land_surface_water__domain_time_integral_of_runoff_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sumq;
         return BMI_SUCCESS;
     }
     // sumrz
     if (strcmp (name, "soil_water__domain_root-zone_volume_deficit") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sumrz;
         return BMI_SUCCESS;
     }
     // sumuz
     if (strcmp (name, "soil_water__domain_unsaturated-zone_volume") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> sumuz;
         return BMI_SUCCESS;
     }
     // bal
     if (strcmp (name, "land_surface_water__water_balance_volume") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> bal;
         return BMI_SUCCESS;
     }
@@ -976,17 +948,12 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //      defs here speak to "scalar"  
     //      TODO: add logic to only apply these defs for framework runs 
     if (strcmp (name, "water_potential_evaporation_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> pe[1];
         //*dest = (void*)(topmodel->pe + topmodel->current_time_step);
-        
         return BMI_SUCCESS;
     }
 
     if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel->rain[1];
         return BMI_SUCCESS;
     }
