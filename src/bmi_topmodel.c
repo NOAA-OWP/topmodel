@@ -4,8 +4,8 @@
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
-#define OUTPUT_VAR_NAME_COUNT 14
-#define INPUT_VAR_NAME_COUNT 2
+//#define OUTPUT_VAR_NAME_COUNT 14
+//#define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 62   // must match var_info array size
 #define VAR_NAME_COUNT 62   // NEW BMI EXTENTION 
 // int size = sizeof(arr)/sizeof(arr[0]);
@@ -1562,7 +1562,10 @@ static int Get_model_var_count (Bmi *self, int * count, char *role)
         return BMI_SUCCESS;
     }    
 
-    int is_role = 0;
+    // This block code uses get_model_var_roles to check if *role
+    // is valid, but maybe overkill?
+
+/*    int is_role = 0;
     // Otherise, check if role is valid first
     // Get_model_var_roles would be "cleanest"?
     
@@ -1601,7 +1604,21 @@ static int Get_model_var_count (Bmi *self, int * count, char *role)
         *count = this_count;
         return BMI_SUCCESS;
     }
-        
+        */
+
+    // Loop thru and count vars with this role
+    int this_count = 0;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(role, var_info[i].role) == 0) {
+            this_count++;
+        }    
+    }
+
+    if (this_count > 0) {
+        *count = this_count;
+        return BMI_SUCCESS;
+    }    
+    
     // If we get here, it means the role wasn't recognized
     count[0] = '\0';
     return BMI_FAILURE;
@@ -1619,7 +1636,10 @@ static int Get_model_var_names (Bmi *self, char **names, char *role)
     return BMI_SUCCESS;      
     }
 
-    int is_role = 0;
+    // This block code uses get_model_var_roles to check if *role
+    // is valid, but maybe overkill?
+
+/*    int is_role = 0;
     // Otherise, check if role is valid first
     
     // Setup array size...
@@ -1655,7 +1675,18 @@ static int Get_model_var_names (Bmi *self, char **names, char *role)
             }    
         }
         return BMI_SUCCESS;
+    }*/
+
+    // Loop thru and get var names with this role
+    int this_index = -1;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(role, var_info[i].role) == 0) {
+            this_index++;
+            strncpy (names[this_index], var_info[i].name, BMI_MAX_VAR_NAME);   
+        }    
     }
+    
+    if (this_index > -1) return BMI_SUCCESS;
         
     // If we get here, it means the role wasn't recognized
     return BMI_FAILURE;
@@ -1663,16 +1694,28 @@ static int Get_model_var_names (Bmi *self, char **names, char *role)
 }      
 
 
-// This is now a special case of get_model_var_count()
+// This is now loops thru var_info struct
 static int Get_input_item_count (Bmi *self, int * count)
 {
-    int input_count;
+/*    int input_count;
     int input_count_result = Get_model_var_count(self, &input_count, "input");
     if (input_count_result != BMI_SUCCESS) {
         return BMI_FAILURE;
     }
     *count = input_count;
-    return BMI_SUCCESS;
+    return BMI_SUCCESS;*/
+
+    // Loop thru and count vars with this role = "input"
+    int input_count = 0;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("input", var_info[i].role) == 0) {
+            input_count++;
+        }    
+    }
+
+    *count = input_count;
+    return BMI_SUCCESS; //even if count = 0
+  
 }
 
 static int Get_input_var_names (Bmi *self, char ** names)
@@ -1693,7 +1736,7 @@ static int Get_input_var_names (Bmi *self, char ** names)
 */
 
 
-    // NEW BMI EXTENTION
+    // now loops thru var_info struct
     int idx = -1; 
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp("input", var_info[i].role) == 0){
@@ -1705,16 +1748,27 @@ static int Get_input_var_names (Bmi *self, char ** names)
     return BMI_SUCCESS;
 }
 
-// This is now a special case of get_model_var_count()
+// This is now loops thru var_info struct
 static int Get_output_item_count (Bmi *self, int * count)
 {
-    int output_count;
+/*    int output_count;
     int output_count_result = Get_model_var_count(self, &output_count, "output");
     if (output_count_result != BMI_SUCCESS) {
         return BMI_FAILURE;
     }
     *count = output_count;
-    return BMI_SUCCESS;
+    return BMI_SUCCESS;*/
+
+    // Loop thru and count vars with this role = "input"
+    int output_count = 0;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("output", var_info[i].role) == 0) {
+            output_count++;
+        }    
+    }
+
+    *count = output_count;
+    return BMI_SUCCESS; //even if count = 0
 }
 
 static int Get_output_var_names (Bmi *self, char ** names)
@@ -1723,12 +1777,14 @@ static int Get_output_var_names (Bmi *self, char ** names)
         strncpy (names[i], output_var_names[i], BMI_MAX_VAR_NAME);
     }*/
     
-    // NEW BMI EXTENTION 
+    // now loops thru var_info struct
+    int idx = -1; 
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
-        if (strcmp("input", var_info[i].role) == 0){
+        if (strcmp("output", var_info[i].role) == 0){
+            idx++;
             strncpy (names[i], var_info[i].name, BMI_MAX_VAR_NAME);
         }
-    } 
+    }  
 
     return BMI_SUCCESS;
 }
