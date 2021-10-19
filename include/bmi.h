@@ -77,7 +77,6 @@ typedef struct Bmi {
     int (*get_model_var_roles)(struct Bmi *self, char **roles);
     int (*get_model_var_count)(struct Bmi *self, int *count, char *role);
     int (*get_model_var_names)(struct Bmi *self, char **names, char *role);
-    // char? float? (*get_bmi_version) returns: owp-noaa
     int (*get_bmi_version)(struct Bmi *self, char *verion);      
 
     /* Variable information */
