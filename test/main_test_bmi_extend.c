@@ -34,7 +34,7 @@ main(void){
 
     // Test BMI: MODEL INFORMATION FUNCTIONS
     printf("\nTEST BMI MODEL INFORMATION FUNCTIONS\n************************************\n");
-    char name[BMI_MAX_COMPONENT_NAME];
+    //char name[BMI_MAX_COMPONENT_NAME];
     int count_in = 0;
     int count_out = 0;
     char **names_in = NULL;
@@ -98,7 +98,16 @@ main(void){
     char **names_model_var = NULL; //""
     char **names_model_var_roles = NULL;
     char **names_tmp = NULL; //loop
+    char version[BMI_MAX_VERSION_NAME];
     int j;
+
+
+        // Test get_bmi_verion()
+    {
+        status = model->get_bmi_version(model, version);
+        if (status == BMI_FAILURE) return BMI_FAILURE;
+        printf(" get_bmi_version(): %s\n", version);
+    }
     // Test get_model_var_roles()
     { 
         names_model_var_roles = (char**) malloc (sizeof(char *) * count_model_var_roles);

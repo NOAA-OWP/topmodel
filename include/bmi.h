@@ -42,8 +42,11 @@ extern "C" {
 #define BMI_MAX_TYPE_NAME (2048)
 #define BMI_MAX_COMPONENT_NAME (2048)
 #define BMI_MAX_VAR_NAME (2048)
-#define BMI_MAX_LOCATION_NAME (2048)    //OWP Custom
-#define BMI_MAX_ROLE_NAME (2048)        //OWP Custom
+// OWP Custom (3)
+#define BMI_MAX_LOCATION_NAME (2048) // TODO: Ngen should move this outside 
+                                     // bmi.h as it so not "core" bmi v2.0   
+#define BMI_MAX_ROLE_NAME (2048)
+#define BMI_MAX_VERSION_NAME (2048)       
 
 
 typedef struct Bmi {
@@ -59,8 +62,6 @@ typedef struct Bmi {
     int (*finalize)(struct Bmi *self);
 
     /* Exchange items */
-    // char? float? (*get_bmi_version) returns: owp-noaa
-
     int (*get_component_name)(struct Bmi *self, char *name);
 
     int (*get_input_item_count)(struct Bmi *self, int *count);
@@ -75,7 +76,9 @@ typedef struct Bmi {
     // TODO JG change these names
     int (*get_model_var_roles)(struct Bmi *self, char **roles);
     int (*get_model_var_count)(struct Bmi *self, int *count, char *role);
-    int (*get_model_var_names)(struct Bmi *self, char **names, char *role);      
+    int (*get_model_var_names)(struct Bmi *self, char **names, char *role);
+    // char? float? (*get_bmi_version) returns: owp-noaa
+    int (*get_bmi_version)(struct Bmi *self, char *verion);      
 
     /* Variable information */
     int (*get_var_grid)(struct Bmi *self, const char *name, int *grid);

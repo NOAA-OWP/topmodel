@@ -19,6 +19,7 @@
 //---------------------------------------------- 
 // {idx, name, type, size, role, units, grid, location}
 //----------------------------------------------
+// role is new to bmi enhancement
 // valid role options via 'model_var_roles' 
 //    "input",
 //    "output",
@@ -29,6 +30,10 @@
 //    "description",
 //    "observation",
 //    "core"
+//----------------------------------------------
+// Note only 'input' and 'output' need to follow
+// CSDMS standard names. See
+// https://csdms.colorado.edu/wiki/CSDMS_Standard_Names
 //----------------------------------------------
 Variable var_info[] = {
     //-------------------------------------
@@ -1529,6 +1534,13 @@ static int Get_component_name (Bmi *self, char * name)
 }
 
 // NEW BMI EXTENTION 
+static int Get_bmi_version (Bmi *self, char * version)
+{
+    strncpy (version, "2.0.1 NOAA-OWP", BMI_MAX_VERSION_NAME);
+    return BMI_SUCCESS;
+}
+
+// NEW BMI EXTENTION 
 static int Get_model_var_roles (Bmi *self, char ** roles)
 {
     for (int i = 0; i < VAR_ROLE_COUNT; i++) {
@@ -1917,9 +1929,10 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->finalize = Finalize;
 
         model->get_component_name = Get_component_name;
-        model->get_model_var_count = Get_model_var_count;
-        model->get_model_var_roles = Get_model_var_roles;
-        model->get_model_var_names = Get_model_var_names;
+        model->get_bmi_version = Get_bmi_version;           //OWP CUSTOM
+        model->get_model_var_count = Get_model_var_count;   //OWP CUSTOM
+        model->get_model_var_roles = Get_model_var_roles;   //OWP CUSTOM
+        model->get_model_var_names = Get_model_var_names;   //OWP CUSTOM
         model->get_input_item_count = Get_input_item_count;
         model->get_output_item_count = Get_output_item_count;
         model->get_input_var_names = Get_input_var_names;
@@ -1932,7 +1945,7 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->get_var_nbytes = Get_var_nbytes;
         model->get_var_location = Get_var_location;
 
-        model->get_var_role       = Get_var_role;
+        model->get_var_role = Get_var_role; //OWP CUSTOM
 
         model->get_current_time = Get_current_time;
         model->get_start_time = Get_start_time;
