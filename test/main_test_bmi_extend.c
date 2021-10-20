@@ -93,7 +93,7 @@ main(void){
     //int count_all = 0; //state
     int count_model_var = 0; //"all"
     int count_tmp = 0; //loop
-    int count_model_var_roles = 14;  // this is hard-coded for now
+    int count_model_var_roles = 16;  // this is hard-coded for now
     //char **names_all = NULL; //state
     char **names_model_var = NULL; //"all"
     char **names_model_var_roles = NULL;
@@ -117,7 +117,7 @@ main(void){
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf( " get_model_var_roles():\n");
         for (j=0; j<count_model_var_roles; j++)
-            printf("  %s\n", names_model_var_roles [j]);
+            printf("  %i %s\n", j, names_model_var_roles [j]);
     }
 
     for (j=0; j<count_model_var_roles; j++){

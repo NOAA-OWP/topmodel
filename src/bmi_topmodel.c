@@ -139,7 +139,7 @@ static const char *model_var_roles[] = {
     "input_from_file",
     "output_to_bmi",
     "output_to_file",
-    "array_size"
+    "array_size",
     "constant",
     "state",
     "parameter_fixed",
@@ -148,7 +148,7 @@ static const char *model_var_roles[] = {
     "option",
     "filename",
     "directory",
-    "file_offset"
+    "file_offset",
     "info_string",
     "time_info",
     "not_set"
@@ -1767,7 +1767,7 @@ static int Get_input_item_count (Bmi *self, int * count)
     // Loop thru and count vars with this role = "input"
     int input_count = 0;
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
-        if (strcmp("input", var_info[i].role) == 0) {
+        if (strcmp("input_from_bmi", var_info[i].role) == 0) {
             input_count++;
         }    
     }
@@ -1798,7 +1798,7 @@ static int Get_input_var_names (Bmi *self, char ** names)
     // now loops thru var_info struct
     int idx = -1; 
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
-        if (strcmp("input", var_info[i].role) == 0){
+        if (strcmp("input_from_bmi", var_info[i].role) == 0){
             idx++;
             strncpy (names[idx], var_info[i].name, BMI_MAX_VAR_NAME);
         }
@@ -1821,7 +1821,7 @@ static int Get_output_item_count (Bmi *self, int * count)
     // Loop thru and count vars with this role = "input"
     int output_count = 0;
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
-        if (strcmp("output", var_info[i].role) == 0) {
+        if (strcmp("output_to_bmi", var_info[i].role) == 0) {
             output_count++;
         }    
     }
@@ -1839,7 +1839,7 @@ static int Get_output_var_names (Bmi *self, char ** names)
     // now loops thru var_info struct
     int idx = -1; 
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
-        if (strcmp("output", var_info[i].role) == 0){
+        if (strcmp("output_to_bmi", var_info[i].role) == 0){
             idx++;
             strncpy (names[idx], var_info[i].name, BMI_MAX_VAR_NAME);
         }
