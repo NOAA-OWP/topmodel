@@ -48,8 +48,8 @@ Variable var_info[] = {
     //----------------------------------------------
     // String vars.  Will replace 1 w/ title_size.
     //----------------------------------------------
-    { 6,  "title",  "string", 1, "description", "none", 0, "node" },
-    { 7,  "subcat", "string", 1, "description", "none", 0, "node" },   
+    { 6,  "title",  "string", 1, "info", "none", 0, "node" },
+    { 7,  "subcat", "string", 1, "info", "none", 0, "node" },   
     //-----------------------
     // Variable definitions
     //-----------------------
@@ -57,8 +57,8 @@ Variable var_info[] = {
     { 9,  "nstep",              "int",    1, "time", "none", 0, "node" },   //inputs.dat
     { 10, "yes_print_output",   "int",    1, "option", "none", 0, "node" }, //subcat.dat
     { 11, "imap",               "int",    1, "option", "none", 0, "node" }, //subcat.dat
-    { 12, "num_channels",       "int",    1, "param", "none", 0, "node" },  //subcat.dat
-    { 13, "num_topodex_values", "int",    1, "param", "none", 0, "node" },  //subcat.dat
+    { 12, "num_channels",       "int",    1, "parameter_fixed", "none", 0, "node" },  //subcat.dat
+    { 13, "num_topodex_values", "int",    1, "parameter_fixed", "none", 0, "node" },  //subcat.dat
     { 14, "infex",              "int",    1, "option", "none", 0, "node" }, //infiltration           
     //-------------------------------------
     // Model parameters and input scalars
@@ -68,11 +68,11 @@ Variable var_info[] = {
     { 17,  "td",         "double", 1, "param", "h-1", 0, "node" }, //unsaturated zome time delay per unit storage deficit
     { 18,  "srmax",      "double", 1, "param", "m", 0, "node" },   //maximum root zone storage deficit
     { 19,  "Q0",         "double", 1, "param", "m h-1", 0, "node" }, //initial subsurface flow per unit area
-    { 20,  "sr0",        "double", 1, "param", "m", 0, "node" }, //initial root zone storage deficit
-    { 21,  "xk0",        "double", 1, "param", "m h-1", 0, "node" }, //surface soil hydraulic conductivity
-    { 22,  "hf",         "double", 1, "param", "m", 0, "node" }, //wetting front suction for G&A soln.
-    { 23,  "dth",        "double", 1, "param", "none", 0, "node" }, //water content change across the wetting front
-    { 24,  "area",       "double", 1, "param", "none", 0, "node" }, //subcat.dat
+    { 20,  "sr0",        "double", 1, "parameter_fixed", "m", 0, "node" }, //initial root zone storage deficit
+    { 21,  "xk0",        "double", 1, "parameter_fixed", "m h-1", 0, "node" }, //surface soil hydraulic conductivity
+    { 22,  "hf",         "double", 1, "parameter_fixed", "m", 0, "node" }, //wetting front suction for G&A soln.
+    { 23,  "dth",        "double", 1, "parameter_fixed", "none", 0, "node" }, //water content change across the wetting front
+    { 24,  "area",       "double", 1, "parameter_fixed", "none", 0, "node" }, //subcat.dat
     { 25,  "num_delay",  "int",    1, "param", "none", 0, "node" }, //number of time steps lag (delay) in channel within catchment to outlet 
     { 26,  "num_time_delay_hist_ords",  "int", 1, "param", "none", 0, "node"}, //number of time delay histogram ordinates */
 
@@ -130,7 +130,7 @@ Variable var_info[] = {
     { 58, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux", "double", 1, "output_to_file ", "m h-1", 0, "node" },
     { 59, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",        "double", 1, "output_to_file", "m h-1", 0, "node" },
     { 60, "land_surface_water__potential_evaporation_volume_flux",                 "double", 1, "output_to_file", "m h-1", 0, "node" },
-    { 61, "stand_alone", "int",    1, "option", "none", 0, "node" }
+    { 61, "stand_alone",                                                           "int",    1, "option", "none", 0, "node" }
     // { 62, "obs_values",      "double", 1 },    
     // { 63, "double_arr_test", "double", 3 }             
 };
@@ -148,7 +148,7 @@ static const char *model_var_roles[] = {
     "tracking",
     "option",
     "filename",
-    "description",
+    "info",
     //"observation",
     "time"
 };
