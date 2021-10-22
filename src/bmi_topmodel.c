@@ -104,10 +104,10 @@ Variable var_info[] = {
     //---------------------- 
     // Other internal vars
     //----------------------
-    { 45,  "num_sub_catchments",       "int", 1, "array_size", "none", 0, "node" }, //subcat.dat
-    { 46,  "max_atb_increments",       "int", 1, "array_size", "none", 0, "node" },
-    { 47,  "max_num_subcatchments",    "int", 1, "array_size", "none", 0, "node" },
-    { 48,  "max_time_delay_ordinates", "int", 1, "array_size", "none", 0, "node" },
+    { 45,  "num_sub_catchments",       "int", 1, "array_length", "none", 0, "node" }, //subcat.dat
+    { 46,  "max_atb_increments",       "int", 1, "array_length", "none", 0, "node" },
+    { 47,  "max_num_subcatchments",    "int", 1, "array_length", "none", 0, "node" },
+    { 48,  "max_time_delay_ordinates", "int", 1, "array_length", "none", 0, "node" },
     { 49,  "Qout",                     "double", 1, "state", "m h-1", 0, "node" }, // Output var  //runoff at timestep further converted using width func
     //---------------------- 
     // BMI vars
@@ -116,17 +116,17 @@ Variable var_info[] = {
     //-----------------
     // State var sums
     //-----------------
-    { 51,  "land_surface_water__domain_time_integral_of_precipitation_volume_flux", "double", 1, "output_to_file", "m", 0, "node" },
-    { 52,  "land_surface_water__domain_time_integral_of_evaporation_volume_flux",   "double", 1, "output_to_file", "m", 0, "node" },
-    { 53,  "land_surface_water__domain_time_integral_of_runoff_volume_flux",        "double", 1, "output_to_file", "m", 0, "node" },
-    { 54,  "soil_water__domain_root-zone_volume_deficit",                           "double", 1, "output_to_file", "m", 0, "node" },
-    { 55,  "soil_water__domain_unsaturated-zone_volume",                            "double", 1, "output_to_file", "m", 0, "node" },
+    { 51,  "land_surface_water__domain_time_integral_of_precipitation_volume_flux", "double", 1, "diagnostic", "m", 0, "node" },
+    { 52,  "land_surface_water__domain_time_integral_of_evaporation_volume_flux",   "double", 1, "diagnostic", "m", 0, "node" },
+    { 53,  "land_surface_water__domain_time_integral_of_runoff_volume_flux",        "double", 1, "diagnostic", "m", 0, "node" },
+    { 54,  "soil_water__domain_root-zone_volume_deficit",                           "double", 1, "diagnostic", "m", 0, "node" },
+    { 55,  "soil_water__domain_unsaturated-zone_volume",                            "double", 1, "diagnostic", "m", 0, "node" },
     //----------------------    
     // External/forcing vars
     //----------------------
     { 56, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",             "double", 1, "output_to_file", "m", 0, "node" },
     { 57, "land_surface_water__baseflow_volume_flux",                              "double", 1, "output_to_file", "m", 0, "node" },
-    { 58, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux", "double", 1, "output_to_file ", "m h-1", 0, "node" },
+    { 58, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux", "double", 1, "output_to_file", "m h-1", 0, "node" },
     { 59, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",        "double", 1, "output_to_file", "m h-1", 0, "node" },
     { 60, "land_surface_water__potential_evaporation_volume_flux",                 "double", 1, "output_to_file", "m h-1", 0, "node" },
     { 61, "stand_alone",                                                           "int",    1, "option", "none", 0, "node" }
@@ -135,23 +135,23 @@ Variable var_info[] = {
 };
 
 static const char *model_var_roles[] = {
-    "input_from_bmi",
-    "input_from_file",
-    "output_to_bmi",
-    "output_to_file",
-    "array_size",
+    "array_length",
     "constant",
-    "state",
-    "parameter_fixed",
-    "parameter_adjustable",
-    //"tracking",
-    "option",
-    "filename",
+    "diagnostic",
     "directory",
+    "filename",
     "file_offset",
     "info_string",
-    "time_info",
-    "not_set"
+    "input_from_bmi",
+    "input_from_file",
+    "not_set",
+    "option",
+    "output_to_bmi",
+    "output_to_file",
+    "parameter_fixed",
+    "parameter_adjustable",
+    "state",
+    "time_info"
 };
 
 // These replace hard-coded #DEFINE so you don't have to keep updating, yey
@@ -902,16 +902,21 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     // Use CSDMS standard names ONLY when role is INPUT or OUPUT
 
     //-------------------------------------
-    // OUTPUT TO BMI - CSDMS Standard Names    
+    // OUTPUT_TO_BMI - CSDMS Standard Names    
     //-------------------------------------
-    // Qout
-    if (strcmp (name, "Qout") == 0) {
-        *dest = (void*)&topmodel-> Qout;
+    // Q[it]
+    if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
+        *dest = (void*)&topmodel-> Q[1];
+        return BMI_SUCCESS;
+    }
+    // sbar
+    if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
+        *dest = (void*)&topmodel-> sbar;
         return BMI_SUCCESS;
     }
 
     //-------------------------------------
-    //           OUTPUT TO FILE    
+    //           OUTPUT_TO_FILE    
     //-------------------------------------
     // p
     if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
@@ -923,11 +928,6 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> ep;
         return BMI_SUCCESS;
     }
-    // Q[it]
-    if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
-        *dest = (void*)&topmodel-> Q[1];
-        return BMI_SUCCESS;
-    }
     // quz
     if (strcmp (name, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux") == 0) {
         *dest = (void*)&topmodel-> quz;
@@ -936,11 +936,6 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     // qb
     if (strcmp (name, "land_surface_water__baseflow_volume_flux") == 0) {
         *dest = (void*)&topmodel-> qb;
-        return BMI_SUCCESS;
-    }
-    // sbar
-    if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
-        *dest = (void*)&topmodel-> sbar;
         return BMI_SUCCESS;
     }
     // qof
@@ -979,7 +974,7 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     }
 
     //-------------------------------------
-    // INPUT FROM BMI - CSDMS Standard Names    
+    // INPUT_FROM_BMI - CSDMS Standard Names    
     //-------------------------------------
     // STANDALONE Note: 
     //      When TRUE/1 there are no bmi inputs being passed
@@ -997,7 +992,24 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     }
 
     //-------------------------------------
-    //              FILENAME
+    //           INPUT_FROM_FILE    
+    //-------------------------------------
+    if (strcmp (name, "Qobs") == 0) {
+        *dest = (void*)&topmodel->Qobs[1];
+        return BMI_SUCCESS;
+    }
+
+    //-------------------------------------
+    //                STATE    
+    //-------------------------------------
+    // Qout
+    if (strcmp (name, "Qout") == 0) {
+        *dest = (void*)&topmodel-> Qout;
+        return BMI_SUCCESS;
+    }
+
+    //-------------------------------------
+    //              FILE_OFFSET
     //-------------------------------------
     if (strcmp (name, "control_fptr") == 0) {
         *dest = (void*)&topmodel-> control_fptr;
@@ -1025,7 +1037,7 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     }
 
     //-------------------------------------
-    //             DESCRIPTION
+    //             INFO_STRING
     //-------------------------------------
     if (strcmp (name, "title") == 0) {
         //*dest = (void*)&topmodel-> title;
@@ -1034,10 +1046,10 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         memcpy(&topmodel-> title, dest, 256);
         return BMI_SUCCESS;
     }
-/*    if (strcmp (name, "subcat") == 0) {
+    if (strcmp (name, "subcat") == 0) {
         *dest = (void*)&topmodel-> subcat;
         return BMI_SUCCESS;
-    }  */  
+    }    
 
 
     return BMI_FAILURE;

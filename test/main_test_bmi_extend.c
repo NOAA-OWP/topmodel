@@ -93,7 +93,7 @@ main(void){
     //int count_all = 0; //state
     int count_model_var = 0; //"all"
     int count_tmp = 0; //loop
-    int count_model_var_roles = 16;  // this is hard-coded for now
+    int count_model_var_roles = 17;  // this is hard-coded for now
     //char **names_all = NULL; //state
     char **names_model_var = NULL; //"all"
     char **names_model_var_roles = NULL;
@@ -117,7 +117,7 @@ main(void){
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf( " get_model_var_roles():\n");
         for (j=0; j<count_model_var_roles; j++)
-            printf("  %i %s\n", j, names_model_var_roles [j]);
+            printf("  %i %s\n",j, names_model_var_roles [j]);
     }
 
     for (j=0; j<count_model_var_roles; j++){
@@ -218,7 +218,7 @@ main(void){
     char role[BMI_MAX_ROLE_NAME];
 
     // Loop through some variables and call get_var_*()
-    for (i=28; i<37; i++){
+    for (i=37; i<37; i++){
         const char *var_name = names_model_var[i];
         printf( " %s\n", var_name);
         // Test get_var_grid()
@@ -562,7 +562,42 @@ main(void){
                 //free(var);
             }
         }
+
     }
+
+/*        // input_from_file
+        for (i=0; i<6; i++){
+            const char *var_name = names_model_var[i];
+            //printf( "  %s\n", var_name);
+            //int len = 1;
+            double *var = NULL;
+            //int inds = 0;
+            //double *dest = NULL;
+            // Test get_value() at each timestep
+            {
+                var = (double*) malloc (sizeof (double)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("   get value: %f\n", var[0]);
+                free(var);
+
+            }
+            // Test get_value_at_indices()
+            { 
+                dest = (double*) malloc (sizeof (double)*len);
+                status = model->get_value_at_indices(model, var_name, dest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("   get value at indices: %f\n",dest[0]);
+                free(dest);
+            }
+            // Test get_value_ptr()
+            {
+                status = model->get_value_ptr(model, var_name, (void**)(&var));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf("   get_value_ptr(%s): %f\n",var_name,var);
+                //free(var);
+            }
+        }*/
     //free(names_model_var);
     
     // Test BMI: CONTROL FUNCTION update_until()
