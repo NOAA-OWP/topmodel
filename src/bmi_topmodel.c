@@ -7,8 +7,8 @@
 //#define OUTPUT_VAR_NAME_COUNT 14
 //#define INPUT_VAR_NAME_COUNT 2
 #define STATE_VAR_NAME_COUNT 62   // must match var_info array size
-//#define VAR_NAME_COUNT 62   // NEW BMI EXTENTION 
-//#define VAR_ROLE_COUNT 9   // NEW BMI EXTENTION 
+//#define VAR_NAME_COUNT 62   // NEW BMI EXTENSION 
+//#define VAR_ROLE_COUNT 9   // NEW BMI EXTENSION 
 
 //----------------------------------------------
 // Put variable info into a struct to simplify
@@ -683,7 +683,7 @@ static int Get_var_type (Bmi *self, const char *name, char * type)
         }
     }*/
 
-    // NEW BMI EXTENTION
+    // NEW BMI EXTENSION
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
             strncpy(type, var_info[i].type, BMI_MAX_TYPE_NAME);
@@ -715,7 +715,7 @@ static int Get_var_grid(Bmi *self, const char *name, int *grid)
         }
     }*/
     
-    // NEW BMI EXTENTION
+    // NEW BMI EXTENSION
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
             *grid = var_info[i].grid;
@@ -736,7 +736,7 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         return BMI_FAILURE;
     }
 
-    // NEW BMI EXTENTION
+    // NEW BMI EXTENSION
     if ((strcmp (type, "double") == 0) | (strcmp (type, "double*") == 0)) {
         *size = sizeof(double);
         return BMI_SUCCESS;
@@ -757,7 +757,7 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         *size = sizeof(long);
         return BMI_SUCCESS;
     }
-    // NEW BMI EXTENTION
+    // NEW BMI EXTENSION
     // TODO: This returns sizeof 1.  NEEDS UPDATING
     else if ((strcmp (type, "FILE") == 0) | (strcmp (type, "string") == 0)) {
         *size = sizeof(char);
@@ -789,7 +789,7 @@ static int Get_var_location (Bmi *self, const char *name, char * location)
         }
     }*/
 
-    // NEW BMI EXTENTION
+    // NEW BMI EXTENSION
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
             strncpy(location, var_info[i].location, BMI_MAX_LOCATION_NAME);
@@ -821,7 +821,7 @@ static int Get_var_units (Bmi *self, const char *name, char * units)
         }
     }*/
 
-    // NEW BMI EXTENTION
+    // NEW BMI EXTENSION
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
             strncpy(units, var_info[i].units, BMI_MAX_UNITS_NAME);
@@ -861,7 +861,7 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
     if (item_count < 1)
         item_count = ((topmodel_model *) self->data)->nstep;*/
 
-    // NEW BMI EXTENTION
+    // NEW BMI EXTENSION
     int item_count;
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
@@ -899,50 +899,21 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     topmodel_model *topmodel;
     topmodel = (topmodel_model *) self->data;
 
-    // Use CSDMS standard names ONLY when role is INPUT or OUPUT
+    // Use CSDMS standard names ONLY when role is 
+    // INPUT_TO_BMI or OUPUT_TO_BMI
 
     //-------------------------------------
-    // OUTPUT_TO_BMI - CSDMS Standard Names    
+    //             ARRAY_LENGTH
     //-------------------------------------
-    // Q[it]
-    if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
-        *dest = (void*)&topmodel-> Q[1];
-        return BMI_SUCCESS;
-    }
-    // sbar
-    if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
-        *dest = (void*)&topmodel-> sbar;
-        return BMI_SUCCESS;
-    }
+    /*  0 num_sub_catchments
+      1 max_atb_increments
+      2 max_num_subcatchments
+      3 max_time_delay_ordinates
+    */
 
     //-------------------------------------
-    //           OUTPUT_TO_FILE    
+    //             DIAGNOSTIC
     //-------------------------------------
-    // p
-    if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
-        *dest = (void*)&topmodel-> p;
-        return BMI_SUCCESS;
-    // ep    
-    }
-    if (strcmp (name, "land_surface_water__potential_evaporation_volume_flux") == 0) {
-        *dest = (void*)&topmodel-> ep;
-        return BMI_SUCCESS;
-    }
-    // quz
-    if (strcmp (name, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux") == 0) {
-        *dest = (void*)&topmodel-> quz;
-        return BMI_SUCCESS;
-    }
-    // qb
-    if (strcmp (name, "land_surface_water__baseflow_volume_flux") == 0) {
-        *dest = (void*)&topmodel-> qb;
-        return BMI_SUCCESS;
-    }
-    // qof
-    if (strcmp (name, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux") == 0) {
-        *dest = (void*)&topmodel-> qof;
-        return BMI_SUCCESS;
-    }
     // sump
     if (strcmp (name, "land_surface_water__domain_time_integral_of_precipitation_volume_flux") == 0) {
         *dest = (void*)&topmodel-> sump;
@@ -965,46 +936,6 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     // sumuz
     if (strcmp (name, "soil_water__domain_unsaturated-zone_volume") == 0) {
         *dest = (void*)&topmodel-> sumuz;
-        return BMI_SUCCESS;
-    }
-    // bal
-    if (strcmp (name, "land_surface_water__water_balance_volume") == 0) {
-        *dest = (void*)&topmodel-> bal;
-        return BMI_SUCCESS;
-    }
-
-    //-------------------------------------
-    // INPUT_FROM_BMI - CSDMS Standard Names    
-    //-------------------------------------
-    // STANDALONE Note: 
-    //      When TRUE/1 there are no bmi inputs being passed
-    //      defs here speak to "scalar"  
-    //      TODO: add logic to only apply these defs for framework runs 
-    if (strcmp (name, "water_potential_evaporation_flux") == 0) {
-        *dest = (void*)&topmodel-> pe[1];
-        //*dest = (void*)(topmodel->pe + topmodel->current_time_step);
-        return BMI_SUCCESS;
-    }
-
-    if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
-        *dest = (void*)&topmodel->rain[1];
-        return BMI_SUCCESS;
-    }
-
-    //-------------------------------------
-    //           INPUT_FROM_FILE    
-    //-------------------------------------
-    if (strcmp (name, "Qobs") == 0) {
-        *dest = (void*)&topmodel->Qobs[1];
-        return BMI_SUCCESS;
-    }
-
-    //-------------------------------------
-    //                STATE    
-    //-------------------------------------
-    // Qout
-    if (strcmp (name, "Qout") == 0) {
-        *dest = (void*)&topmodel-> Qout;
         return BMI_SUCCESS;
     }
 
@@ -1049,8 +980,142 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     if (strcmp (name, "subcat") == 0) {
         *dest = (void*)&topmodel-> subcat;
         return BMI_SUCCESS;
-    }    
+    }
 
+    //-------------------------------------
+    // INPUT_FROM_BMI - CSDMS Standard Names    
+    //-------------------------------------
+    // STANDALONE Note: 
+    //      When TRUE/1 there are no bmi inputs being passed
+    //      defs here speak to "scalar"  
+    //      TODO: add logic to only apply these defs for framework runs 
+    if (strcmp (name, "water_potential_evaporation_flux") == 0) {
+        *dest = (void*)&topmodel-> pe[1];
+        //*dest = (void*)(topmodel->pe + topmodel->current_time_step);
+        return BMI_SUCCESS;
+    }
+
+    if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
+        *dest = (void*)&topmodel->rain[1];
+        return BMI_SUCCESS;
+    }
+
+    //-------------------------------------
+    //           INPUT_FROM_FILE    
+    //-------------------------------------
+    if (strcmp (name, "Qobs") == 0) {
+        *dest = (void*)&topmodel->Qobs[1];
+        return BMI_SUCCESS;
+    }
+
+    //-------------------------------------
+    //              OPTION    
+    //-------------------------------------
+
+    /*  0 yes_print_output
+      1 imap
+      2 infex
+      3 stand_alone*/
+
+    //-------------------------------------
+    // OUTPUT_TO_BMI - CSDMS Standard Names    
+    //-------------------------------------
+    // Q[it]
+    if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
+        *dest = (void*)&topmodel-> Q[1];
+        return BMI_SUCCESS;
+    }
+    // sbar
+    if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
+        *dest = (void*)&topmodel-> sbar;
+        return BMI_SUCCESS;
+    }
+
+    //-------------------------------------
+    //           OUTPUT_TO_FILE    
+    //-------------------------------------
+    // p
+    if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> p;
+        return BMI_SUCCESS;
+    // ep    
+    }
+    if (strcmp (name, "land_surface_water__potential_evaporation_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> ep;
+        return BMI_SUCCESS;
+    }
+    // quz
+    if (strcmp (name, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> quz;
+        return BMI_SUCCESS;
+    }
+    // qb
+    if (strcmp (name, "land_surface_water__baseflow_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> qb;
+        return BMI_SUCCESS;
+    }
+    // qof
+    if (strcmp (name, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> qof;
+        return BMI_SUCCESS;
+    }
+    // bal
+    if (strcmp (name, "land_surface_water__water_balance_volume") == 0) {
+        *dest = (void*)&topmodel-> bal;
+        return BMI_SUCCESS;
+    }
+
+    //-------------------------------------
+    //            PARAMETER_FIXED    
+    //-------------------------------------
+    /*  0 num_channels
+      1 num_topodex_values
+      2 t0
+      3 area
+      4 num_delay
+      5 num_time_delay_histo_ords
+      6 szq
+      7 tl
+      8 time_delay_histogram
+      9 dist_area_lnaotb
+      10 lnaotb
+      11 cum_dist_area_with_dist
+      12 dist_from_outlet*/
+
+    //-------------------------------------
+    //         PARAMETER_ADJUSTABLE    
+    //-------------------------------------
+    /*  0 szm
+      1 td
+      2 srmax
+      3 xk0
+      4 hf
+      5 dth*/
+
+    //-------------------------------------
+    //                STATE    
+    //-------------------------------------
+    // Qout
+    if (strcmp (name, "Qout") == 0) {
+        *dest = (void*)&topmodel-> Qout;
+        return BMI_SUCCESS;
+    }
+    /*  0 Q0
+      1 sr0
+      2 contrib_area
+      3 stor_unsat_zone
+      4 deficit_root_zone
+      5 deficit_local
+      6 Qout
+*/
+
+    //-------------------------------------
+    //              TIME_INFO    
+    //-------------------------------------
+/*  0 dt
+  1 nstep
+  2 current_time_step
+*/
 
     return BMI_FAILURE;
 }
@@ -1606,14 +1671,14 @@ static int Get_component_name (Bmi *self, char * name)
     return BMI_SUCCESS;
 }
 
-// NEW BMI EXTENTION 
+// NEW BMI EXTENSION 
 static int Get_bmi_version (Bmi *self, char * version)
 {
     strncpy (version, "2.0.1 NOAA-OWP", BMI_MAX_VERSION_NAME);
     return BMI_SUCCESS;
 }
 
-// NEW BMI EXTENTION 
+// NEW BMI EXTENSION 
 static int Get_model_var_roles (Bmi *self, char ** roles)
 {
     for (int i = 0; i < VAR_ROLE_COUNT; i++) {
@@ -1796,7 +1861,7 @@ static int Get_input_var_names (Bmi *self, char ** names)
     }
     return BMI_SUCCESS;*/
 
-    // NEW BMI EXTENTION - this uses new get_model_var
+    // NEW BMI EXTENSION - this uses new get_model_var
 /*    char * input_names;
     int input_names_result = Get_model_var_names(self, &&input_names, "input");
     if (input_names_result != BMI_SUCCESS) {
