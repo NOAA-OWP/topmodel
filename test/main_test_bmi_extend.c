@@ -494,14 +494,14 @@ main(void){
         //for (i=0; i<count_model_var; i++){
         
         // FILENAME
-        for (i=0; i<6; i++){
+/*        for (i=0; i<6; i++){
             const char *var_name = names_model_var[i];
             //printf( "  %s\n", var_name);
             //int len = 1;
             double *var = NULL;
             //int inds = 0;
             //double *dest = NULL;
-/*            // Test get_value() at each timestep
+            // Test get_value() at each timestep
             {
                 var = (double*) malloc (sizeof (double)*len);
                 status = model->get_value(model, var_name, var);
@@ -517,7 +517,7 @@ main(void){
                 if (status == BMI_FAILURE) return BMI_FAILURE;
                 printf("   get value at indices: %f\n",dest[0]);
                 free(dest);
-            }*/
+            }
             // Test get_value_ptr()
             {
                 status = model->get_value_ptr(model, var_name, (void**)(&var));
@@ -525,18 +525,18 @@ main(void){
                 printf("   get_value_ptr(%s): %f\n",var_name,var);
                 //free(var);
             }
-        }
+        }*/
 
-        // DESCRIPTION   
-        // NOT WORKING 
-        for (i=6; i<7; i++){
+        // info_string  
+        for (i=6; i<8; i++){
             const char *var_name = names_model_var[i];
             //printf( "  %s\n", var_name);
             //int len = 1;
             //double *var = NULL;
             //int inds = 0;
-            //double *dest = NULL;
-            char var[BMI_MAX_COMPONENT_NAME];
+            void *dest = NULL;
+            //char this_title[BMI_MAX_COMPONENT_NAME];
+            char *this_title;
 /*            // Test get_value() at each timestep
             {
                 var = (double*) malloc (sizeof (double)*len);
@@ -556,10 +556,12 @@ main(void){
             }*/
             // Test get_value_ptr()
             {
-                status = model->get_value_ptr(model, var_name, (void**)(&var));
+                status = model->get_value_ptr(model, var_name, &dest);
+                this_title = (char*) dest;
+                //printf("THIS TITLE: %s\n", this_title);
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf("   get_value_ptr(%s): %s\n",var_name,&var);
-                //free(var);
+                printf("   get_value_ptr(%s): %s",var_name,this_title);
+                //free(dest);
             }
         }
 

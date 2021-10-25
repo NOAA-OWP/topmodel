@@ -971,14 +971,11 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //             INFO_STRING
     //-------------------------------------
     if (strcmp (name, "title") == 0) {
-        //*dest = (void*)&topmodel-> title;
-        //strncpy(dest, (void*)&topmodel-> title, BMI_MAX_ROLE_NAME);
-        //memcpy(&state->title, src, size);
-        memcpy(&topmodel-> title, dest, 256);
+        *dest = (void*)(topmodel-> title);
         return BMI_SUCCESS;
     }
     if (strcmp (name, "subcat") == 0) {
-        *dest = (void*)&topmodel-> subcat;
+        *dest = (void*)topmodel-> subcat;
         return BMI_SUCCESS;
     }
 
