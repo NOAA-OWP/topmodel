@@ -266,9 +266,9 @@ main(void){
 
     // Test BMI: GET VALUE FUNCTIONS
     printf("\nTEST BMI GETTER SETTER FUNCTIONS\n********************************\n"); 
-    int test_nstep=1;
+    int test_nstep=10;
     double now;
-    //printf(" updating... timesteps in test loop: %i\n", test_nstep);
+    printf(" updating... timesteps in test loop: %i\n", test_nstep);
     
     for (int n=1;n<=test_nstep;n++) // shorter time loop for testing
     {
@@ -277,89 +277,303 @@ main(void){
             status = model->update(model);
             if (status == BMI_FAILURE) return BMI_FAILURE;
         }
-
-        // Print current time step - function already tested
-        model->get_current_time(model, &now);
-        //printf("\n current time: %f\n", now);
-        
-        // Loop through both all variables and call get/set_value_*()
-        for (i=0; i<count_model_var; i++){
-
-            const char *var_name = names_model_var[i]; //this is all of them
-    
-            // The return setup will depend on role
-            model->get_var_role(model, var_name, role);
-
-            //-------------------------------------
-            //             DIAGNOSTIC
-            //-------------------------------------
-            if (strcmp(role,"diagnostic") == 0){
-                double *var = NULL;
-                // Test get_value_ptr()
-                {
-                    status = model->get_value_ptr(model, var_name, (void**)(&var));
-                    if (status == BMI_FAILURE)return BMI_FAILURE;
-                    printf(" get_value_ptr(%s): %f\n",var_name,var);
-                }
-            }     
-
-            //-------------------------------------
-            //             INFO_STRING
-            //-------------------------------------
-            if (strcmp(role,"info_string") == 0){
-                void *dest = NULL;
-                char *this_info;
-                // Test get_value_ptr()
-                {
-                    status = model->get_value_ptr(model, var_name, &dest);
-                    this_info = (char*) dest;
-                    if (status == BMI_FAILURE)return BMI_FAILURE;
-                    printf(" get_value_ptr(%s): %s",var_name,this_info);
-                    //free(dest);
-                }
-            }    
-
-            //-------------------------------------
-            //             FILE_OFFSET
-            //-------------------------------------
-            if (strcmp(role,"file_offset") == 0){
-                void *var = NULL;
-                // Test get_value_ptr()
-                {
-                    status = model->get_value_ptr(model, var_name, (void**)(&var));
-                    if (status == BMI_FAILURE)return BMI_FAILURE;
-                    printf(" get_value_ptr(%s): %f\n",var_name,var);
-                    //free(var);
-                }
-            }
-            //-------------------------------------
-            //           INPUT_FROM_FILE    
-            //-------------------------------------
-            if (strcmp(role,"input_from_file") == 0){
-                double *var = NULL;
-                // Test get_value_ptr()
-                {
-                    status = model->get_value_ptr(model, var_name, (void**)(&var));
-                    if (status == BMI_FAILURE)return BMI_FAILURE;
-                    printf(" get_value_ptr(%s): %f\n",var_name,var);
-                }
-            }
-            //-------------------------------------
-            //              OPTION    
-            //-------------------------------------
-            if (strcmp(role,"option") == 0){
-                void *var = NULL;
-                int *this_option;
-                // Test get_value_ptr()
-                {
-                    status = model->get_value_ptr(model, var_name, (&var));
-                    this_option = (int*) var;
-                    if (status == BMI_FAILURE)return BMI_FAILURE;
-                    printf(" get_value_ptr(%s): %f\n",var_name,this_option);
-                }
-            }   
-        }
     }
+
+    // Print current time step - function already tested
+    model->get_current_time(model, &now);
+    printf("\n current time: %f\n\n", now);
+    
+    // Loop through both all variables and call get/set_value_*()
+    for (i=0; i<count_model_var; i++){
+
+        const char *var_name = names_model_var[i]; //this is all of them
+        //printf( "  %s\n", var_name);
+        int len = 1;
+        int inds = 0;
+        //double *dest = NULL;
+
+        // The return setup will depend on role
+        model->get_var_role(model, var_name, role);
+
+
+
+        //-------------------------------------
+        //      ARRAY_LENGTH  &  OPTION
+        //-------------------------------------
+        if (strcmp(role,"array_length") == 0 | strcmp(role,"option") == 0){
+            // Test get_value()
+            {
+                int *var;
+                var = malloc (sizeof (int)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf(" [%i] get_value(%s): %i\n",i,var_name, var[0]);
+                free(var);
+
+            }
+            // Test get_value_ptr()
+            {
+                int *var_ptr;
+                status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %i\n",i,var_name,*var_ptr);
+            }
+            printf("\n");
+        } 
+
+        //-------------------------------------
+        //             DIAGNOSTIC
+        //-------------------------------------
+        if (strcmp(role,"diagnostic") == 0){
+            // Test get_value()
+            {
+                double *var;
+                var = malloc (sizeof (double)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf(" [%i] get_value(%s): %f\n",i,var_name, var[0]);
+                free(var);
+
+            }
+            // Test get_value_ptr()
+            {
+                double *var_ptr;
+                status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+            }
+            printf("\n");
+        }     
+
+        //-------------------------------------
+        //             INFO_STRING
+        //-------------------------------------
+        if (strcmp(role,"info_string") == 0){
+            // Test get_value()
+            {
+                char *var_info[BMI_MAX_VAR_NAME];
+                status = model->get_value(model, var_name, &var_info);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf(" [%i] get_value(%s): %s\n",i,var_name, var_info);
+
+            }
+            // Test get_value_ptr()
+            {
+                char *info; // = NULL;
+                status = model->get_value_ptr(model, var_name, (void**)(&info));
+                //this_info = (char*) dest;
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %s",i,var_name,info);
+
+            }
+            printf("\n");
+        }
+
+        //-------------------------------------
+        //  INPUT_FROM_FILE & INPUT_FROM_BMI   
+        //-------------------------------------
+        if (strcmp(role,"input_from_file") == 0 | strcmp(role,"input_from_bmi") == 0){
+            //printf( "  [%i] %s\n", i, var_name);
+            // Test get_value()
+            {
+                double *var;
+                var = malloc (sizeof (double)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf(" [%i] get_value(%s): %f\n",i,var_name, var[0]);
+                free(var);
+
+            }
+            // Test get_value_ptr()
+            {
+                double *var_ptr;
+                status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+            }
+            printf("\n");
+        }    
+        
+        //-------------------------------------
+        //  OUTPUT_TO_FILE & OUTPUT_TO_BMI   
+        //-------------------------------------
+        if (strcmp(role,"output_to_file") == 0 | strcmp(role,"output_to_bmi") == 0){
+            // Test get_value()
+            {
+                double *var;
+                var = malloc (sizeof (double)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf(" [%i] get_value(%s): %f\n",i,var_name,var[0]);
+                free(var);
+
+            }            
+            // Test get_value_ptr()
+            {
+                double *var_ptr;
+                status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+            }
+            printf("\n");
+        } 
+        
+        //-------------------------------------
+        //             FILE_OFFSET
+        //-------------------------------------
+        if (strcmp(role,"file_offset") == 0){
+            // Test get_value_ptr()
+            {
+                double *fptr;
+                status = model->get_value_ptr(model, var_name, (void**)(&fptr));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,*fptr);
+                //printf(" [%i] get_value_ptr(%s): BMI SUCCESS\n", i, var_name);
+            }
+            printf("\n");
+        }
+        
+        //-------------------------------------
+        //         PARAMETER_ADJUSTABLE    
+        //-------------------------------------
+        if (strcmp(role,"parameter_adjustable") == 0){
+            // Test get_value()
+            {
+                double *var;
+                var = malloc (sizeof (double)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf(" [%i] get_value(%s): %f\n",i,var_name, var[0]);
+                free(var);
+
+            }
+            // Test get_value_ptr()
+            {
+                double *var_ptr;
+                status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+            }
+            printf("\n");
+        }
+
+        //-------------------------------------
+        //         PARAMETER_FIXED    
+        //-------------------------------------
+        if (strcmp(role,"parameter_fixed") == 0){
+            // Test get_value()
+            {
+                //this is a cheat - these vars are type int
+                if ((i==12) | (i==13)){
+                    int *iparam;
+                    iparam = malloc (sizeof (int)*len);
+
+                    status = model->get_value(model, var_name, iparam);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf(" [%i] get_value(%s): %i\n",i,var_name, iparam[0]);                    
+                    free(iparam);
+                } 
+                else {
+                    double *dparam;
+                    dparam = malloc (sizeof (double)*len);
+
+                    status = model->get_value(model, var_name, dparam);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf(" [%i] get_value(%s): %f\n",i,var_name, dparam[0]);                    
+                    free(dparam);                    
+                }   
+
+            }
+            // Test get_value_ptr()
+            {
+                //this is a cheat - these vars are type int
+                if ((i==12) | (i==13)){
+                    int *param_ptr0;
+                    status = model->get_value_ptr(model, var_name, (void**)(&param_ptr0));
+                    if (status == BMI_FAILURE)return BMI_FAILURE; 
+                    printf(" [%i] get_value_ptr(%s): %i\n",i,var_name,*param_ptr0);
+                }
+                else {
+                    double *param_ptr1;
+                    status = model->get_value_ptr(model, var_name, (void**)(&param_ptr1));
+                    if (status == BMI_FAILURE)return BMI_FAILURE; 
+                    printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,param_ptr1);
+                }
+            }
+            printf("\n");
+        } 
+        
+        //-------------------------------------
+        //               STATE   
+        //-------------------------------------
+        if (strcmp(role,"state") == 0){
+            // Test get_value()
+            {
+                double *var;
+                var = malloc (sizeof (double)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf(" [%i] get_value(%s): %f\n",i,var_name,var[0]);
+                free(var);
+
+            }            
+            // Test get_value_ptr()
+            {
+                double *var_ptr;
+                status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
+                if (status == BMI_FAILURE)return BMI_FAILURE;
+                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+            }
+            printf("\n");
+        }
+
+        //-------------------------------------
+        //             TIME_INFO    
+        //-------------------------------------
+        if (strcmp(role,"time_info") == 0){
+            // Test get_value()
+            {
+                //this is a cheat - dt type double
+                if (i==8){
+                    double *dt;
+                    dt = malloc (sizeof (double)*len);
+
+                    status = model->get_value(model, var_name, dt);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf(" [%i] get_value(%s): %f\n",i,var_name, dt[0]);                    
+                    free(dt);
+                } 
+                else {
+                    int *itime;
+                    itime = malloc (sizeof (int)*len);
+
+                    status = model->get_value(model, var_name, itime);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf(" [%i] get_value(%s): %i\n",i,var_name, itime[0]);                    
+                    free(itime);                    
+                }   
+
+            }
+            // Test get_value_ptr()
+            {
+                //dt type double
+                if (i ==8){
+                    double *dt_ptr;
+                    status = model->get_value_ptr(model, var_name, (void**)(&dt_ptr));
+                    if (status == BMI_FAILURE)return BMI_FAILURE; 
+                    printf(" [%i] get_value_ptr(%s): %f\n",i,var_name, *dt_ptr);
+                }
+                else {
+                    int *itime_ptr;
+                    status = model->get_value_ptr(model, var_name, (void**)(&itime_ptr));
+                    if (status == BMI_FAILURE)return BMI_FAILURE; 
+                    printf(" [%i] get_value_ptr(%s): %i\n",i,var_name,*itime_ptr);
+                }
+            }
+            printf("\n");
+        }     
+    }
+
 
 
     //free(names_model_var);
@@ -377,10 +591,10 @@ main(void){
     }*/
     // Test BMI: CONTROL FUNCTION finalize()
     {
-        printf("\n finalizing...\n");
+        printf(" finalizing...\n\n");
         status = model->finalize(model);
         if (status == BMI_FAILURE) return BMI_FAILURE;
-        printf("\n******************\nEND BMI UNIT TEST\n\n");
+        //printf("\n******************\nEND BMI UNIT TEST\n\n");
     }
     return 0;
 }

@@ -402,7 +402,7 @@ int init_config(const char* config_file, topmodel_model* model)
         
         /* Set nstep and dt*/
         model->nstep = 1;
-        model->dt = 1;
+        model->dt = 1.0;
 
         /* allocate memory for "arrays" */
         d_alloc(&model->rain,model->nstep);
@@ -911,11 +911,25 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
       3 max_time_delay_ordinates
     */
 
+    if (strcmp (name, "num_sub_catchments") == 0) {
+        *dest = (void*)&topmodel->num_sub_catchments;
+    }
+    else if (strcmp (name, "max_atb_increments") == 0) {
+        *dest = (void*)&topmodel->max_atb_increments;
+    }
+    else if (strcmp (name, "max_num_subcatchments") == 0) {
+        *dest = (void*)&topmodel->max_num_subcatchments;
+    }
+    else if (strcmp (name, "max_time_delay_ordinates") == 0) {
+        *dest = (void*)&topmodel->max_time_delay_ordinates;
+    }
+
+
     //-------------------------------------
     //             DIAGNOSTIC
     //-------------------------------------
     // sump
-    if (strcmp (name, "land_surface_water__domain_time_integral_of_precipitation_volume_flux") == 0) {
+    else if (strcmp (name, "land_surface_water__domain_time_integral_of_precipitation_volume_flux") == 0) {
         *dest = (void*)&topmodel-> sump;
     }
     // sumae
@@ -938,7 +952,7 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //              FILE_OFFSET
     //-------------------------------------
     else if (strcmp (name, "control_fptr") == 0) {
-        *dest = (void*)&topmodel-> control_fptr;
+        *dest = (void*)topmodel-> control_fptr;
     }
     else if (strcmp (name, "input_fptr") == 0) {
         *dest = (void*)&topmodel-> input_fptr;
@@ -992,16 +1006,25 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //-------------------------------------
     //              OPTION    
     //-------------------------------------
-    else if (strcmp (name, "yes_print_output") == 0) {
-        *dest = (void*)&topmodel->yes_print_output;
-    }
-    else if (strcmp (name, "stand_alone") == 0) {
-        *dest = (void*)&topmodel->stand_alone;
-    }
+    
     /*  0 yes_print_output
       1 imap
       2 infex
       3 stand_alone*/
+
+    else if (strcmp (name, "yes_print_output") == 0) {
+        *dest = (void*)&topmodel->yes_print_output;
+    }
+    else if (strcmp (name, "imap") == 0) {
+        *dest = (void*)&topmodel->imap;
+    }
+    else if (strcmp (name, "infex") == 0) {
+        *dest = (void*)&topmodel->infex;
+    }
+    else if (strcmp (name, "stand_alone") == 0) {
+        *dest = (void*)&topmodel->stand_alone;
+    }
+
 
     //-------------------------------------
     // OUTPUT_TO_BMI - CSDMS Standard Names    
@@ -1059,6 +1082,46 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
       10 lnaotb
       11 cum_dist_area_with_dist
       12 dist_from_outlet*/
+    else if (strcmp (name, "num_channels") == 0) {
+        *dest = (void*)&topmodel-> num_channels;
+    }
+    else if (strcmp (name, "num_topodex_values") == 0) {
+        *dest = (void*)&topmodel-> num_topodex_values;
+    }
+    else if (strcmp (name, "t0") == 0) {
+        *dest = (void*)&topmodel-> t0;
+    }
+    else if (strcmp (name, "area") == 0) {
+        *dest = (void*)&topmodel-> area;
+    }
+    else if (strcmp (name, "num_delay") == 0) {
+        *dest = (void*)&topmodel-> num_delay;
+    }
+    else if (strcmp (name, "num_time_delay_histo_ords") == 0) {
+        *dest = (void*)&topmodel-> num_time_delay_histo_ords;
+    }
+    else if (strcmp (name, "szq") == 0) {
+        *dest = (void*)&topmodel-> szq;
+    }
+    else if (strcmp (name, "tl") == 0) {
+        *dest = (void*)&topmodel-> tl;
+    }
+    else if (strcmp (name, "time_delay_histogram") == 0) {
+        *dest = (void*)&topmodel-> time_delay_histogram;
+    }
+    else if (strcmp (name, "dist_area_lnaotb") == 0) {
+        *dest = (void*)&topmodel-> dist_area_lnaotb;
+    }
+    else if (strcmp (name, "lnaotb") == 0) {
+        *dest = (void*)&topmodel-> lnaotb;
+    }
+    else if (strcmp (name, "cum_dist_area_with_dist") == 0) {
+        *dest = (void*)&topmodel-> cum_dist_area_with_dist;
+    }
+    else if (strcmp (name, "dist_from_outlet") == 0) {
+        *dest = (void*)&topmodel-> dist_from_outlet;
+    }
+
 
     //-------------------------------------
     //         PARAMETER_ADJUSTABLE    
@@ -1069,14 +1132,31 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
       3 xk0
       4 hf
       5 dth*/
-
+    // qof
+    else if (strcmp (name, "szm") == 0) {
+        *dest = (void*)&topmodel-> szm;
+    }
+    else if (strcmp (name, "td") == 0) {
+        *dest = (void*)&topmodel-> td;
+    }
+    else if (strcmp (name, "srmax") == 0) {
+        *dest = (void*)&topmodel-> srmax;
+    }
+    else if (strcmp (name, "xk0") == 0) {
+        *dest = (void*)&topmodel-> xk0;
+    }
+    else if (strcmp (name, "hf") == 0) {
+        *dest = (void*)&topmodel-> hf;
+    }
+    else if (strcmp (name, "dth") == 0) {
+        *dest = (void*)&topmodel-> dth;
+    }
+    else if (strcmp (name, "qof") == 0) {
+        *dest = (void*)&topmodel-> qof;
+    }
     //-------------------------------------
     //                STATE    
     //-------------------------------------
-    // Qout
-    else if (strcmp (name, "Qout") == 0) {
-        *dest = (void*)&topmodel-> Qout;
-    }
     /*  0 Q0
       1 sr0
       2 contrib_area
@@ -1084,15 +1164,45 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
       4 deficit_root_zone
       5 deficit_local
       6 Qout
-*/
+    */
+    else if (strcmp (name, "Q0") == 0) {
+        *dest = (void*)&topmodel-> Q0;
+    }
+    else if (strcmp (name, "sr0") == 0) {
+        *dest = (void*)&topmodel-> sr0;
+    }
+    else if (strcmp (name, "contrib_area") == 0) {
+        *dest = (void*)&topmodel-> contrib_area;
+    }
+    else if (strcmp (name, "stor_unsat_zone") == 0) {
+        *dest = (void*)&topmodel-> stor_unsat_zone;
+    }
+    else if (strcmp (name, "deficit_root_zone") == 0) {
+        *dest = (void*)&topmodel-> deficit_root_zone;
+    }
+    else if (strcmp (name, "deficit_local") == 0) {
+        *dest = (void*)&topmodel-> deficit_local;
+    }
+    else if (strcmp (name, "Qout") == 0) {
+        *dest = (void*)&topmodel-> Qout;
+    }
 
     //-------------------------------------
     //              TIME_INFO    
     //-------------------------------------
-/*  0 dt
-  1 nstep
-  2 current_time_step
-*/
+    /*  0 dt
+      1 nstep
+      2 current_time_step
+    */
+    else if (strcmp (name, "dt") == 0) {
+        *dest = (void*)&topmodel-> dt;
+    }
+    else if (strcmp (name, "nstep") == 0) {
+        *dest = (void*)&topmodel-> nstep;
+    }
+    else if (strcmp (name, "current_time_step") == 0) {
+        *dest = (void*)&topmodel-> current_time_step;
+    }
 /*    else {
         return BMI_FAILURE;
     }*/
