@@ -77,7 +77,7 @@ Variable var_info[] = {
     { 26,  "num_time_delay_histo_ords",  "int", 1, "parameter_fixed", "none", 0, "node"}, //number of time delay histogram ordinates */
     { 27,  "szq",              "double", 1, "parameter_fixed", "none", 0, "node" },
     { 28,  "tl",               "double", 1, "parameter_fixed", "none", 0, "node" },
-    { 29,  "max_contrib_area", "double", 1, "param_fixed", "none", 0, "node" }, //could be option
+    { 29,  "max_contrib_area", "double", 1, "parameter_fixed", "none", 0, "node" }, //could be option
     { 30,  "land_surface_water__water_balance_volume", "double", 1, "output_to_file", "m", 0, "node" }, //bal //residual of the water balance
     { 31,  "soil_water__domain_volume_deficit",        "double", 1, "output_to_bmi", "m", 0, "node" }, //sbar //catchment average soil moisture deficit
     //------------------------------------------------
@@ -1081,7 +1081,8 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
       9 dist_area_lnaotb
       10 lnaotb
       11 cum_dist_area_with_dist
-      12 dist_from_outlet*/
+      12 dist_from_outlet
+      13 max_contrib_area*/
     else if (strcmp (name, "num_channels") == 0) {
         *dest = (void*)&topmodel-> num_channels;
     }
@@ -1121,7 +1122,9 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     else if (strcmp (name, "dist_from_outlet") == 0) {
         *dest = (void*)&topmodel-> dist_from_outlet;
     }
-
+    else if (strcmp (name, "max_contrib_area") == 0) {
+        *dest = (void*)&topmodel-> max_contrib_area;
+    }
 
     //-------------------------------------
     //         PARAMETER_ADJUSTABLE    
