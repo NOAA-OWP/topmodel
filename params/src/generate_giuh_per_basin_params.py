@@ -9,8 +9,9 @@ positional arguments:
   namest                HUC Number
   catchments            hydrofabrics catchment
   time_to_stream_raster Time to stream in minutes - generated with workflow_hand_twi_giuh.sh
-  soil_params_file      CSV file with soil parameters from NWM 2.1 - part of the hydrofabric released in 08/2021
-  GW_params_file        CSV file with groundwater parameters from NWM 2.1 - part of the hydrofabric released in 08/2021
+  soil_params_file      CSV file with soil parameters from NWM 2.1 - part of the hydrofabric released in 10/2021
+  GW_params_file        CSV file with groundwater parameters from NWM 2.1 - part of the hydrofabric released in 10/2021
+  FR_params_file        CSV file with groundwater parameters from NWM 2.1 - part of the hydrofabric released in 10/2021
   outputfolder_giuh     Output folder
 
 optional arguments:
@@ -52,7 +53,7 @@ def bbox_to_pixel_offsets(gt, bbox):
 
 
 
-def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_params_file, GW_params_file, outputfolder_giuh,
+def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_params_file, GW_params_file, FR_params_file, outputfolder_giuh,
                     output_flag=1,
                     nodata_value=None,
                     global_src_extent=False,
@@ -135,19 +136,23 @@ def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_para
         GW_params=pd.read_csv(GW_params_file,index_col=0)
         if(not "cat-" in str(GW_params.index[0])): GW_params.index = 'cat-' + GW_params.index.astype(str)
 
+        FR_params=pd.read_csv(FR_params_file,index_col=0)
+        if(not "cat-" in str(FR_params.index[0])): FR_params.index = 'cat-' + FR_params.index.astype(str)
+        
         # Remove Nan for the parameters that are used to generate config file
         # Replace with values from the original CFE config file
         #print ("Getting values from table ")
-        soil_params['bexp_soil_layers_stag=1_Time=1']= soil_params['bexp_soil_layers_stag=1_Time=1'].fillna(16)                    
-        soil_params['dksat_soil_layers_stag=1_Time=1']= soil_params['dksat_soil_layers_stag=1_Time=1'].fillna(0.00000338)
-        soil_params['psisat_soil_layers_stag=1_Time=1']= soil_params['psisat_soil_layers_stag=1_Time=1'].fillna(0.355)  
-        soil_params['slope_Time=1']= soil_params['slope_Time=1'].replace(np.nan,1.0)
-        soil_params['smcmax_soil_layers_stag=1_Time=1']= soil_params['smcmax_soil_layers_stag=1_Time=1'].fillna(0.439)
-        soil_params['smcwlt_soil_layers_stag=1_Time=1']= soil_params['smcwlt_soil_layers_stag=1_Time=1'].fillna(0.066)
-        soil_params['refkdt_Time=1']= soil_params['refkdt_Time=1'].fillna(3.0)
+        soil_params['bexp_soil_layers_stag=1']= soil_params['bexp_soil_layers_stag=1'].fillna(16)                    
+        soil_params['dksat_soil_layers_stag=1']= soil_params['dksat_soil_layers_stag=1'].fillna(0.00000338)
+        soil_params['psisat_soil_layers_stag=1']= soil_params['psisat_soil_layers_stag=1'].fillna(0.355)  
+        soil_params['slope']= soil_params['slope'].replace(np.nan,1.0)
+        soil_params['smcmax_soil_layers_stag=1']= soil_params['smcmax_soil_layers_stag=1'].fillna(0.439)
+        soil_params['smcwlt_soil_layers_stag=1']= soil_params['smcwlt_soil_layers_stag=1'].fillna(0.066)
+        soil_params['refkdt']= soil_params['refkdt'].fillna(3.0)
         GW_params['Zmax'] = GW_params['Zmax'].fillna(16.0)
         GW_params['Coeff'] = GW_params['Coeff'].fillna(0.01)
         GW_params['Expon'] = GW_params['Expon'].fillna(6.0)
+        FR_params['LKSATFAC'] =FR_params['LKSATFAC'].fillna(1000.0)
     else:
         
         skippednulgeoms = False
@@ -162,13 +167,13 @@ def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_para
             feat = vlyr.GetNextFeature()        
         soil_params=pd.DataFrame(index=IDAr)
         GW_params=pd.DataFrame(index=IDAr)
-        soil_params['bexp_soil_layers_stag=1_Time=1']= 16.0                    
-        soil_params['dksat_soil_layers_stag=1_Time=1']= 0.00000338
-        soil_params['psisat_soil_layers_stag=1_Time=1']= 0.355
-        soil_params['slope_Time=1']= 1.0
-        soil_params['smcmax_soil_layers_stag=1_Time=1']= 0.439
-        soil_params['smcwlt_soil_layers_stag=1_Time=1']= 0.066
-        soil_params['refkdt_Time=1']=3.0
+        soil_params['bexp_soil_layers_stag=1']= 16.0                    
+        soil_params['dksat_soil_layers_stag=1']= 0.00000338
+        soil_params['psisat_soil_layers_stag=1']= 0.355
+        soil_params['slope']= 1.0
+        soil_params['smcmax_soil_layers_stag=1']= 0.439
+        soil_params['smcwlt_soil_layers_stag=1']= 0.066
+        soil_params['refkdt']=3.0
         GW_params['Zmax']= 16.0
         GW_params['Coeff'] = 0.01
         GW_params['Expon'] = 6.0
@@ -190,6 +195,9 @@ def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_para
 
     while feat is not None:
         cat = feat.GetField('ID')
+        catstr=str(cat)
+        if(isinstance(cat, float)): catstr=str(int(cat))
+        if(not "cat" in catstr): catstr="cat-"+catstr
         count = count + 1
         
         if count % 100 == 0:
@@ -302,15 +310,15 @@ def generate_giuh_per_basin(namestr,catchments, time_to_stream_raster, soil_para
                     
                     f.write("%s" %("forcing_file=BMI\n"))
                     f.write("%s" %("soil_params.depth=2.0\n"))
-                    f.write("%s" %("soil_params.b="+str(soil_params.loc[cat]['bexp_soil_layers_stag=1_Time=1'])+"\n"))
+                    f.write("%s" %("soil_params.b="+str(soil_params.loc[cat]['bexp_soil_layers_stag=1'])+"\n"))
                     # This parameter (LKSATFAC) needs to be added when the file Fulldom_CONUS_FullRouting.csv is added to the hydrofabrics               
-                    f.write("%s" %("soil_params.mult=1000.0\n"))
-                    f.write("%s" %("soil_params.satdk="+str(soil_params.loc[cat]['dksat_soil_layers_stag=1_Time=1'])+"\n"))
-                    f.write("%s" %("soil_params.satpsi="+str(soil_params.loc[cat]['psisat_soil_layers_stag=1_Time=1'])+"\n"))
-                    f.write("%s" %("soil_params.slop="+str(soil_params.loc[cat]['slope_Time=1'])+"\n"))
-                    f.write("%s" %("soil_params.smcmax="+str(soil_params.loc[cat]['smcmax_soil_layers_stag=1_Time=1'])+"\n"))
-                    f.write("%s" %("soil_params.wltsmc="+str(soil_params.loc[cat]['smcwlt_soil_layers_stag=1_Time=1'])+"\n"))
-                    f.write("%s" %("refkdt"+str(soil_params.loc[cat]['refkdt_Time=1'])+"\n"))
+                    f.write("%s" %("soil_params.mult="+str(FR_params.loc[cat]['LKSATFAC'])+"\n"))
+                    f.write("%s" %("soil_params.satdk="+str(soil_params.loc[cat]['dksat_soil_layers_stag=1'])+"\n"))
+                    f.write("%s" %("soil_params.satpsi="+str(soil_params.loc[cat]['psisat_soil_layers_stag=1_'])+"\n"))
+                    f.write("%s" %("soil_params.slop="+str(soil_params.loc[cat]['slope'])+"\n"))
+                    f.write("%s" %("soil_params.smcmax="+str(soil_params.loc[cat]['smcmax_soil_layers_stag=1'])+"\n"))
+                    f.write("%s" %("soil_params.wltsmc="+str(soil_params.loc[cat]['smcwlt_soil_layers_stag=1'])+"\n"))
+                    f.write("%s" %("refkdt"+str(soil_params.loc[cat]['refkdt'])+"\n"))
                     f.write("%s" %("max_gw_storage="+str(GW_params.loc[cat]['Zmax'])+"\n"))
                    
                     f.write("%s" %("Cgw="+str(GW_params.loc[cat]['Coeff'])+"\n"))
@@ -367,6 +375,8 @@ if __name__ == "__main__":
                         help="CSV file with NWM 2.1 soil params")
     parser.add_argument("GW_params_file",
                         help="CSV file with NWM 2.1 groundwater params")    
+    parser.add_argument("FR_params_file",
+                        help="CSV file with NWM 2.1 full routing params")    
     parser.add_argument("outputfolder_giuh",
                         help="Output folder")
 
@@ -382,7 +392,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     
-    generate_giuh_per_basin(args.namest,args.catchments, args.time_to_stream_raster, args.soil_params_file,args.GW_params_file,args.outputfolder_giuh,                    
+    generate_giuh_per_basin(args.namest,args.catchments, args.time_to_stream_raster, args.soil_params_file,args.GW_params_file,args.FR_params_file,args.outputfolder_giuh,                    
                     nodata_value = args.nodata,
                     global_src_extent = args.preload,
                     buffer_distance = args.buffer,

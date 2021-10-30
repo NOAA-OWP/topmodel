@@ -62,14 +62,19 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
     #outputfolder_twi_param_file=outputfolder_twi+"/TOPMODEL_param/"
     #if not os.path.exists(outputfolder_twi_param_file): os.mkdir(outputfolder_twi_param_file)
     if not os.path.exists(soil_params_file):  print ("does not exist "  + soil_params_file)
+    
+    outputfolder_twi_config_file=outputfolder_twi+"/TOPMODEL_cat_file/"
+    if not os.path.exists(outputfolder_twi_config_file): os.mkdir(outputfolder_twi_config_file)
+
+
+    vds = ogr.Open(catchments, GA_ReadOnly) 
+    assert(vds)
+    vlyr =  vds.GetLayer(0)
         
     if(output_flag==1) & (os.path.isfile(soil_params_file)) & (os.path.isfile(soil_params_file)): 
         soil_params=pd.read_csv(soil_params_file,index_col=0)
         if(not "cat-" in str(soil_params.index[0])): soil_params.index = 'cat-' + soil_params.index.astype(str)
-        soil_params['dksat_soil_layers_stag=1_Time=1']= soil_params['dksat_soil_layers_stag=1_Time=1'].fillna(1)
-        
-        outputfolder_twi_config_file=outputfolder_twi+"/TOPMODEL_cat_file/"
-        if not os.path.exists(outputfolder_twi_config_file): os.mkdir(outputfolder_twi_config_file)
+        soil_params['dksat_soil_layers_stag=1']= soil_params['dksat_soil_layers_stag=1'].fillna(1)*3600.
     else:
         
         skippednulgeoms = False
@@ -84,7 +89,7 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
             feat = vlyr.GetNextFeature()        
         soil_params=pd.DataFrame(index=IDAr)
 
-        soil_params['dksat_soil_layers_stag=1_Time=1']= 1.0                    
+        soil_params['dksat_soil_layers_stag=1']= 1.0                    
     
     rds = gdal.Open(twi_raster, GA_ReadOnly)
     assert rds, "Could not open twi raster"
@@ -176,6 +181,9 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
 
     while feat is not None:
         cat = feat.GetField('ID')
+        catstr=str(cat)
+        if(isinstance(cat, float)): catstr=str(int(cat))
+        if(not "cat" in catstr): catstr="cat-"+catstr
         count = count + 1
         
         if count % 100 == 0:
@@ -353,35 +361,35 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                 if(output_flag==1):
                     
                     # Topmodel requires one directory per catchment since topmod.run needs to have the same name
-                    outputfolder_data = outputfolder_twi_config_file+"/"+ str(cat) +"/"
+                    outputfolder_data = outputfolder_twi_config_file+"/"+catstr+"/"
                     if not os.path.exists(outputfolder_data): os.mkdir(outputfolder_data)
                     
                     RunTop_File=os.path.join(outputfolder_data,"topmod.run")
                     f= open(RunTop_File, "w")                    
                     f.write("%s" %("1\n"))  
-                    f.write("%s" %(str(cat)+"\n")) 
-                    f.write("%s" %("forcing/"+str(cat)+".csv\n")) 
-                    f.write("%s" %("data/"+str(cat)+"/"+"subcat_"+str(cat)+".dat\n")) 
-                    f.write("%s" %("data/"+str(cat)+"/"+"params_"+str(cat)+".dat\n")) 
-                    f.write("%s" %("output/topmod_"+str(cat)+".out\n")) 
-                    f.write("%s" %("output/hyd_"+str(cat)+".out\n")) 
+                    f.write("%s" %(catstr+"\n")) 
+                    f.write("%s" %("forcing/"+namestr+"/"+catstr+".csv\n")) 
+                    f.write("%s" %("data/"+namestr+"/"+catstr+"/"+"subcat_"+catstr+".dat\n")) 
+                    f.write("%s" %("data/"+namestr+"/"+catstr+"/"+"params_"+catstr+".dat\n")) 
+                    f.write("%s" %("output/"+namestr+"/"+"topmod_"+catstr+".out\n")) 
+                    f.write("%s" %("output/"+namestr+"/"+"hyd_"+catstr+".out\n")) 
                     f.close()
                     
-                    DatFile=os.path.join(outputfolder_data,"params_"+str(cat)+".dat")
+                    DatFile=os.path.join(outputfolder_data,"params_"+catstr+".dat")
                     #DatFile=DatFile.replace("cat-cat-","cat-")
                     f= open(DatFile, "w")
                     
-                    f.write("%s" %("Extracted study basin: "+str(cat)+"\n")) 
-                    strparam="0.032  5.0  50.  3600.0  3600.0  0.05  0.0000328  0.002  0  "+str(soil_params.loc[cat]['dksat_soil_layers_stag=1_Time=1'])+"  0.02  0.1\n"
+                    f.write("%s" %("Extracted study basin: "+catstr+"\n")) 
+                    strparam="0.032  5.0  50.  3600.0  3600.0  0.05  0.0000328  0.002  0  "+str(soil_params.loc[cat]['dksat_soil_layers_stag=1'])+"  0.02  0.1\n"
                     f.write("%s" %(strparam))  
                     f.close()
                     #DirCat=os.path.join(outputfolder_twi, str(cat))
                 #if not os.path.exists(DirCat): os.mkdir(DirCat)
-                    DatFile=os.path.join(outputfolder_data,"subcat_"+str(cat)+".dat")
+                    DatFile=os.path.join(outputfolder_data,"subcat_"+catstr+".dat")
                     #DatFile=DatFile.replace("cat-cat-cat","cat-cat")
                     f= open(DatFile, "w")
                     f.write("1  1  1\n")
-                    f.write("%s" %("Extracted study basin: " + str(cat) +"\n"))
+                    f.write("%s" %("Extracted study basin: " + catstr +"\n"))
                     f.write("%s" %(str(nclasses)+" 1\n"))
                     for icdf in range(0,len(CDF)):
                         strdata="{0:.6f}".format((round(CDF['Freq'].iloc[icdf],6))) + " " + "{0:.6f}".format((round(CDF['TWI'].iloc[icdf],6))) +"\n"
@@ -395,6 +403,7 @@ def generate_twi_per_basin(namestr,catchments, twi_raster,slope_raster, dist_to_
                     #f.write("0.0  500.  0.5  1000.  1.0  1500.\n") 
                     f.write("$mapfile.dat\n") 
                     f.close()
+                   
                    
                 
                 # Catdatadict={}
