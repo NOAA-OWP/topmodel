@@ -211,14 +211,14 @@ main(void){
 
     // Test BMI: VARIABLE INFORMATION FUNCTIONS
     //printf("\nTEST BMI VARIABLE INFORMATION FUNCTIONS\n*****************************************\n");
-    int grid, itemsize, nbytes;
+    int grid, itemsize, nbytes, length;
     char type[BMI_MAX_TYPE_NAME];
     char location[BMI_MAX_LOCATION_NAME];
     char units[BMI_MAX_UNITS_NAME];
     char role[BMI_MAX_ROLE_NAME];
 
     // Loop through some variables and call get_var_*()
-    for (i=37; i<37; i++){
+    for (i=37; i<40; i++){
         const char *var_name = names_model_var[i];
         printf( " %s\n", var_name);
         // Test get_var_grid()
@@ -226,12 +226,6 @@ main(void){
             status = model->get_var_grid(model, var_name, &grid);
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( "  get_var_grid(): %i\n", grid);
-        }
-        // Test get_var_itemsize()
-        {
-            status = model->get_var_itemsize(model, var_name, &itemsize);
-            if (status == BMI_FAILURE) return BMI_FAILURE;
-            printf( "  get_var_itemsize(): %i\n", itemsize);
         }
         { // Test get_var_location()
             status = model->get_var_location(model, var_name, location);
@@ -250,10 +244,21 @@ main(void){
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( "  get_var_type(): %s\n", type);
         }
+        // Test get_var_itemsize()
+        {
+            status = model->get_var_itemsize(model, var_name, &itemsize);
+            if (status == BMI_FAILURE) return BMI_FAILURE;
+            printf( "  get_var_itemsize(): %i\n", itemsize);
+        }
         { // get_var_nbytes()
             status = model->get_var_nbytes(model, var_name, &nbytes);
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( "  get_var_nbytes(): %i\n", nbytes);
+        }
+        { // get_var_length()
+            status = model->get_var_length(model, var_name, &length);
+            if (status == BMI_FAILURE) return BMI_FAILURE;
+            printf( "  get_var_length(): %i\n", length);
         }
         { // Test get_var_role()
             status = model->get_var_role(model, var_name, role);

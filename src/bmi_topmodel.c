@@ -6,7 +6,7 @@
 #define MAX_FILENAME_LENGTH 256
 //#define OUTPUT_VAR_NAME_COUNT 14
 //#define INPUT_VAR_NAME_COUNT 2
-#define STATE_VAR_NAME_COUNT 62   // must match var_info array size
+//#define STATE_VAR_NAME_COUNT 62   // must match var_info array size
 //#define VAR_NAME_COUNT 62   // NEW BMI EXTENSION 
 //#define VAR_ROLE_COUNT 9   // NEW BMI EXTENSION 
 
@@ -758,7 +758,8 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         return BMI_SUCCESS;
     }
     // NEW BMI EXTENSION
-    // TODO: This returns sizeof 1.  NEEDS UPDATING
+    // Note: This returns sizeof 1; Get_var_nbytes() considers length/size
+    // JG TODO: Confirm OK?
     else if ((strcmp (type, "FILE") == 0) | (strcmp (type, "string") == 0)) {
         *size = sizeof(char);
         return BMI_SUCCESS;
@@ -838,8 +839,8 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
 {
     // JG 10.07.21: Not 100% on this one, why condition < 1?
 
-    int item_size;
-    int item_size_result = Get_var_itemsize(self, name, &item_size);
+    int each_item_size;
+    int item_size_result = Get_var_itemsize(self, name, &each_item_size);
     if (item_size_result != BMI_SUCCESS) {
         return BMI_FAILURE;
     }
@@ -862,15 +863,112 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
         item_count = ((topmodel_model *) self->data)->nstep;*/
 
     // NEW BMI EXTENSION
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+
+    //-----------------------------------------------------
+    // NOTE:  TOPMODEL uses d_alloc() to allocate memory
+    //        for arrays, but adds 1 to the array size
+    //        and then loop counts start at 1 not 0.
+    //        Also, d_alloc() is often called with a +1.
+    //        So we need to add 1 to all of these.
+    //-----------------------------------------------------
+    unsigned int title_size = 257;   // see topmodel.h; char array
+    unsigned int n_steps       = topmodel->nstep+1;
+    unsigned int max_n_subcats = topmodel->max_num_subcatchments+1;
+    unsigned int max_n_incs    = topmodel->max_atb_increments+1;
+    unsigned int max_atb_incs  = topmodel->max_atb_increments+1;
+    unsigned int max_td_ords   = topmodel->max_time_delay_ordinates+1;
+  
+
+    // JG TODO: change these to strcmp() vs index?
+
+    //-------------------------------------------------
+    // Overwrite the sizes that are not 1 (now known)
+    //-------------------------------------------------
+    var_info[6].size  = title_size;     // title
+    var_info[7].size  = title_size;     // subcat
+    //---------------------------------------------    
+    var_info[32].size = n_steps;        // Q
+    var_info[33].size = n_steps;        // Qobs
+    var_info[34].size = n_steps;        // rain
+    var_info[35].size = n_steps;        // pe
+    var_info[36].size = n_steps;        // contrib_area
+    var_info[37].size = max_atb_incs;   // stor_unsat_zone
+    var_info[38].size = max_atb_incs;   // deficit_root_zone
+    var_info[39].size = max_atb_incs;   // deficit_local
+    var_info[40].size = max_td_ords;    // time_delay_histogram
+    var_info[41].size = max_n_incs;     // dist_area_lnaotb
+    var_info[42].size = max_n_incs;     // lnaotb
+    var_info[43].size = max_n_subcats;  // cum_dist_area_with_dist
+    var_info[44].size = max_n_subcats;  // dist_from_outlet
+
+    // No we know #ofElems, so xBy each item_size    
     int item_count;
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
             item_count = var_info[i].size;
-            *nbytes = item_size * item_count;
+            *nbytes = each_item_size * item_count;
             return BMI_SUCCESS;
         }    
     }
 
+    return BMI_FAILURE;
+}
+
+/* OWP Custom BMI Enhancements */
+static int Get_var_length (Bmi *self, const char *name, int * elements)
+{
+    // Returns size of varibleable array
+    // consider get_var_size?
+
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+
+    //-----------------------------------------------------
+    // NOTE:  TOPMODEL uses d_alloc() to allocate memory
+    //        for arrays, but adds 1 to the array size
+    //        and then loop counts start at 1 not 0.
+    //        Also, d_alloc() is often called with a +1.
+    //        So we need to add 1 to all of these.
+    //-----------------------------------------------------
+    unsigned int title_size = 257;   // see topmodel.h; char array
+    unsigned int n_steps       = topmodel->nstep+1;
+    unsigned int max_n_subcats = topmodel->max_num_subcatchments+1;
+    unsigned int max_n_incs    = topmodel->max_atb_increments+1;
+    unsigned int max_atb_incs  = topmodel->max_atb_increments+1;
+    unsigned int max_td_ords   = topmodel->max_time_delay_ordinates+1;
+  
+
+    // JG TODO: change these to strcmp() vs index?
+
+    //-------------------------------------------------
+    // Overwrite the sizes that are not 1 (now known)
+    //-------------------------------------------------
+    var_info[6].size  = title_size;     // title
+    var_info[7].size  = title_size;     // subcat
+    //---------------------------------------------    
+    var_info[32].size = n_steps;        // Q
+    var_info[33].size = n_steps;        // Qobs
+    var_info[34].size = n_steps;        // rain
+    var_info[35].size = n_steps;        // pe
+    var_info[36].size = n_steps;        // contrib_area
+    var_info[37].size = max_atb_incs;   // stor_unsat_zone
+    var_info[38].size = max_atb_incs;   // deficit_root_zone
+    var_info[39].size = max_atb_incs;   // deficit_local
+    var_info[40].size = max_td_ords;    // time_delay_histogram
+    var_info[41].size = max_n_incs;     // dist_area_lnaotb
+    var_info[42].size = max_n_incs;     // lnaotb
+    var_info[43].size = max_n_subcats;  // cum_dist_area_with_dist
+    var_info[44].size = max_n_subcats;  // dist_from_outlet
+
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            *elements = var_info[i].size;
+            return BMI_SUCCESS;
+        }
+    }
+  
     return BMI_FAILURE;
 }
 
@@ -1379,7 +1477,7 @@ static int Set_value_at_indices (Bmi *self, const char *name, int * inds, int le
 static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
 {
     //---------------------------------------------------
-    // Note: This pulls information from the var_info
+    // Note: This pulls information from tvar_sizehe var_info
     // structure defined at the top, which helps to 
     // prevent implementation errors.   
     //---------------------------------------------------
@@ -1395,7 +1493,7 @@ static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
 
     topmodel_model *state;
     state = (topmodel_model*) self->data;
-    int n_state_vars = STATE_VAR_NAME_COUNT;
+    int n_state_vars = VAR_NAME_COUNT;
 
     //------------------------------------------------     
     // NOTE:  max_num_increments is just a local var
@@ -1471,10 +1569,10 @@ static int Get_state_var_ptrs (Bmi *self, void *ptr_list[])
     //--------------------------------------
     // Create a test array: dbl_array_test
     //--------------------------------------
-    /* double dbl_test_data[3] = {10.0, 20.0, 30.0};
-    for (int j = 0; j < 3; j++) {
-        state->dbl_arr_test[j] = dbl_test_data[j];
-    } */   
+    // double dbl_test_data[3] = {10.0, 20.0, 30.0};
+    // for (int j = 0; j < 3; j++) {
+    //    state->dbl_arr_test[j] = dbl_test_data[j];
+    //}    
 
     ptr_list[0]  = state->control_fptr;
     ptr_list[1]  = state->input_fptr;    
@@ -2181,6 +2279,7 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->get_var_location = Get_var_location;
 
         model->get_var_role =       Get_var_role;           //OWP CUSTOM
+        model->get_var_length =     Get_var_length;         //OWP CUSTOM
 
         model->get_current_time = Get_current_time;
         model->get_start_time = Get_start_time;
