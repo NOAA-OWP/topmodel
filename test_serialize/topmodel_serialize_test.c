@@ -117,7 +117,9 @@ int main(void)
       puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 1 ...");
   }
 
-  model1->get_state_var_count(model1, &n_state_vars);  
+  // JG EDIT
+  //model1->get_state_var_count(model1, &n_state_vars);
+  model1->get_model_var_count(model1, &n_state_vars, "all");  
 
   //---------------------------------------------
   // For testing:  All 3 print "8" on my MacPro

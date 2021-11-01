@@ -128,13 +128,17 @@ int get_file_size(const char *ser_file, unsigned long int *file_size){
 int serialize(Bmi* model1, const char *ser_file) {
 
     int n_state_vars;
-    model1->get_state_var_count(model1, &n_state_vars);
+    int verbose = 1;
+    
+    // JG EDIT
+    //model1->get_state_var_count(model1, &n_state_vars);
+    if (verbose){ puts("Calling BMI.get_model_var_count(all)..."); }
+    model1->get_model_var_count(model1, &n_state_vars, "all");
     
     FILE *fp = fopen(ser_file, "w+");
     int i, j, n_bytes;
     void *ptr_list[ n_state_vars ];
     unsigned int size, sizes[ n_state_vars ];
-    int verbose = 1;
     int    i_val;
     long   li_val;
     float  f_val;
@@ -156,11 +160,19 @@ int serialize(Bmi* model1, const char *ser_file) {
     //--------------------------------------------------------------
     // Get required information on the model's state variables
     //--------------------------------------------------------------  
-    if (verbose){ puts("Calling BMI.get_state_var_names()..."); }
-    model1->get_state_var_names(model1, names);
+    // JG EDIT
+    if (verbose){ puts("Calling BMI.get_model_var_names(all)..."); }
+    //model1->get_state_var_names(model1, names);
+    model1->get_model_var_names(model1, names, "all");
 
-    if (verbose){ puts("Calling BMI.get_state_var_types()..."); }
-    model1->get_state_var_types(model1, types);
+    // JG EDIT
+    if (verbose){ puts("Calling BMI.get_var_type() OVER LOOP..."); }
+    //model1->get_state_var_types(model1, types);
+    
+    for (int k=0; k<n_state_vars; k++){
+        model1->get_var_type(model1, names[k], types[k]);
+    }
+
 
     if (verbose){ puts("Calling BMI.get_state_var_sizes()..."); }
     model1->get_state_var_sizes(model1, sizes);      
@@ -345,23 +357,37 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
     int verbose   = 1;
     // int print_obj = 1;
     int n_state_vars;
-    model2->get_state_var_count(model2, &n_state_vars);
+    //model2->get_state_var_count(model2, &n_state_vars);
+    // JG EDIT
+    model2->get_model_var_count(model2, &n_state_vars, "all");
  
     unsigned int sizes[ n_state_vars ], size;
     model2->get_state_var_sizes(model2, sizes);
-    int     i_val, *i_arr, j;
+    int     i_val, *i_arr;
     long    li_val, *li_arr;
     float   f_val, *f_arr;
     double  d_val, *d_arr;
     void    *ptr;
+
+    // JG EDIT
+    char **names = NULL;
+    names = (char**) malloc (sizeof(char *) * n_state_vars);
+    for (int i=0; i<n_state_vars; i++){
+        names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+    }
         
     char *type, *sval;
     char **types = NULL;
     types = (char**) malloc (sizeof(char *) * n_state_vars);  
     for (int j=0; j<n_state_vars; j++){
-        types[j] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+        types[j] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);       
     }
-    model2->get_state_var_types(model2, types);
+    
+    // JG EDIT
+    //model2->get_state_var_types(model2, types);
+    for (int k=0; k<n_state_vars; k++){
+        model2->get_var_type(model2, names[k], types[k]);
+    }
 
     //-------------------------------------
     // Get the file size, set buffer_size
@@ -588,7 +614,8 @@ int compare_states(Bmi* model1, Bmi* model2){
     //--------------------------------------
     // Get total number of state variables
     //--------------------------------------
-   model1->get_state_var_count(model1, &n_state_vars); 
+    //model1->get_state_var_count(model1, &n_state_vars);
+    model1->get_model_var_count(model1, &n_state_vars, "all"); 
 
     //----------------------------------------
     // Get the state variable internal names
@@ -598,7 +625,8 @@ int compare_states(Bmi* model1, Bmi* model2){
     for (i=0; i<n_state_vars; i++){
         names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
     }
-    model1->get_state_var_names(model1, names);
+    //model1->get_state_var_names(model1, names);
+    model1->get_model_var_names(model1, names, "all");
   
     //------------------------------------  
     // Get the state variable data types
@@ -609,7 +637,11 @@ int compare_states(Bmi* model1, Bmi* model2){
     for (i=0; i<n_state_vars; i++){
         types[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
     }
-    model1->get_state_var_types(model1, types);
+    // JG EDIT 
+    //model1->get_state_var_types(model1, types);
+    for (int k=0; k<n_state_vars; k++){
+        model1->get_var_type(model1, names[k], types[k]);
+    }
 
     //-------------------------------  
     // Get the state variable sizes

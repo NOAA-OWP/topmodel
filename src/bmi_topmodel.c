@@ -1296,7 +1296,7 @@ static int Set_value_at_indices (Bmi *self, const char *name, int * inds, int le
 // *****  NEW BMI: STATE VAR GETTER & SETTER FUNCTIONS   *****
 // *****  Proposed extensions to support serialization.  *****
 // ***********************************************************
-static int Get_state_var_count (Bmi *self, int * count)
+/*static int Get_state_var_count (Bmi *self, int * count)
 {
     if (!self){
         return BMI_FAILURE;   
@@ -1304,9 +1304,9 @@ static int Get_state_var_count (Bmi *self, int * count)
 
     *count = STATE_VAR_NAME_COUNT;
     return BMI_SUCCESS;
-}
+}*/
 //--------------------------------------------------------------------------
-static int Get_state_var_names (Bmi *self, char ** names)
+/*static int Get_state_var_names (Bmi *self, char ** names)
 {
     //---------------------------------------------------
     // Note: This pulls information from the var_info
@@ -1338,10 +1338,10 @@ static int Get_state_var_names (Bmi *self, char ** names)
     }
         
     return BMI_SUCCESS;
-}
+}*/
 
 //--------------------------------------------------------------------------
-static int Get_state_var_types (Bmi *self, char ** types)
+/*static int Get_state_var_types (Bmi *self, char ** types)
 {
     //---------------------------------------------------
     // Note: This pulls information from the var_info
@@ -1373,7 +1373,7 @@ static int Get_state_var_types (Bmi *self, char ** types)
     }
         
     return BMI_SUCCESS;
-}
+}*/
 
 //--------------------------------------------------------------------------
 static int Get_state_var_sizes (Bmi *self, unsigned int size_list[])
@@ -1560,7 +1560,8 @@ static int Set_state_var (Bmi *self, void *src, int index)
     }
 
     int n_state_vars, i;
-    self->get_state_var_count(self, &n_state_vars);  
+    //self->get_state_var_count(self, &n_state_vars);
+    self->get_model_var_count(self, &n_state_vars, "all");   
     unsigned int sizes[ n_state_vars ];
     self->get_state_var_sizes(self, sizes);
     unsigned int size = sizes[ index ];
@@ -2195,9 +2196,9 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->set_value_at_indices = Set_value_at_indices;
 
         // New BMI extensions to support serialization
-        model->get_state_var_count = Get_state_var_count;
-        model->get_state_var_names = Get_state_var_names;
-        model->get_state_var_types = Get_state_var_types;
+        //model->get_state_var_count = Get_state_var_count;
+        //model->get_state_var_names = Get_state_var_names;
+        //model->get_state_var_types = Get_state_var_types;
         model->get_state_var_ptrs  = Get_state_var_ptrs;
         model->get_state_var_sizes = Get_state_var_sizes;
         model->set_state_var       = Set_state_var;
