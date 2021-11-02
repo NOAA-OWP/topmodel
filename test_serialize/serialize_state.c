@@ -129,7 +129,7 @@ int serialize(Bmi* model1, const char *ser_file) {
 
     int n_state_vars;
     int verbose = 1;
-    
+
     // JG EDIT
     //model1->get_state_var_count(model1, &n_state_vars);
     if (verbose){ puts("Calling BMI.get_model_var_count(all)..."); }
@@ -171,14 +171,18 @@ int serialize(Bmi* model1, const char *ser_file) {
     
     for (int k=0; k<n_state_vars; k++){
         model1->get_var_type(model1, names[k], types[k]);
+        //if (verbose){ puts("Calling BMI.get_state_var_sizes()..."); }
+        model1->get_var_length(model1, names[k], &sizes[k]);
+        //if (verbose){ puts("Calling BMI.get_state_var_ptrs()..."); }
+        model1->get_value_ptr(model1, names[k], &ptr_list[k]);
     }
 
 
-    if (verbose){ puts("Calling BMI.get_state_var_sizes()..."); }
-    model1->get_state_var_sizes(model1, sizes);      
+    //if (verbose){ puts("Calling BMI.get_state_var_sizes()..."); }
+    //model1->get_state_var_sizes(model1, sizes);      
 
-    if (verbose){ puts("Calling BMI.get_state_var_ptrs()..."); }
-    model1->get_state_var_ptrs(model1, ptr_list);
+    //if (verbose){ puts("Calling BMI.get_state_var_ptrs()..."); }
+    //model1->get_state_var_ptrs(model1, ptr_list);
 
     //--------------------------------------------
     // Prepare to write serialized state to file
@@ -362,7 +366,7 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
     model2->get_model_var_count(model2, &n_state_vars, "all");
  
     unsigned int sizes[ n_state_vars ], size;
-    model2->get_state_var_sizes(model2, sizes);
+    //model2->get_state_var_sizes(model2, sizes);
     int     i_val, *i_arr;
     long    li_val, *li_arr;
     float   f_val, *f_arr;
@@ -387,6 +391,7 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
     //model2->get_state_var_types(model2, types);
     for (int k=0; k<n_state_vars; k++){
         model2->get_var_type(model2, names[k], types[k]);
+        model2->get_var_length(model2, names[k], &sizes[k]);
     }
 
     //-------------------------------------
@@ -625,6 +630,15 @@ int compare_states(Bmi* model1, Bmi* model2){
     for (i=0; i<n_state_vars; i++){
         names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
     }
+
+/*    //----------------------------------------
+    // Get the state variable internal names model 2
+    //----------------------------------------
+    char **names2 = NULL;
+    names2 = (char**) malloc (sizeof(char *) * n_state_vars);
+    for (i=0; i<n_state_vars; i++){
+        names2[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+    }*/
     //model1->get_state_var_names(model1, names);
     model1->get_model_var_names(model1, names, "all");
   
@@ -637,29 +651,43 @@ int compare_states(Bmi* model1, Bmi* model2){
     for (i=0; i<n_state_vars; i++){
         types[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
     }
+    //-------------------------------  
+    // Get the state variable sizes
+    //-------------------------------
+    unsigned int size, sizes[ n_state_vars ];
+    void *ptr_list1[ n_state_vars ];
+    void *ptr_list2[ n_state_vars ]; 
     // JG EDIT 
     //model1->get_state_var_types(model1, types);
     for (int k=0; k<n_state_vars; k++){
         model1->get_var_type(model1, names[k], types[k]);
+        //-------------------------------  
+        // Get the state variable sizes
+        //-------------------------------
+        model1->get_var_length(model1, names[k], &sizes[k]);
+        //-------------------------------------        
+        // Get pointers to Model 1 state vars
+        //-------------------------------------
+        model1->get_value_ptr(model1, names[k], &ptr_list1[k]);
+        //-------------------------------------
+        // Get pointers to Model 2 state vars
+        //-------------------------------------  
+        model2->get_value_ptr(model2, names[k], &ptr_list2[k]);
     }
 
-    //-------------------------------  
-    // Get the state variable sizes
-    //-------------------------------
-    unsigned int size, sizes[ n_state_vars ];  
-    model1->get_state_var_sizes(model1, sizes);
+ 
+    //model1->get_state_var_sizes(model1, sizes);
 
-   //-------------------------------------        
+    //-------------------------------------        
     // Get pointers to Model 1 state vars
     //-------------------------------------
-    void *ptr_list1[ n_state_vars ];
-    model1->get_state_var_ptrs(model1, ptr_list1);
+    //model1->get_state_var_ptrs(model1, ptr_list1);
 
     //-------------------------------------
     // Get pointers to Model 2 state vars
     //-------------------------------------  
-    void *ptr_list2[ n_state_vars ];
-    model2->get_state_var_ptrs(model2, ptr_list2);
+    //void *ptr_list2[ n_state_vars ];
+    //model2->get_state_var_ptrs(model2, ptr_list2);
 
     //--------------------------------
     // Loop over all state variables

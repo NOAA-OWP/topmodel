@@ -114,7 +114,8 @@ int main(void)
 
   //--------------------------------------------------------------  
   if (verbose){
-      puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 1 ...");
+      //puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 1 ...");
+      puts("Calling BMI.get_value_ptr() OVER LOOP on TOPMODEL 1 ...");
   }
 
   // JG EDIT
@@ -133,8 +134,24 @@ int main(void)
   // See: https://stackoverflow.com/questions/7798383/
   //      array-of-pointers-to-multiple-types-c/7799543
   //--------------------------------------------------------------- 
+  
+  //----------------------------------------
+  // Get the state variable internal names
+  //----------------------------------------
+  char **names = NULL;
+  names = (char**) malloc (sizeof(char *) * n_state_vars);
+  for (int i=0; i<n_state_vars; i++){
+      names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+  }
+
+  model1->get_model_var_names(model1, names, "all");
+
+
   void *ptr_list[ n_state_vars ];
-  model1->get_state_var_ptrs(model1, ptr_list);
+  for (int k=0; k<n_state_vars; k++){
+    model1->get_value_ptr(model1, names[k], &ptr_list[k]);
+  }
+  //model1->get_state_var_ptrs(model1, ptr_list);
 
   if (verbose){ print_some( ptr_list ); }
 
@@ -184,7 +201,11 @@ int main(void)
       puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 1 ...");
   }
 
-  model1->get_state_var_ptrs(model1, ptr_list);
+  for (int k=0; k<n_state_vars; k++){
+    model1->get_value_ptr(model1, names[k], &ptr_list[k]);
+  }
+
+  //model1->get_state_var_ptrs(model1, ptr_list);
 
   if (verbose){ print_some( ptr_list ); }
   
@@ -193,7 +214,10 @@ int main(void)
       puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 2 ...");
   }
 
-  model2->get_state_var_ptrs(model2, ptr_list);
+  for (int k=0; k<n_state_vars; k++){
+    model2->get_value_ptr(model2, names[k], &ptr_list[k]);
+  }
+  //model2->get_state_var_ptrs(model2, ptr_list);
 
   if (verbose){ print_some( ptr_list ); }
 
@@ -211,6 +235,8 @@ int main(void)
   if (verbose){ 
       puts("Finished with serialization test.\n");
   }
+
+  free(names);
   return 0;
 }
 
