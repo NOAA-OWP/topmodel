@@ -13,13 +13,13 @@ extern "C" {
 //--------------------------------------------
 typedef struct Variable{
     unsigned int index;
-    char name[BMI_MAX_VAR_NAME]; 
+    char name[BMI_MAX_VAR_NAME];
     char type[BMI_MAX_TYPE_NAME];
-    unsigned int size;
+    unsigned int size;  // (nbytes / itemsize)
     char role[BMI_MAX_ROLE_NAME];
     char units[BMI_MAX_UNITS_NAME];
-    unsigned int grid;
-    char location[BMI_MAX_LOCATION_NAME];
+    char location[BMI_MAX_LOCATION_NAME];  // e.g. "node", "face"
+    int grid; // e.g. 0
     // bool is_pointer;
 } Variable;
 

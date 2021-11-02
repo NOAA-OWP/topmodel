@@ -39,47 +39,47 @@ Variable var_info[] = {
     //-------------------------------------
     // File pointers.  For reference only
     //-------------------------------------
-    { 0,  "control_fptr", "FILE", 1, "file_offset", "none", 0, "node" },
-    { 1,  "input_fptr",   "FILE", 1, "file_offset", "none", 0, "node" },
-    { 2,  "subcat_fptr",  "FILE", 1, "file_offset", "none", 0, "node" },
-    { 3,  "params_fptr",  "FILE", 1, "file_offset", "none", 0, "node" },
-    { 4,  "output_fptr",  "FILE", 1, "file_offset", "none", 0, "node" },
-    { 5,  "out_hyd_fptr", "FILE", 1, "file_offset", "none", 0, "node" },
+    { 0,  "control_fptr", "FILE", 1, "file_offset", "none", "node", 0 },
+    { 1,  "input_fptr",   "FILE", 1, "file_offset", "none", "node", 0 },
+    { 2,  "subcat_fptr",  "FILE", 1, "file_offset", "none", "node", 0 },
+    { 3,  "params_fptr",  "FILE", 1, "file_offset", "none", "node", 0 },
+    { 4,  "output_fptr",  "FILE", 1, "file_offset", "none", "node", 0 },
+    { 5,  "out_hyd_fptr", "FILE", 1, "file_offset", "none", "node", 0 },
     //----------------------------------------------
     // String vars.  Will replace 1 w/ title_size.
     //----------------------------------------------
-    { 6,  "title",  "string", 1, "info_string", "none", 0, "node" },
-    { 7,  "subcat", "string", 1, "info_string", "none", 0, "node" },   
+    { 6,  "title",  "string", 1, "info_string", "none", "node", 0 },
+    { 7,  "subcat", "string", 1, "info_string", "none", "node", 0 },   
     //-----------------------
     // Variable definitions
     //-----------------------
-    { 8,  "dt",                 "double", 1, "time_info", "h-1", 0, "node" },    //inputs.dat
-    { 9,  "nstep",              "int",    1, "time_info", "none", 0, "node" },   //inputs.dat
-    { 10, "yes_print_output",   "int",    1, "option", "none", 0, "node" }, //subcat.dat
-    { 11, "imap",               "int",    1, "option", "none", 0, "node" }, //subcat.dat
-    { 12, "num_channels",       "int",    1, "parameter_fixed", "none", 0, "node" },  //subcat.dat
-    { 13, "num_topodex_values", "int",    1, "parameter_fixed", "none", 0, "node" },  //subcat.dat
-    { 14, "infex",              "int",    1, "option", "none", 0, "node" }, //infiltration           
+    { 8,  "dt",                 "double", 1, "time_info", "h-1", "node", 0 },    //inputs.dat
+    { 9,  "nstep",              "int",    1, "time_info", "none", "node", 0 },   //inputs.dat
+    { 10, "yes_print_output",   "int",    1, "option", "none", "node", 0 }, //subcat.dat
+    { 11, "imap",               "int",    1, "option", "none", "node", 0 }, //subcat.dat
+    { 12, "num_channels",       "int",    1, "parameter_fixed", "none", "node", 0 },  //subcat.dat
+    { 13, "num_topodex_values", "int",    1, "parameter_fixed", "none", "node", 0 },  //subcat.dat
+    { 14, "infex",              "int",    1, "option", "none", "node", 0 }, //infiltration           
     //-------------------------------------
     // Model parameters and input scalars
     //-------------------------------------
-    { 15,  "szm",        "double", 1, "parameter_adjustable", "m", 0, "node" }, 
-    { 16,  "t0",         "double", 1, "parameter_fixed", "none", 0, "node" }, //areal average of ln(a/tanB)
-    { 17,  "td",         "double", 1, "parameter_adjustable", "h-1", 0, "node" }, //unsaturated zome time delay per unit storage deficit
-    { 18,  "srmax",      "double", 1, "parameter_adjustable", "m", 0, "node" },   //maximum root zone storage deficit
-    { 19,  "Q0",         "double", 1, "state", "m h-1", 0, "node" }, //initial subsurface flow per unit area //JG TODO: check this one
-    { 20,  "sr0",        "double", 1, "state", "m", 0, "node" }, //initial root zone storage deficit
-    { 21,  "xk0",        "double", 1, "parameter_adjustable", "m h-1", 0, "node" }, //surface soil hydraulic conductivity
-    { 22,  "hf",         "double", 1, "parameter_adjustable", "m", 0, "node" }, //wetting front suction for G&A soln.
-    { 23,  "dth",        "double", 1, "parameter_adjustable", "none", 0, "node" }, //water content change across the wetting front
-    { 24,  "area",       "double", 1, "parameter_fixed", "none", 0, "node" }, //subcat.dat
-    { 25,  "num_delay",  "int",    1, "parameter_fixed", "none", 0, "node" }, //number of time steps lag (delay) in channel within catchment to outlet 
-    { 26,  "num_time_delay_histo_ords",  "int", 1, "parameter_fixed", "none", 0, "node"}, //number of time delay histogram ordinates */
-    { 27,  "szq",              "double", 1, "parameter_fixed", "none", 0, "node" },
-    { 28,  "tl",               "double", 1, "parameter_fixed", "none", 0, "node" },
-    { 29,  "max_contrib_area", "double", 1, "parameter_fixed", "none", 0, "node" }, //could be option
-    { 30,  "land_surface_water__water_balance_volume", "double", 1, "output_to_file", "m", 0, "node" }, //bal //residual of the water balance
-    { 31,  "soil_water__domain_volume_deficit",        "double", 1, "output_to_bmi", "m", 0, "node" }, //sbar //catchment average soil moisture deficit
+    { 15,  "szm",        "double", 1, "parameter_adjustable", "m", "node", 0 }, 
+    { 16,  "t0",         "double", 1, "parameter_fixed", "none", "node", 0 }, //areal average of ln(a/tanB)
+    { 17,  "td",         "double", 1, "parameter_adjustable", "h-1", "node", 0 }, //unsaturated zome time delay per unit storage deficit
+    { 18,  "srmax",      "double", 1, "parameter_adjustable", "m", "node", 0 },   //maximum root zone storage deficit
+    { 19,  "Q0",         "double", 1, "state", "m h-1", "node", 0 }, //initial subsurface flow per unit area //JG TODO: check this one
+    { 20,  "sr0",        "double", 1, "state", "m", "node", 0 }, //initial root zone storage deficit
+    { 21,  "xk0",        "double", 1, "parameter_adjustable", "m h-1", "node", 0 }, //surface soil hydraulic conductivity
+    { 22,  "hf",         "double", 1, "parameter_adjustable", "m", "node", 0 }, //wetting front suction for G&A soln.
+    { 23,  "dth",        "double", 1, "parameter_adjustable", "none", "node", 0 }, //water content change across the wetting front
+    { 24,  "area",       "double", 1, "parameter_fixed", "none", "node", 0 }, //subcat.dat
+    { 25,  "num_delay",  "int",    1, "parameter_fixed", "none", "node", 0 }, //number of time steps lag (delay) in channel within catchment to outlet 
+    { 26,  "num_time_delay_histo_ords",  "int", 1, "parameter_fixed", "none", "node", 0}, //number of time delay histogram ordinates */
+    { 27,  "szq",              "double", 1, "parameter_fixed", "none", "node", 0 },
+    { 28,  "tl",               "double", 1, "parameter_fixed", "none", "node", 0 },
+    { 29,  "max_contrib_area", "double", 1, "parameter_fixed", "none", "node", 0 }, //could be option
+    { 30,  "land_surface_water__water_balance_volume", "double", 1, "output_to_file", "m", "node", 0 }, //bal //residual of the water balance
+    { 31,  "soil_water__domain_volume_deficit",        "double", 1, "output_to_bmi", "m", "node", 0 }, //sbar //catchment average soil moisture deficit
     //------------------------------------------------
     // Pointers to dynamically dimensioned 1D arrays
     // Will replace size of 1 with size in comment
@@ -88,48 +88,48 @@ Variable var_info[] = {
     // A trailing asterisk indicates that the var
     // is actually a pointer to the given type.
     //------------------------------------------------ 
-    { 32,  "land_surface_water__runoff_mass_flux", "double*", 1, "output_to_bmi", "m h-1", 0, "node" }, // n_steps //Q //simulated discharge
-    { 33,  "Qobs",                     "double*", 1, "input_from_file", "m h-1", 0, "node" },  // n_steps
-    { 34,  "atmosphere_water__liquid_equivalent_precipitation_rate", "double*", 1, "input_from_bmi", "m h-1", 0, "node" },  // n_steps //rain //inputs.dat
-    { 35,  "water_potential_evaporation_flux",                       "double*", 1, "input_from_bmi", "m h-1", 0, "node" },  // n_steps //pe //inputs.dat
-    { 36,  "contrib_area",             "double*", 1, "state", "none", 0, "node" },    // n_steps
-    { 37,  "stor_unsat_zone",          "double*", 1, "state", "m", 0, "node" },  // max_atb_incs
-    { 38,  "deficit_root_zone",        "double*", 1, "state", "m", 0, "node" },  // max_atb_incs
-    { 39,  "deficit_local",            "double*", 1, "state", "m", 0, "node" },  // max_atb_incs
-    { 40,  "time_delay_histogram",     "double*", 1, "parameter_fixed", "none", 0, "node" },  // max_td_ords
-    { 41,  "dist_area_lnaotb",         "double*", 1, "parameter_fixed", "none", 0, "node" },  // max_n_incs
-    { 42,  "lnaotb",                   "double*", 1, "parameter_fixed", "none", 0, "node" },  // max_n_incs
-    { 43,  "cum_dist_area_with_dist",  "double*", 1, "parameter_fixed", "none", 0, "node" },  // max_n_subcats
-    { 44,  "dist_from_outlet",         "double*", 1, "parameter_fixed", "m", 0, "node" },      // max_n_subcats   
+    { 32,  "land_surface_water__runoff_mass_flux", "double*", 1, "output_to_bmi", "m h-1", "node", 0 }, // n_steps //Q //simulated discharge
+    { 33,  "Qobs",                     "double*", 1, "input_from_file", "m h-1", "node", 0 },  // n_steps
+    { 34,  "atmosphere_water__liquid_equivalent_precipitation_rate", "double*", 1, "input_from_bmi", "m h-1", "node", 0 },  // n_steps //rain //inputs.dat
+    { 35,  "water_potential_evaporation_flux",                       "double*", 1, "input_from_bmi", "m h-1", "node", 0 },  // n_steps //pe //inputs.dat
+    { 36,  "contrib_area",             "double*", 1, "state", "none", "node", 0 },    // n_steps
+    { 37,  "stor_unsat_zone",          "double*", 1, "state", "m", "node", 0 },  // max_atb_incs
+    { 38,  "deficit_root_zone",        "double*", 1, "state", "m", "node", 0 },  // max_atb_incs
+    { 39,  "deficit_local",            "double*", 1, "state", "m", "node", 0 },  // max_atb_incs
+    { 40,  "time_delay_histogram",     "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_td_ords
+    { 41,  "dist_area_lnaotb",         "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_n_incs
+    { 42,  "lnaotb",                   "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_n_incs
+    { 43,  "cum_dist_area_with_dist",  "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_n_subcats
+    { 44,  "dist_from_outlet",         "double*", 1, "parameter_fixed", "m", "node", 0 },      // max_n_subcats   
     //---------------------- 
     // Other internal vars
     //----------------------
-    { 45,  "num_sub_catchments",       "int", 1, "array_length", "none", 0, "node" }, //subcat.dat
-    { 46,  "max_atb_increments",       "int", 1, "array_length", "none", 0, "node" },
-    { 47,  "max_num_subcatchments",    "int", 1, "array_length", "none", 0, "node" },
-    { 48,  "max_time_delay_ordinates", "int", 1, "array_length", "none", 0, "node" },
-    { 49,  "Qout",                     "double", 1, "state", "m h-1", 0, "node" }, // Output var  //runoff at timestep further converted using width func
+    { 45,  "num_sub_catchments",       "int", 1, "array_length", "none", "node", 0 }, //subcat.dat
+    { 46,  "max_atb_increments",       "int", 1, "array_length", "none", "node", 0 },
+    { 47,  "max_num_subcatchments",    "int", 1, "array_length", "none", "node", 0 },
+    { 48,  "max_time_delay_ordinates", "int", 1, "array_length", "none", "node", 0 },
+    { 49,  "Qout",                     "double", 1, "state", "m h-1", "node", 0 }, // Output var  //runoff at timestep further converted using width func
     //---------------------- 
     // BMI vars
     //----------------------    
-    { 50,  "current_time_step",        "int", 1, "time_info", "none", 0, "node" },    // BMI var
+    { 50,  "current_time_step",        "int", 1, "time_info", "none", "node", 0 },    // BMI var
     //-----------------
     // State var sums
     //-----------------
-    { 51,  "land_surface_water__domain_time_integral_of_precipitation_volume_flux", "double", 1, "diagnostic", "m", 0, "node" },
-    { 52,  "land_surface_water__domain_time_integral_of_evaporation_volume_flux",   "double", 1, "diagnostic", "m", 0, "node" },
-    { 53,  "land_surface_water__domain_time_integral_of_runoff_volume_flux",        "double", 1, "diagnostic", "m", 0, "node" },
-    { 54,  "soil_water__domain_root-zone_volume_deficit",                           "double", 1, "diagnostic", "m", 0, "node" },
-    { 55,  "soil_water__domain_unsaturated-zone_volume",                            "double", 1, "diagnostic", "m", 0, "node" },
+    { 51,  "land_surface_water__domain_time_integral_of_precipitation_volume_flux", "double", 1, "diagnostic", "m", "node", 0 },
+    { 52,  "land_surface_water__domain_time_integral_of_evaporation_volume_flux",   "double", 1, "diagnostic", "m", "node", 0 },
+    { 53,  "land_surface_water__domain_time_integral_of_runoff_volume_flux",        "double", 1, "diagnostic", "m", "node", 0 },
+    { 54,  "soil_water__domain_root-zone_volume_deficit",                           "double", 1, "diagnostic", "m", "node", 0 },
+    { 55,  "soil_water__domain_unsaturated-zone_volume",                            "double", 1, "diagnostic", "m", "node", 0 },
     //----------------------    
     // External/forcing vars
     //----------------------
-    { 56, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",             "double", 1, "output_to_file", "m", 0, "node" },
-    { 57, "land_surface_water__baseflow_volume_flux",                              "double", 1, "output_to_file", "m", 0, "node" },
-    { 58, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux", "double", 1, "output_to_file", "m h-1", 0, "node" },
-    { 59, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",        "double", 1, "output_to_file", "m h-1", 0, "node" },
-    { 60, "land_surface_water__potential_evaporation_volume_flux",                 "double", 1, "output_to_file", "m h-1", 0, "node" },
-    { 61, "stand_alone",                                                           "int",    1, "option", "none", 0, "node" }
+    { 56, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",             "double", 1, "output_to_file", "m", "node", 0 },
+    { 57, "land_surface_water__baseflow_volume_flux",                              "double", 1, "output_to_file", "m", "node", 0 },
+    { 58, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux", "double", 1, "output_to_file", "m h-1", "node", 0 },
+    { 59, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",        "double", 1, "output_to_file", "m h-1", "node", 0 },
+    { 60, "land_surface_water__potential_evaporation_volume_flux",                 "double", 1, "output_to_file", "m h-1", "node", 0 },
+    { 61, "stand_alone",                                                           "int",    1, "option", "none", "node", 0 }
     // { 62, "obs_values",      "double", 1 },    
     // { 63, "double_arr_test", "double", 3 }             
 };
@@ -1878,7 +1878,7 @@ static int Get_model_var_roles (Bmi *self, char ** roles)
     }
     return BMI_SUCCESS;
 }
-static int Get_model_var_count (Bmi *self, int * count, char *role)
+static int Get_model_var_count (Bmi *self, const char *role, int *count)
 {
     
     // If role is "all", don't filter just return VAR_NAME_COUNT
@@ -1951,7 +1951,7 @@ static int Get_model_var_count (Bmi *self, int * count, char *role)
 
 }
 
-static int Get_model_var_names (Bmi *self, char **names, char *role)
+static int Get_model_var_names (Bmi *self, const char *role, char **names)
 {
     
     // If role is "all", don't filter just return all

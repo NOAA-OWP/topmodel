@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>   // for access()
 #include "../include/bmi.h"
 #include "../include/bmi_topmodel.h"
 #include "../include/serialize_state.h"
+#include "../include/topmodel_serialize_test.h"
 
 /*
 This main program creates two instances of a BMI-enabled version of
@@ -80,11 +82,18 @@ int main(void)
   int verbose   = 1;
   int print_obj = 0;  // Set to 1 to print values after deserializing
   int n_state_vars;
-    
+  int result;
+  int test_getters = 0;
+  
+  char **names = NULL;
+  names = (char**) malloc (sizeof(char *) * n_state_vars);
+  for (int i=0; i<n_state_vars; i++){
+    names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+  }   
   //--------------------------------------------------------------   
   if (verbose){
-      puts(""); 
-      puts("Allocating memory for BMI TOPMODEL instances 1 & 2 ...");
+    puts(""); 
+    puts("Allocating memory for BMI TOPMODEL instances 1 & 2 ...");
   }
   Bmi *model1 = (Bmi *) malloc(sizeof(Bmi));
   Bmi *model2 = (Bmi *) malloc(sizeof(Bmi));
@@ -101,27 +110,141 @@ int main(void)
   model1->initialize(model1, cfg_file);
   model2->initialize(model2, cfg_file);
   
+  //-------------------------------------------------------------- 
+  if (test_getters){
+
+    int size, itemsize, nbytes, index, grid;
+    int count_all, count_input, count_output;
+    char *name = "stor_unsat_zone";  // index = 37
+    // char name[] = "stor_unsat_zone";  // Doesn't work.
+    char *role_all    = "all";
+    char *role_input  = "input_from_bmi";
+    char *role_output = "output_to_bmi";
+    //-------------------------------      
+    //char *type;
+    //char *role;
+    //char *location;
+    //------------------------------- 
+    char type[BMI_MAX_TYPE_NAME];
+    char role[BMI_MAX_ROLE_NAME];
+    char location[BMI_MAX_LOCATION_NAME];
+    char units[BMI_MAX_UNITS_NAME];
+    //------------------------------- 
+    puts("###############################################");      
+    puts("Testing bmi.get_model_var_count()...");
+    model1->get_model_var_count(model1, role_all, &count_all);
+    printf("  role  = %s\n", role_all);
+    printf("  count = %d\n", count_all);
+    puts("Testing bmi.get_model_var_count()...");      
+    model1->get_model_var_count(model1, role_input, &count_input);
+    printf("  role  = %s\n", role_input);
+    printf("  count = %d\n", count_input);
+    puts("Testing bmi.get_model_var_count()...");      
+    model1->get_model_var_count(model1, role_output, &count_output);
+    printf("  role  = %s\n", role_output);
+    printf("  count = %d\n", count_output);
+    //--------------------------------------------
+    puts("Testing bmi.get_model_var_names()...");
+    printf("  role = %s\n", role_all);
+    model1->get_model_var_names(model1, role_all, names);
+    for (int j=0; j<count_all; j++){
+      printf("  names[%d] = %s\n", j, names[j]);
+    }
+    //--------------------------------------------
+    puts("Testing bmi.get_model_var_names()...");
+    printf("  role = %s\n", role_input);
+    model1->get_model_var_names(model1, role_input, names);
+    for (int j=0; j<count_input; j++){
+      printf("  names[%d] = %s\n", j, names[j]);
+    }
+    //--------------------------------------------
+    puts(""); 
+    printf("Let name = %s\n", name);
+    //-------------------------------------------- 
+    //puts("Testing bmi.get_var_index()...");
+    //model1->get_var_index(model1, name, &index);
+    //printf("  index = %d\n", index);
+    //-------------------------------------------- 
+    puts("Testing bmi.get_var_grid()...");
+    model1->get_var_type(model1, name, &grid);
+    printf("  type = %s\n", grid);      
+    //-------------------------------------------- 
+    puts("Testing bmi.get_var_type()...");
+    model1->get_var_type(model1, name, type);
+    printf("  type = %s\n", type);
+    //-------------------------------------------- 
+    puts("Testing bmi.get_var_units()...");
+    model1->get_var_type(model1, name, units);
+    printf("  type = %s\n", units);      
+    //--------------------------------------------
+    puts("Testing bmi.get_var_role()...");
+    model1->get_var_role(model1, name, role);
+    printf("  role = %s\n", role);
+    //--------------------------------------------
+    puts("Testing bmi.get_var_length()...");
+    model1->get_var_length(model1, name, &size);
+    printf("  size = %d\n", size);       
+    //--------------------------------------------
+    // This one uses bmi.get_var_type().
+    puts("Testing bmi.get_var_itemsize()...");
+    model1->get_var_itemsize(model1, name, &itemsize);
+    printf("  itemsize = %d\n", itemsize);
+    //--------------------------------------------
+    // This one uses bmi.get_var_type().
+    puts("Testing bmi.get_var_nbytes()...");
+    model1->get_var_nbytes(model1, name, &nbytes);
+    printf("  nbytes = %d\n", nbytes);
+    //--------------------------------------------
+    puts("Testing bmi.get_var_location()...");
+    model1->get_var_location(model1, name, location);
+    printf("  location = %s\n", location);
+    //--------------------------------------------
+    puts("###############################################"); 
+    puts("");                     
+  }
   //--------------------------------------------------------------
   if (verbose){
-      puts("Updating TOPMODEL 1 ...");
-      printf("  n_steps1 = %i \n", n_steps1);
-      puts("");
+    puts("Updating TOPMODEL 1 ...");
+    printf("  n_steps1 = %i \n", n_steps1);
+    puts("");
   }
 
   for (int i=1; i<=n_steps1; i++){
-      model1->update(model1);
+    model1->update(model1);
   }
 
   //--------------------------------------------------------------  
   if (verbose){
-      //puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 1 ...");
-      puts("Calling BMI.get_value_ptr() OVER LOOP on TOPMODEL 1 ...");
+    puts("Calling get_state_var_count() on TOPMODEL model 1 ...");
+    //puts("Calling BMI.get_state_var_count() on TOPMODEL model 1 ...");
   }
 
-  // JG EDIT
-  //model1->get_state_var_count(model1, &n_state_vars);
-  model1->get_model_var_count(model1, &n_state_vars, "all");  
+  result = get_state_var_count(model1, &n_state_vars);
+  if (result == BMI_FAILURE){
+    puts("ERROR in get_state_var_count(); returning.");
+    return BMI_FAILURE;
+  }
+  //model1->get_state_var_count(model1, &n_state_vars);  
 
+  //--------------------------------------------------------------  
+  if (verbose){
+    puts("Calling get_state_var_names() on TOPMODEL model 1 ...");
+    //puts("Calling BMI.get_state_var_names() on TOPMODEL model 1 ...");
+  }
+
+  result = get_state_var_names(model1, names);
+  if (result == BMI_FAILURE){
+    puts("ERROR in get_state_var_names(); returning.");
+    return BMI_FAILURE;
+  }
+  //model1->get_state_var_names(model1, names); 
+  
+  //--------------------------------------------------------------  
+  if (verbose){
+    puts("Calling get_state_var_ptrs() on TOPMODEL model 1 ...");
+    //puts("Calling BMI.get_state_var_ptrs() on TOPMODEL model 1 ...");
+
+  }
   //---------------------------------------------
   // For testing:  All 3 print "8" on my MacPro
   //---------------------------------------------
@@ -134,29 +257,18 @@ int main(void)
   // See: https://stackoverflow.com/questions/7798383/
   //      array-of-pointers-to-multiple-types-c/7799543
   //--------------------------------------------------------------- 
-  
-  //----------------------------------------
-  // Get the state variable internal names
-  //----------------------------------------
-  char **names = NULL;
-  names = (char**) malloc (sizeof(char *) * n_state_vars);
-  for (int i=0; i<n_state_vars; i++){
-      names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-  }
-
-  model1->get_model_var_names(model1, names, "all");
-
-
   void *ptr_list[ n_state_vars ];
-  for (int k=0; k<n_state_vars; k++){
-    model1->get_value_ptr(model1, names[k], &ptr_list[k]);
+  result = get_state_var_ptrs(model1, names, ptr_list);
+  if (result == BMI_FAILURE){
+    puts("ERROR in get_state_var_ptrs(); returning.");
+    return BMI_FAILURE;
   }
   //model1->get_state_var_ptrs(model1, ptr_list);
 
   if (verbose){ print_some( ptr_list ); }
 
   //--------------------------------------------------------------  
-  if (verbose){ puts("Calling serialize() on TOPMODEL 1 ..."); }
+  if (verbose){ puts("Calling serialize() on TOPMODEL model 1 ..."); }
 
   //------------------------------------------------
   // Serialize Model1 state and save to:  ser_file
@@ -165,7 +277,7 @@ int main(void)
 
   //--------------------------------------------------------------
   if (verbose){
-      puts("Calling deserialize_to_state() on TOPMODEL 2 ...");
+    puts("Calling deserialize_to_state() on TOPMODEL model 2 ...");
   }
 
   //-----------------------------------------------
@@ -176,58 +288,78 @@ int main(void)
   
   //--------------------------------------------------------------
   if (verbose){
-      puts("Updating BMI TOPMODEL 2 ...");
-      printf("n_steps2 = %i \n", n_steps2);
-      puts("");
+    puts("Updating BMI TOPMODEL model 2 ...");
+    printf("n_steps2 = %i \n", n_steps2);
+    puts("");
   }
 
   for (int i=1; i<=n_steps2; i++){
-      model2->update(model2);
+    model2->update(model2);
   }
  
   //--------------------------------------------------------------
   if (verbose){
-      puts("Updating BMI TOPMODEL 1 ...");
-      printf("n_steps2 = %i \n", n_steps2);
-      puts("");
+    puts("Updating BMI TOPMODEL model 1 ...");
+    printf("n_steps2 = %i \n", n_steps2);
+    puts("");
   }
 
   for (int i=1; i<=n_steps2; i++){
-      model1->update(model1);
+    model1->update(model1);
   }
 
   //--------------------------------------------------------------  
   if (verbose){
-      puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 1 ...");
+    puts("Calling get_state_var_ptrs() on TOPMODEL model 1 ...");
+    //puts("Calling BMI.get_state_var_ptrs() on TOPMODEL model 1 ...");
   }
 
-  for (int k=0; k<n_state_vars; k++){
-    model1->get_value_ptr(model1, names[k], &ptr_list[k]);
+  result = get_state_var_ptrs(model1, names, ptr_list);
+  if (result == BMI_FAILURE){
+    puts("ERROR in get_state_var_ptrs(); returning.");
+    return BMI_FAILURE;
   }
-
   //model1->get_state_var_ptrs(model1, ptr_list);
 
   if (verbose){ print_some( ptr_list ); }
   
   //--------------------------------------------------------------  
   if (verbose){
-      puts("Calling BMI.get_state_var_ptrs() on TOPMODEL 2 ...");
+    puts("Calling get_state_var_ptrs() on TOPMODEL model 2 ...");
+    //puts("Calling BMI.get_state_var_ptrs() on TOPMODEL model 2 ...");
   }
 
-  for (int k=0; k<n_state_vars; k++){
-    model2->get_value_ptr(model2, names[k], &ptr_list[k]);
+  result = get_state_var_ptrs(model2, names, ptr_list);
+  if (result == BMI_FAILURE){
+    puts("ERROR in get_state_var_ptrs(); returning.");
+    return BMI_FAILURE;
   }
   //model2->get_state_var_ptrs(model2, ptr_list);
 
   if (verbose){ print_some( ptr_list ); }
+  
+  //--------------------------------------------------------------
+  if (verbose){
+    puts("Freeing memory...");
+  }
+    
+  //--------------------------------   
+  // Free memory for string arrays
+  //--------------------------------
+  for (int i=0; i<n_state_vars; i++){
+    free (names[i]);
+    //free (types[i]);
+  }
+  free (names);
+  //free (types);
 
   //--------------------------------------------------------------
-  if (verbose){ puts("Comparing TOPMODEL 1 & 2 state vars ..."); }
+  if (verbose){ puts("Comparing TOPMODEL model 1 & 2 state vars ..."); }
   
   compare_states( model1, model2 );
   
   //--------------------------------------------------------------
-  if (verbose){ puts("Finalizing BMI TOPMODELs 1 & 2 ..."); }
+  if (verbose){ puts("Finalizing BMI TOPMODEL models 1 & 2 ..."); }
 
   model1->finalize(model1);
   model2->finalize(model2);  
@@ -235,8 +367,6 @@ int main(void)
   if (verbose){ 
       puts("Finished with serialization test.\n");
   }
-
-  free(names);
   return 0;
 }
 
