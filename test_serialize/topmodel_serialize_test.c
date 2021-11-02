@@ -83,29 +83,24 @@ int main(void)
   int print_obj = 0;  // Set to 1 to print values after deserializing
   int n_state_vars;
   int result;
-  int test_getters = 0;
-  
-  char **names = NULL;
-  names = (char**) malloc (sizeof(char *) * n_state_vars);
-  for (int i=0; i<n_state_vars; i++){
-    names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-  }   
+  int test_getters = 1;
+   
   //--------------------------------------------------------------   
   if (verbose){
     puts(""); 
-    puts("Allocating memory for BMI TOPMODEL instances 1 & 2 ...");
+    puts("Allocating memory for BMI TOPMODEL models 1 & 2 ...");
   }
   Bmi *model1 = (Bmi *) malloc(sizeof(Bmi));
   Bmi *model2 = (Bmi *) malloc(sizeof(Bmi));
 
   //--------------------------------------------------------------
-  if (verbose){ puts("Registering TOPMODELs 1 & 2 ..."); }
+  if (verbose){ puts("Registering TOPMODEL models 1 & 2 ..."); }
 
   register_bmi_topmodel(model1);
   register_bmi_topmodel(model2);
 
   //--------------------------------------------------------------
-  if (verbose){ puts("Initializing TOPMODELs 1 & 2 ..."); }
+  if (verbose){ puts("Initializing TOPMODEL models 1 & 2 ..."); }
 
   model1->initialize(model1, cfg_file);
   model2->initialize(model2, cfg_file);
@@ -146,6 +141,13 @@ int main(void)
     //--------------------------------------------
     puts("Testing bmi.get_model_var_names()...");
     printf("  role = %s\n", role_all);
+    
+    char **names = NULL;
+    names = (char**) malloc (sizeof(char *) * count_all);
+    for (int i=0; i<count_all; i++){
+      names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+    }  
+
     model1->get_model_var_names(model1, role_all, names);
     for (int j=0; j<count_all; j++){
       printf("  names[%d] = %s\n", j, names[j]);
@@ -166,16 +168,16 @@ int main(void)
     //printf("  index = %d\n", index);
     //-------------------------------------------- 
     puts("Testing bmi.get_var_grid()...");
-    model1->get_var_type(model1, name, &grid);
-    printf("  type = %s\n", grid);      
+    model1->get_var_grid(model1, name, &grid);
+    printf("  grid = %d\n", grid);      
     //-------------------------------------------- 
     puts("Testing bmi.get_var_type()...");
     model1->get_var_type(model1, name, type);
     printf("  type = %s\n", type);
     //-------------------------------------------- 
     puts("Testing bmi.get_var_units()...");
-    model1->get_var_type(model1, name, units);
-    printf("  type = %s\n", units);      
+    model1->get_var_units(model1, name, units);
+    printf("  units = %s\n", units);      
     //--------------------------------------------
     puts("Testing bmi.get_var_role()...");
     model1->get_var_role(model1, name, role);
@@ -204,7 +206,7 @@ int main(void)
   }
   //--------------------------------------------------------------
   if (verbose){
-    puts("Updating TOPMODEL 1 ...");
+    puts("Updating TOPMODEL model 1 ...");
     printf("  n_steps1 = %i \n", n_steps1);
     puts("");
   }
@@ -231,6 +233,12 @@ int main(void)
     puts("Calling get_state_var_names() on TOPMODEL model 1 ...");
     //puts("Calling BMI.get_state_var_names() on TOPMODEL model 1 ...");
   }
+
+  char **names = NULL;
+  names = (char**) malloc (sizeof(char *) * n_state_vars);
+  for (int i=0; i<n_state_vars; i++){
+    names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+  }  
 
   result = get_state_var_names(model1, names);
   if (result == BMI_FAILURE){
