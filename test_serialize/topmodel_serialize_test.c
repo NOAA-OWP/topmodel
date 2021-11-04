@@ -76,7 +76,7 @@ int print_some(void *ptr_list[]){
 //------------------------------------------------------------------------
 int main(void)
 {
-  const char *cfg_file = "./data/topmod.run";
+  const char *cfg_file = "./data/topmod_serial.run";
   const char *ser_file = "./model_state.ser";  // make arg later
   int n_steps1  = 10; // n_steps for Model1 before serializing
   int n_steps2  = 50; // n_steps for models after deserializing
@@ -402,10 +402,10 @@ int main(void)
   compare_states( model1, model2 );
   
   //--------------------------------------------------------------
-  if (verbose){ puts("Finalizing BMI TOPMODEL models 1 & 2 ..."); }
+  //if (verbose){ puts("Finalizing BMI TOPMODEL models 1 & 2 ..."); }
 
   model1->finalize(model1);
-  if (verbose){ puts("Finalizing BMI TOPMODEL 1 ..."); } //Prints
+  if (verbose){ puts("Finalized BMI TOPMODEL 1 ..."); } //Prints
   model2->finalize(model2);
   if (verbose){ puts("Finalizing BMI TOPMODEL 2 ..."); } //DOES NOT PRINT 
 

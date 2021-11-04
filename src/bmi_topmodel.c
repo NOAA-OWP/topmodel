@@ -1047,7 +1047,7 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //              FILE_OFFSET
     //-------------------------------------
     else if (strcmp (name, "control_fptr") == 0) {
-        *dest = (void*)topmodel-> control_fptr;
+        *dest = (void*)&topmodel-> control_fptr;
     }
     else if (strcmp (name, "input_fptr") == 0) {
         *dest = (void*)&topmodel-> input_fptr;
@@ -1083,19 +1083,19 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //      defs here speak to "scalar"  
     //      TODO: add logic to only apply these defs for framework runs 
     else if (strcmp (name, "water_potential_evaporation_flux") == 0) {
-        *dest = (void*)&topmodel-> pe[1];
+        *dest = (void*)topmodel-> pe;
         //*dest = (void*)(topmodel->pe + topmodel->current_time_step);
     }
 
     else if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
-        *dest = (void*)&topmodel->rain[1];
+        *dest = (void*)topmodel->rain;
     }
 
     //-------------------------------------
     //           INPUT_FROM_FILE    
     //-------------------------------------
     else if (strcmp (name, "Qobs") == 0) {
-        *dest = (void*)&topmodel->Qobs[1];
+        *dest = (void*)topmodel->Qobs;
     }
 
     //-------------------------------------
@@ -1126,7 +1126,7 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //-------------------------------------
     // Q[it]
     else if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
-        *dest = (void*)&topmodel-> Q[1];
+        *dest = (void*)topmodel-> Q;
     }
     // sbar
     else if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
@@ -1203,7 +1203,7 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> tl;
     }
     else if (strcmp (name, "time_delay_histogram") == 0) {
-        *dest = (void*)&topmodel-> time_delay_histogram;
+        *dest = (void*)topmodel-> time_delay_histogram;
     }
     else if (strcmp (name, "dist_area_lnaotb") == 0) {
         *dest = (void*)topmodel-> dist_area_lnaotb;
@@ -1212,10 +1212,10 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)topmodel-> lnaotb;
     }
     else if (strcmp (name, "cum_dist_area_with_dist") == 0) {
-        *dest = (void*)&topmodel-> cum_dist_area_with_dist;
+        *dest = (void*)topmodel-> cum_dist_area_with_dist;
     }
     else if (strcmp (name, "dist_from_outlet") == 0) {
-        *dest = (void*)&topmodel-> dist_from_outlet;
+        *dest = (void*)topmodel-> dist_from_outlet;
     }
     else if (strcmp (name, "max_contrib_area") == 0) {
         *dest = (void*)&topmodel-> max_contrib_area;
