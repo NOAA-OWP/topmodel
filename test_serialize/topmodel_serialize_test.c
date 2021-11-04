@@ -59,6 +59,7 @@ int print_some(void *ptr_list[]){
   printf("ptr_list[8]  = dt     = %f\n", *(double *)ptr_list[8]);
   printf("ptr_list[9]  = nstep  = %d\n", *(int *)ptr_list[9]);
   printf("ptr_list[32] = Q      = %f\n", *(double *)ptr_list[32]);
+  printf("ptr_list[37] = stor_unsat_zone      = %f\n", *(double *)ptr_list[37]);
   printf("ptr_list[42] = lnaotb = %f\n", *(double *)ptr_list[42]);
   printf("ptr_list[50] = cur_tstep = %d\n", *(int *)ptr_list[50]);
   printf("ptr_list[51] = sump   = %f\n", *(double *)ptr_list[51]);
@@ -80,7 +81,7 @@ int main(void)
   int n_steps1  = 10; // n_steps for Model1 before serializing
   int n_steps2  = 50; // n_steps for models after deserializing
   int verbose   = 1;
-  int print_obj = 0;  // Set to 1 to print values after deserializing
+  int print_obj = 1;  // Set to 1 to print values after deserializing
   int n_state_vars;
   int result;
   int test_getters = 1;
@@ -110,7 +111,7 @@ int main(void)
 
     int size, itemsize, nbytes, index, grid;
     int count_all, count_input, count_output;
-    char *name = "stor_unsat_zone";  // index = 37
+    char *name = "soil_water__domain_unsaturated-zone_volume";  // index = 37
     // char name[] = "stor_unsat_zone";  // Doesn't work.
     char *role_all    = "all";
     char *role_input  = "input_from_bmi";
@@ -139,29 +140,63 @@ int main(void)
     printf("  role  = %s\n", role_output);
     printf("  count = %d\n", count_output);
     //--------------------------------------------
-    puts("Testing bmi.get_model_var_names()...");
-    printf("  role = %s\n", role_all);
-    
-    char **names = NULL;
-    names = (char**) malloc (sizeof(char *) * count_all);
-    for (int i=0; i<count_all; i++){
-      names[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-    }  
-
-    model1->get_model_var_names(model1, role_all, names);
-    for (int j=0; j<count_all; j++){
-      printf("  names[%d] = %s\n", j, names[j]);
-    }
-    //--------------------------------------------
-    puts("Testing bmi.get_model_var_names()...");
-    printf("  role = %s\n", role_input);
-    model1->get_model_var_names(model1, role_input, names);
-    for (int j=0; j<count_input; j++){
-      printf("  names[%d] = %s\n", j, names[j]);
-    }
-    //--------------------------------------------
-    puts(""); 
-    printf("Let name = %s\n", name);
+      //--------------------------------------------
+      // Alloc mem for names array role_all
+      char **names_test_all = NULL;
+      names_test_all = (char**) malloc (sizeof(char *) * count_all);
+        for (int i=0; i<count_all; i++){
+      names_test_all[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+      }
+      // Populate array via get_model_var_names(role_all)
+      puts("Testing bmi.get_model_var_names()...");
+      printf("  role = %s\n", role_all);
+      model1->get_model_var_names(model1, role_all, names_test_all);
+      for (int j=0; j<count_all; j++){
+          printf("  names_test_all[%d] = %s\n", j, names_test_all[j]);
+      }
+      // Free mem
+      for (int n=0; n<count_all; n++){
+          free (names_test_all[n]);
+      }
+      free (names_test_all);
+      //--------------------------------------------
+      // Alloc mem for names array role_input
+      char **names_test_input = NULL;
+      names_test_input = (char**) malloc (sizeof(char *) * count_input);
+        for (int i=0; i<count_input; i++){
+      names_test_input[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+      }
+      // Populate array via get_model_var_names(role_input)
+      puts("Testing bmi.get_model_var_names()...");
+      printf("  role = %s\n", role_input);
+      model1->get_model_var_names(model1, role_input, names_test_input);
+      for (int j=0; j<count_input; j++){
+          printf("  names_test_input[%d] = %s\n", j, names_test_input[j]);
+      }
+      // Free mem
+      for (int n=0; n<count_input; n++){
+          free (names_test_input[n]);
+      }
+      free (names_test_input);
+      //--------------------------------------------
+      // Alloc mem for names array role_output
+      char **names_test_output = NULL;
+      names_test_output = (char**) malloc (sizeof(char *) * count_output);
+        for (int i=0; i<count_output; i++){
+      names_test_output[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
+      }
+      // Populate array via get_model_var_names(role_output)
+      puts("Testing bmi.get_model_var_names()...");
+      printf("  role = %s\n", role_output);
+      model1->get_model_var_names(model1, role_output, names_test_output);
+      for (int j=0; j<count_output; j++){
+          printf("  names_test_output[%d] = %s\n", j, names_test_output[j]);
+      }
+      // Free mem
+      for (int n=0; n<count_output; n++){
+          free (names_test_output[n]);
+      }
+      free (names_test_output);
     //-------------------------------------------- 
     //puts("Testing bmi.get_var_index()...");
     //model1->get_var_index(model1, name, &index);
@@ -370,7 +405,9 @@ int main(void)
   if (verbose){ puts("Finalizing BMI TOPMODEL models 1 & 2 ..."); }
 
   model1->finalize(model1);
-  model2->finalize(model2);  
+  if (verbose){ puts("Finalizing BMI TOPMODEL 1 ..."); } //Prints
+  model2->finalize(model2);
+  if (verbose){ puts("Finalizing BMI TOPMODEL 2 ..."); } //DOES NOT PRINT 
 
   if (verbose){ 
       puts("Finished with serialization test.\n");

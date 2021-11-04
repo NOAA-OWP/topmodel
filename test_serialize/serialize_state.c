@@ -665,7 +665,7 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
         strncpy( name, names[i], BMI_MAX_VAR_NAME);
         size = sizes[i];
 
-        // printf("type = %s\n", type);
+        printf("name = %s\n", name);
         if (strchr(type, '*') != NULL){
             type[strlen(type)-1] = '\0';  // remove last char
         }
@@ -739,7 +739,11 @@ int deserialize_to_state(const char *ser_file, Bmi* model2, int print_obj) {
                     d_arr[j] = obj.via.array.ptr[j].via.f64; }
                 model2->set_value(model2, name, d_arr );
                 free(d_arr);
-            }
+            } 
+/*            else {
+                ptr = obj.via.array.ptr;
+                model2->set_value(model2, name, ptr);
+            }*/
             
             // For testing
             //printf("### obj.via.array.ptr[0].via.f64 = %f\n", obj.via.array.ptr[0].via.f64);

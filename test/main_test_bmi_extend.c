@@ -94,7 +94,6 @@ main(void){
     int count_model_var = 0; //"all"
     int count_tmp = 0; //loop
     int count_model_var_roles = 17;  // this is hard-coded for now
-    //char **names_all = NULL; //state
     char **names_model_var = NULL; //"all"
     char **names_model_var_roles = NULL;
     char **names_tmp = NULL; //loop
@@ -123,7 +122,7 @@ main(void){
     for (j=0; j<count_model_var_roles; j++){
         // Test get_model_var_count(some_role)
         {
-            status = model->get_model_var_count(model, &count_model_var, names_model_var_roles [j]);
+            status = model->get_model_var_count(model, names_model_var_roles [j], &count_model_var);
             if (status == BMI_FAILURE ) return BMI_FAILURE;
             printf(" get_model_var_count(%s): %i\n", names_model_var_roles [j], count_model_var);
 
@@ -133,7 +132,7 @@ main(void){
             names_tmp = (char**) malloc (sizeof(char *) * count_model_var);
             for (i=0; i<count_model_var; i++)
                 names_tmp[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-            status = model->get_model_var_names(model, names_tmp, names_model_var_roles [j]);
+            status = model->get_model_var_names(model, names_model_var_roles [j], names_tmp);
             if (status == BMI_FAILURE) return BMI_FAILURE;
             printf( " get_model_var_names(%s):\n", names_model_var_roles [j]);
             for (i=0; i<count_model_var; i++)
@@ -144,73 +143,28 @@ main(void){
     
     free(names_model_var_roles); //don't need list of roles anymore
     
-    // Check get_model_var_count("all") when null string passed
+    // Check get_model_var_count("all")
     {
-        status = model->get_model_var_count(model, &count_model_var, "all");
+        status = model->get_model_var_count(model, "all", &count_model_var);
         if (status == BMI_FAILURE ) return BMI_FAILURE;
         printf(" get_model_var_count(all): %i\n", count_model_var);
     }
-
-/*    // Test get_state_var_count()
-    {
-        status = model->get_state_var_count(model, &count_all);
-        if (status == BMI_FAILURE ) return BMI_FAILURE;
-        printf(" state var count: %i\n", count_all);
-    }
-    // Test get_state_var_names()
-    { 
-        names_all = (char**) malloc (sizeof(char *) * count_all);
-        for (i=0; i<count_all; i++)
-            names_all[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-        status = model->get_state_var_names(model, names_all);
-        if (status == BMI_FAILURE) return BMI_FAILURE;
-        printf( " state variable names:\n");
-        for (i=0; i<count_all; i++)
-            printf("  %i %s\n", i, names_all[i]);
-        //free(names_all);
-    }*/
 
     // Test get_model_var_names("all")
     { 
         names_model_var = (char**) malloc (sizeof(char *) * count_model_var);
         for (i=0; i<count_model_var; i++)
             names_model_var[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-        status = model->get_model_var_names(model, names_model_var, "all");
+        status = model->get_model_var_names(model, "all", names_model_var);
         if (status == BMI_FAILURE) return BMI_FAILURE;
         printf( " get_model_var_names(all):\n");
         for (i=0; i<count_model_var; i++)
             printf("  %i %s\n", i, names_model_var[i]);
         //free(names_model_var);
     }
-/*    // Test get_model_var_names(input)
-    { 
-        names_in = (char**) malloc (sizeof(char *) * count_in);
-        for (i=0; i<count_in; i++)
-            names_in[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-        status = model->get_model_var_names(model, names_in, "input");
-        if (status == BMI_FAILURE) return BMI_FAILURE;
-        printf( " get_model_var_names(input):\n");
-        for (i=0; i<count_in; i++)
-            printf("  %i %s\n", i, names_in[i]);
-        //free(names_in);
-    }
-    // Test get_model_var_names(output)
-    { 
-        names_out = (char**) malloc (sizeof(char *) * count_out);
-        for (i=0; i<count_out; i++)
-            names_out[i] = (char*) malloc (sizeof(char) * BMI_MAX_VAR_NAME);
-        status = model->get_model_var_names(model, names_out, "output");
-        if (status == BMI_FAILURE) return BMI_FAILURE;
-        printf( " get_model_var_names(output):\n");
-        for (i=0; i<count_out; i++)
-            printf("  %i %s\n", i, names_out[i]);
-        //free(names_out);
-    }*/
-
-
 
     // Test BMI: VARIABLE INFORMATION FUNCTIONS
-    //printf("\nTEST BMI VARIABLE INFORMATION FUNCTIONS\n*****************************************\n");
+    printf("\nTEST BMI VARIABLE INFORMATION FUNCTIONS\n*****************************************\n");
     int grid, itemsize, nbytes, length;
     char type[BMI_MAX_TYPE_NAME];
     char location[BMI_MAX_LOCATION_NAME];
@@ -218,7 +172,7 @@ main(void){
     char role[BMI_MAX_ROLE_NAME];
 
     // Loop through some variables and call get_var_*()
-    for (i=37; i<40; i++){
+    for (i=55; i<56; i++){
         const char *var_name = names_model_var[i];
         printf( " %s\n", var_name);
         // Test get_var_grid()
@@ -292,15 +246,15 @@ main(void){
     for (i=0; i<count_model_var; i++){
 
         const char *var_name = names_model_var[i]; //this is all of them
-        //printf( "  %s\n", var_name);
+        printf( " [%i] %s\n",i, var_name);
         int len = 1;
         int inds = 0;
-        //double *dest = NULL;
+        double *ddest = NULL;
+        int *idest = NULL;
+        //char *cdest = NULL;
 
         // The return setup will depend on role
         model->get_var_role(model, var_name, role);
-
-
 
         //-------------------------------------
         //      ARRAY_LENGTH  &  OPTION
@@ -312,7 +266,7 @@ main(void){
                 var = malloc (sizeof (int)*len);
                 status = model->get_value(model, var_name, var);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
-                printf(" [%i] get_value(%s): %i\n",i,var_name, var[0]);
+                printf("  get_value(): %i\n", var[0]);
                 free(var);
 
             }
@@ -321,7 +275,15 @@ main(void){
                 int *var_ptr;
                 status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %i\n",i,var_name,*var_ptr);
+                printf("  get_value_ptr(): %i\n",*var_ptr);
+            }
+            // Test get_value_at_indices()
+            { 
+                idest = malloc (sizeof (int)*len);
+                status = model->get_value_at_indices(model, var_name, idest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("  get_value_at_indices(): %i\n",idest[0]);
+                free(idest);
             }
             printf("\n");
         } 
@@ -336,7 +298,7 @@ main(void){
                 var = malloc (sizeof (double)*len);
                 status = model->get_value(model, var_name, var);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
-                printf(" [%i] get_value(%s): %f\n",i,var_name, var[0]);
+                printf("  get_value(): %f\n",var[0]);
                 free(var);
 
             }
@@ -345,7 +307,15 @@ main(void){
                 double *var_ptr;
                 status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+                printf("  get_value_ptr(): %f\n",var_ptr);
+            }
+            // Test get_value_at_indices()
+            { 
+                ddest = malloc (sizeof (double)*len);
+                status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("  get_value_at_indices(): %f\n",ddest[0]);
+                free(ddest);
             }
             printf("\n");
         }     
@@ -359,7 +329,7 @@ main(void){
                 char *var_info[BMI_MAX_VAR_NAME];
                 status = model->get_value(model, var_name, &var_info);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
-                printf(" [%i] get_value(%s): %s\n",i,var_name, var_info);
+                printf("  get_value(): %s", var_info);
 
             }
             // Test get_value_ptr()
@@ -368,8 +338,16 @@ main(void){
                 status = model->get_value_ptr(model, var_name, (void**)(&info));
                 //this_info = (char*) dest;
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %s",i,var_name,info);
+                printf("  get_value_ptr(): %s",info);
 
+            }
+            // Test get_value_at_indices()
+            { 
+                char *ivar_info[BMI_MAX_VAR_NAME];
+                status = model->get_value_at_indices(model, var_name, &ivar_info, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("  get_value_at_indices(): %s",ivar_info);
+                //free(cdest);
             }
             printf("\n");
         }
@@ -385,7 +363,7 @@ main(void){
                 var = malloc (sizeof (double)*len);
                 status = model->get_value(model, var_name, var);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
-                printf(" [%i] get_value(%s): %f\n",i,var_name, var[0]);
+                printf("  get_value(): %f\n", var[0]);
                 free(var);
 
             }
@@ -394,7 +372,15 @@ main(void){
                 double *var_ptr;
                 status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+                printf("  get_value_ptr(): %f\n",var_ptr);
+            }
+            // Test get_value_at_indices()
+            { 
+                ddest = malloc (sizeof (double)*len);
+                status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("  get_value_at_indices(): %f\n",ddest[0]);
+                free(ddest);
             }
             printf("\n");
         }    
@@ -409,7 +395,7 @@ main(void){
                 var = malloc (sizeof (double)*len);
                 status = model->get_value(model, var_name, var);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
-                printf(" [%i] get_value(%s): %f\n",i,var_name,var[0]);
+                printf("  get_value(): %f\n",var[0]);
                 free(var);
 
             }            
@@ -418,7 +404,15 @@ main(void){
                 double *var_ptr;
                 status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+                printf("  get_value_ptr(): %f\n",var_ptr);
+            }
+            // Test get_value_at_indices()
+            { 
+                ddest = malloc (sizeof (double)*len);
+                status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("  get_value_at_indices(): %f\n",ddest[0]);
+                free(ddest);
             }
             printf("\n");
         } 
@@ -427,14 +421,36 @@ main(void){
         //             FILE_OFFSET
         //-------------------------------------
         if (strcmp(role,"file_offset") == 0){
+            // Test get_value()
+            {
+                double *var;
+                var = malloc (sizeof (double)*len);
+                status = model->get_value(model, var_name, var);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                //printf("  get_value(): %f\n",var);
+                printf("  get_value(): BMI SUCCESS\n");
+                free(var);
+
+            }              
             // Test get_value_ptr()
             {
                 double *fptr;
                 status = model->get_value_ptr(model, var_name, (void**)(&fptr));
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,*fptr);
-                //printf(" [%i] get_value_ptr(%s): BMI SUCCESS\n", i, var_name);
+                //printf("  get_value_ptr(): %s\n",*fptr);
+                //printf("  get_value_ptr(): %f\n",*fptr);
+                printf("  get_value_ptr(): BMI SUCCESS\n");
             }
+            // Test get_value_at_indices()
+            { 
+                ddest = malloc (sizeof (double)*len);
+                status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                //printf("  get_value_at_indices(): %f\n",ddest[0]);
+                printf("  get_value_at_indices(): BMI SUCCESS\n");
+                free(ddest);
+            }
+
             printf("\n");
         }
         
@@ -448,7 +464,7 @@ main(void){
                 var = malloc (sizeof (double)*len);
                 status = model->get_value(model, var_name, var);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
-                printf(" [%i] get_value(%s): %f\n",i,var_name, var[0]);
+                printf("  get_value(): %f\n", var[0]);
                 free(var);
 
             }
@@ -457,7 +473,15 @@ main(void){
                 double *var_ptr;
                 status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+                printf("  get_value_ptr(): %f\n",var_ptr);
+            }
+            // Test get_value_at_indices()
+            { 
+                ddest = malloc (sizeof (double)*len);
+                status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("  get_value_at_indices(): %f\n",ddest[0]);
+                free(ddest);
             }
             printf("\n");
         }
@@ -475,7 +499,7 @@ main(void){
 
                     status = model->get_value(model, var_name, iparam);
                     if (status == BMI_FAILURE) return BMI_FAILURE;
-                    printf(" [%i] get_value(%s): %i\n",i,var_name, iparam[0]);                    
+                    printf("  get_value(): %i\n", iparam[0]);                    
                     free(iparam);
                 } 
                 else {
@@ -484,7 +508,7 @@ main(void){
 
                     status = model->get_value(model, var_name, dparam);
                     if (status == BMI_FAILURE) return BMI_FAILURE;
-                    printf(" [%i] get_value(%s): %f\n",i,var_name, dparam[0]);                    
+                    printf("  get_value(): %f\n", dparam[0]);                    
                     free(dparam);                    
                 }   
 
@@ -496,13 +520,31 @@ main(void){
                     int *param_ptr0;
                     status = model->get_value_ptr(model, var_name, (void**)(&param_ptr0));
                     if (status == BMI_FAILURE)return BMI_FAILURE; 
-                    printf(" [%i] get_value_ptr(%s): %i\n",i,var_name,*param_ptr0);
+                    printf("  get_value_ptr(): %i\n",*param_ptr0);
                 }
                 else {
                     double *param_ptr1;
                     status = model->get_value_ptr(model, var_name, (void**)(&param_ptr1));
                     if (status == BMI_FAILURE)return BMI_FAILURE; 
-                    printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,param_ptr1);
+                    printf("  get_value_ptr(): %f\n",param_ptr1);
+                }
+            }
+            // Test get_value_at_indices()
+            {
+                //this is a cheat - these vars are type int
+                if ((i==12) | (i==13)){
+                    idest = malloc (sizeof (int)*len);
+                    status = model->get_value_at_indices(model, var_name, idest, &inds, len);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf("  get_value_at_indices(): %i\n",idest[0]);
+                    free(idest);
+                }
+                else {
+                    ddest = malloc (sizeof (double)*len);
+                    status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf("  get_value_at_indices(): %f\n",ddest[0]);
+                    free(ddest);
                 }
             }
             printf("\n");
@@ -518,7 +560,7 @@ main(void){
                 var = malloc (sizeof (double)*len);
                 status = model->get_value(model, var_name, var);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
-                printf(" [%i] get_value(%s): %f\n",i,var_name,var[0]);
+                printf("  get_value(): %f\n",var[0]);
                 free(var);
 
             }            
@@ -527,7 +569,15 @@ main(void){
                 double *var_ptr;
                 status = model->get_value_ptr(model, var_name, (void**)(&var_ptr));
                 if (status == BMI_FAILURE)return BMI_FAILURE;
-                printf(" [%i] get_value_ptr(%s): %f\n",i,var_name,var_ptr);
+                printf("  get_value_ptr(): %f\n",var_ptr);
+            }
+            // Test get_value_at_indices()
+            { 
+                ddest = malloc (sizeof (double)*len);
+                status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                if (status == BMI_FAILURE) return BMI_FAILURE;
+                printf("  get_value_at_indices(): %f\n",ddest[0]);
+                free(ddest);
             }
             printf("\n");
         }
@@ -545,7 +595,7 @@ main(void){
 
                     status = model->get_value(model, var_name, dt);
                     if (status == BMI_FAILURE) return BMI_FAILURE;
-                    printf(" [%i] get_value(%s): %f\n",i,var_name, dt[0]);                    
+                    printf("  get_value(): %f\n", dt[0]);                    
                     free(dt);
                 } 
                 else {
@@ -554,7 +604,7 @@ main(void){
 
                     status = model->get_value(model, var_name, itime);
                     if (status == BMI_FAILURE) return BMI_FAILURE;
-                    printf(" [%i] get_value(%s): %i\n",i,var_name, itime[0]);                    
+                    printf("  get_value(): %i\n", itime[0]);                    
                     free(itime);                    
                 }   
 
@@ -566,13 +616,31 @@ main(void){
                     double *dt_ptr;
                     status = model->get_value_ptr(model, var_name, (void**)(&dt_ptr));
                     if (status == BMI_FAILURE)return BMI_FAILURE; 
-                    printf(" [%i] get_value_ptr(%s): %f\n",i,var_name, *dt_ptr);
+                    printf("  get_value_ptr(): %f\n", *dt_ptr);
                 }
                 else {
                     int *itime_ptr;
                     status = model->get_value_ptr(model, var_name, (void**)(&itime_ptr));
                     if (status == BMI_FAILURE)return BMI_FAILURE; 
-                    printf(" [%i] get_value_ptr(%s): %i\n",i,var_name,*itime_ptr);
+                    printf("  get_value_ptr(): %i\n",*itime_ptr);
+                }
+            }
+            // Test get_value_at_indices()
+            {
+                //dt type double
+                if (i ==8){
+                    ddest = malloc (sizeof (double)*len);
+                    status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf("  get_value_at_indices(): %f\n",ddest[0]);
+                    free(ddest);
+                }
+                else {
+                    idest = malloc (sizeof (int)*len);
+                    status = model->get_value_at_indices(model, var_name, idest, &inds, len);
+                    if (status == BMI_FAILURE) return BMI_FAILURE;
+                    printf("  get_value_at_indices(): %i\n",idest[0]);
+                    free(idest);
                 }
             }
             printf("\n");

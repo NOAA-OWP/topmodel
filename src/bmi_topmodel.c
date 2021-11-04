@@ -576,18 +576,20 @@ static int Update_until (Bmi *self, double t)
         return BMI_FAILURE;
 
     {
-      int n;
-      double frac;
-      const double n_steps = (t - now) / dt;
-      for (n=0; n<(int)n_steps; n++) {
+    
+    int n;
+    double frac;
+    const double n_steps = (t - now) / dt;
+    for (n=0; n<(int)n_steps; n++) {
         Update(self);
-      }
-
-      frac = n_steps - (int)n_steps;
-      ((topmodel_model *)self->data)->dt = frac * dt;
-      Update (self);
-      ((topmodel_model *)self->data)->dt = dt;
-
+    }
+    frac = n_steps - (int)n_steps;
+    if (frac > 0){
+        ((topmodel_model *)self->data)->dt = frac * dt;
+        Update (self);
+        ((topmodel_model *)self->data)->dt = dt;
+    }
+    
     }
 
     return BMI_SUCCESS;
@@ -1204,10 +1206,10 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> time_delay_histogram;
     }
     else if (strcmp (name, "dist_area_lnaotb") == 0) {
-        *dest = (void*)&topmodel-> dist_area_lnaotb;
+        *dest = (void*)topmodel-> dist_area_lnaotb;
     }
     else if (strcmp (name, "lnaotb") == 0) {
-        *dest = (void*)&topmodel-> lnaotb;
+        *dest = (void*)topmodel-> lnaotb;
     }
     else if (strcmp (name, "cum_dist_area_with_dist") == 0) {
         *dest = (void*)&topmodel-> cum_dist_area_with_dist;
@@ -1268,16 +1270,16 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> sr0;
     }
     else if (strcmp (name, "contrib_area") == 0) {
-        *dest = (void*)&topmodel-> contrib_area;
+        *dest = (void*)topmodel-> contrib_area;
     }
     else if (strcmp (name, "stor_unsat_zone") == 0) {
-        *dest = (void*)&topmodel-> stor_unsat_zone;
+        *dest = (void*)topmodel-> stor_unsat_zone;
     }
     else if (strcmp (name, "deficit_root_zone") == 0) {
-        *dest = (void*)&topmodel-> deficit_root_zone;
+        *dest = (void*)topmodel-> deficit_root_zone;
     }
     else if (strcmp (name, "deficit_local") == 0) {
-        *dest = (void*)&topmodel-> deficit_local;
+        *dest = (void*)topmodel-> deficit_local;
     }
     else if (strcmp (name, "Qout") == 0) {
         *dest = (void*)&topmodel-> Qout;
@@ -1348,17 +1350,53 @@ static int Get_value(Bmi * self, const char * name, void *dest)
 
 static int Set_value (Bmi *self, const char *name, void *array)
 {
+    
     void * dest = NULL;
     int nbytes = 0;
 
     if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
-        return BMI_FAILURE;
+    return BMI_FAILURE;
 
     if (self->get_var_nbytes(self, name, &nbytes) == BMI_FAILURE)
-        return BMI_FAILURE;
+    return BMI_FAILURE;
 
     memcpy (dest, array, nbytes);
 
+/*    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+    
+    if (strcmp (name, "control_fptr") == 0) {
+        topmodel->control_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "input_fptr") == 0) {
+        topmodel->input_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "subcat_fptr") == 0) {
+        topmodel->subcat_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "params_fptr") == 0) {
+        topmodel->params_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "output_fptr") == 0) {
+        topmodel->output_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "out_hyd_fptr") == 0) {
+        topmodel->out_hyd_fptr = fopen("/dev/null", "w");
+    }
+    else {
+
+        void * dest = NULL;
+        int nbytes = 0;
+
+        if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
+            return BMI_FAILURE;
+
+        if (self->get_var_nbytes(self, name, &nbytes) == BMI_FAILURE)
+            return BMI_FAILURE;
+
+        memcpy (dest, array, nbytes);
+    }
+*/
     return BMI_SUCCESS;
 }
 
