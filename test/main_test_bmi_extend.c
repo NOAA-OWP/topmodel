@@ -422,7 +422,7 @@ main(void){
         //-------------------------------------
         if (strcmp(role,"file_offset") == 0){
             // Test get_value()
-            {
+/*            {
                 double *var;
                 var = malloc (sizeof (double)*len);
                 status = model->get_value(model, var_name, var);
@@ -431,7 +431,7 @@ main(void){
                 printf("  get_value(): BMI SUCCESS\n");
                 free(var);
 
-            }              
+            }  */            
             // Test get_value_ptr()
             {
                 double *fptr;
@@ -442,14 +442,14 @@ main(void){
                 printf("  get_value_ptr(): BMI SUCCESS\n");
             }
             // Test get_value_at_indices()
-            { 
+/*            { 
                 ddest = malloc (sizeof (double)*len);
                 status = model->get_value_at_indices(model, var_name, ddest, &inds, len);
                 if (status == BMI_FAILURE) return BMI_FAILURE;
                 //printf("  get_value_at_indices(): %f\n",ddest[0]);
                 printf("  get_value_at_indices(): BMI SUCCESS\n");
                 free(ddest);
-            }
+            }*/
 
             printf("\n");
         }

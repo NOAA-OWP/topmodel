@@ -1047,22 +1047,22 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
     //              FILE_OFFSET
     //-------------------------------------
     else if (strcmp (name, "control_fptr") == 0) {
-        *dest = (void*)&topmodel-> control_fptr;
+        *dest = (void*)topmodel-> control_fptr;
     }
     else if (strcmp (name, "input_fptr") == 0) {
-        *dest = (void*)&topmodel-> input_fptr;
+        *dest = (void*)topmodel-> input_fptr;
     }
     else if (strcmp (name, "subcat_fptr") == 0) {
-        *dest = (void*)&topmodel-> subcat_fptr;
+        *dest = (void*)topmodel-> subcat_fptr;
     }
     else if (strcmp (name, "params_fptr") == 0) {
-        *dest = (void*)&topmodel-> params_fptr;
+        *dest = (void*)topmodel-> params_fptr;
     }
     else if (strcmp (name, "output_fptr") == 0) {
-        *dest = (void*)&topmodel-> output_fptr;
+        *dest = (void*)topmodel-> output_fptr;
     }
     else if (strcmp (name, "out_hyd_fptr") == 0) {
-        *dest = (void*)&topmodel-> out_hyd_fptr;
+        *dest = (void*)topmodel-> out_hyd_fptr;
     }
 
     //-------------------------------------
@@ -1351,7 +1351,7 @@ static int Get_value(Bmi * self, const char * name, void *dest)
 static int Set_value (Bmi *self, const char *name, void *array)
 {
     
-    void * dest = NULL;
+/*    void * dest = NULL;
     int nbytes = 0;
 
     if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
@@ -1360,9 +1360,9 @@ static int Set_value (Bmi *self, const char *name, void *array)
     if (self->get_var_nbytes(self, name, &nbytes) == BMI_FAILURE)
     return BMI_FAILURE;
 
-    memcpy (dest, array, nbytes);
+    memcpy (dest, array, nbytes);*/
 
-/*    topmodel_model *topmodel;
+    topmodel_model *topmodel;
     topmodel = (topmodel_model *) self->data;
     
     if (strcmp (name, "control_fptr") == 0) {
@@ -1396,7 +1396,7 @@ static int Set_value (Bmi *self, const char *name, void *array)
 
         memcpy (dest, array, nbytes);
     }
-*/
+
     return BMI_SUCCESS;
 }
 
