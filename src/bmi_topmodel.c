@@ -853,6 +853,34 @@ static int Get_var_role (Bmi *self, const char *name, char * role)
     return BMI_FAILURE;
 }
 
+/* OWP Custom BMI Enhancements */
+static int Get_var_index (Bmi *self, const char *name, int *index)
+{
+    //-------------------------------------------------
+    // Note: This pulls information from the var_info
+    // structure defined at the top, which helps to 
+    // prevent implementation errors.   
+    //-------------------------------------------------
+    if (!self){
+        return BMI_FAILURE;   
+    }
+    
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp( var_info[i].name, name ) == 0){
+            *index = var_info[i].index;
+            return BMI_SUCCESS;
+        }
+    }
+
+    //--------------------------
+    // No match found for name
+    //--------------------------
+    printf("ERROR in get_var_index():\n");
+    printf("  No match for: %s\n\n", name);
+    *index = -1;
+    return BMI_FAILURE;
+}
+
 // ***********************************************************
 // ********* BMI: VARIABLE GETTER & SETTER FUNCTIONS *********
 // ***********************************************************
@@ -1716,6 +1744,7 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->get_var_nbytes = Get_var_nbytes;
         model->get_var_location = Get_var_location;
 
+        model->get_var_index =      Get_var_index;          //OWP CUSTOM 
         model->get_var_role =       Get_var_role;           //OWP CUSTOM
         model->get_var_length =     Get_var_length;         //OWP CUSTOM
 

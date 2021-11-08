@@ -105,7 +105,7 @@ typedef struct Bmi {
     
     int (*get_model_var_count)(struct Bmi *self, const char *role, int *count);
     
-    //int (*get_var_index)(struct Bmi *self, const char *name, int *index);
+    int (*get_var_index)(struct Bmi *self, const char *name, int *index);
     
     int (*get_var_role)(struct Bmi *self, const char *name, char *role);
     
