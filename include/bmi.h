@@ -38,11 +38,25 @@ extern "C" {
 #define BMI_SUCCESS (0)
 #define BMI_FAILURE (1)
 
-#define BMI_MAX_UNITS_NAME (2048)
+/*#define BMI_MAX_UNITS_NAME (2048)
 #define BMI_MAX_TYPE_NAME (2048)
 #define BMI_MAX_COMPONENT_NAME (2048)
 #define BMI_MAX_VAR_NAME (2048)
-#define BMI_MAX_LOCATION_NAME (2048) //OWP Custom
+// OWP Custom (3)
+#define BMI_MAX_LOCATION_NAME (2048) // TODO: Ngen should move this outside 
+                                     // bmi.h as it so not "core" bmi v2.0   
+#define BMI_MAX_ROLE_NAME (2048)
+#define BMI_MAX_VERSION_NAME (2048)  */
+
+#define BMI_MAX_UNITS_NAME (128)
+#define BMI_MAX_TYPE_NAME (128)
+#define BMI_MAX_COMPONENT_NAME (128)
+#define BMI_MAX_VAR_NAME (128)
+// OWP Custom (3)
+#define BMI_MAX_LOCATION_NAME (128) // TODO: Ngen should move this outside 
+                                     // bmi.h as it so not "core" bmi v2.0   
+#define BMI_MAX_ROLE_NAME (128)
+#define BMI_MAX_VERSION_NAME (128)       
 
 
 typedef struct Bmi {
@@ -81,6 +95,22 @@ typedef struct Bmi {
 
     int (*get_var_location)(struct Bmi *self, const char *name, char *location);
 
+    /* OWP Custom - BMI Enhancements */
+    /* Supports variable roles for serialization, calibration, etc. */
+    int (*get_bmi_version)(struct Bmi *self, char *verion);
+
+    int (*get_model_var_roles)(struct Bmi *self, char **roles);   
+    
+    int (*get_model_var_names)(struct Bmi *self, const char *role, char **names);
+    
+    int (*get_model_var_count)(struct Bmi *self, const char *role, int *count);
+    
+    //int (*get_var_index)(struct Bmi *self, const char *name, int *index);
+    
+    int (*get_var_role)(struct Bmi *self, const char *name, char *role);
+    
+    int (*get_var_length)(struct Bmi *self, const char *name, int *elements);
+ 
     /* Time information */
     int (*get_current_time)(struct Bmi *self, double *time);
 

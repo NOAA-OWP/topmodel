@@ -86,7 +86,7 @@ run_bmi
 z_trash
 test/hyd.out
 test/topmod.out
-test/run_bmi_test
+test/run_bmi_unit_test
 test/z_trash_test
 
 # Output from GIUH - python functions #

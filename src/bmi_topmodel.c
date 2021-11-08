@@ -4,140 +4,154 @@
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
-#define OUTPUT_VAR_NAME_COUNT 14
-#define INPUT_VAR_NAME_COUNT 2
-  
-static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
-        "Qout",
-        "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",   //p
-        "land_surface_water__potential_evaporation_volume_flux",            //ep
-        "land_surface_water__runoff_mass_flux",                             //Q[it]
-        "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",        //qz
-        "land_surface_water__baseflow_volume_flux",                         //qb
-        "soil_water__domain_volume_deficit",                                //sbar
-        "land_surface_water__domain_time_integral_of_overland_flow_volume_flux",    //qof
-        "land_surface_water__domain_time_integral_of_precipitation_volume_flux",    //sump
-        "land_surface_water__domain_time_integral_of_evaporation_volume_flux",      //sumae
-        "land_surface_water__domain_time_integral_of_runoff_volume_flux",           //sumq
-        "soil_water__domain_root-zone_volume_deficit",  //sumrz
-        "soil_water__domain_unsaturated-zone_volume",   //sumuz
-        "land_surface_water__water_balance_volume"      //bal
+
+//----------------------------------------------
+// Put variable info into a struct to simplify
+// BMI implementation and avoid errors.
+//----------------------------------------------
+// Should we add "/0" after each string here?
+// Everything works without it.
+//---------------------------------------------- 
+// {idx, name, type, size, role, units, grid, location}
+//----------------------------------------------
+// role is new to bmi enhancement
+// valid role options via 'model_var_roles' 
+//    "input",
+//    "output",
+//    "state",
+//    "param",
+//    "option",
+//    "filename",
+//    "description",
+//    "observation",
+//    "time"
+//----------------------------------------------
+// Note only 'input' and 'output' need to follow
+// CSDMS standard names. See
+// https://csdms.colorado.edu/wiki/CSDMS_Standard_Names
+//----------------------------------------------
+Variable var_info[] = {
+    //-------------------------------------
+    // File pointers.  For reference only
+    //-------------------------------------
+    { 0,  "control_fptr", "FILE", 1, "file_offset", "none", "node", 0 },
+    { 1,  "input_fptr",   "FILE", 1, "file_offset", "none", "node", 0 },
+    { 2,  "subcat_fptr",  "FILE", 1, "file_offset", "none", "node", 0 },
+    { 3,  "params_fptr",  "FILE", 1, "file_offset", "none", "node", 0 },
+    { 4,  "output_fptr",  "FILE", 1, "file_offset", "none", "node", 0 },
+    { 5,  "out_hyd_fptr", "FILE", 1, "file_offset", "none", "node", 0 },
+    //----------------------------------------------
+    // String vars.  Will replace 1 w/ title_size.
+    //----------------------------------------------
+    { 6,  "title",  "string", 1, "info_string", "none", "node", 0 },
+    { 7,  "subcat", "string", 1, "info_string", "none", "node", 0 },   
+    //-----------------------
+    // Variable definitions
+    //-----------------------
+    { 8,  "dt",                 "double", 1, "time_info", "h-1", "node", 0 },    //inputs.dat
+    { 9,  "nstep",              "int",    1, "time_info", "none", "node", 0 },   //inputs.dat
+    { 10, "yes_print_output",   "int",    1, "option", "none", "node", 0 }, //subcat.dat
+    { 11, "imap",               "int",    1, "option", "none", "node", 0 }, //subcat.dat
+    { 12, "num_channels",       "int",    1, "parameter_fixed", "none", "node", 0 },  //subcat.dat
+    { 13, "num_topodex_values", "int",    1, "parameter_fixed", "none", "node", 0 },  //subcat.dat
+    { 14, "infex",              "int",    1, "option", "none", "node", 0 }, //infiltration           
+    //-------------------------------------
+    // Model parameters and input scalars
+    //-------------------------------------
+    { 15,  "szm",        "double", 1, "parameter_adjustable", "m", "node", 0 }, 
+    { 16,  "t0",         "double", 1, "parameter_fixed", "none", "node", 0 }, //areal average of ln(a/tanB)
+    { 17,  "td",         "double", 1, "parameter_adjustable", "h-1", "node", 0 }, //unsaturated zome time delay per unit storage deficit
+    { 18,  "srmax",      "double", 1, "parameter_adjustable", "m", "node", 0 },   //maximum root zone storage deficit
+    { 19,  "Q0",         "double", 1, "state", "m h-1", "node", 0 }, //initial subsurface flow per unit area //JG TODO: check this one
+    { 20,  "sr0",        "double", 1, "state", "m", "node", 0 }, //initial root zone storage deficit
+    { 21,  "xk0",        "double", 1, "parameter_adjustable", "m h-1", "node", 0 }, //surface soil hydraulic conductivity
+    { 22,  "hf",         "double", 1, "parameter_adjustable", "m", "node", 0 }, //wetting front suction for G&A soln.
+    { 23,  "dth",        "double", 1, "parameter_adjustable", "none", "node", 0 }, //water content change across the wetting front
+    { 24,  "area",       "double", 1, "parameter_fixed", "none", "node", 0 }, //subcat.dat
+    { 25,  "num_delay",  "int",    1, "parameter_fixed", "none", "node", 0 }, //number of time steps lag (delay) in channel within catchment to outlet 
+    { 26,  "num_time_delay_histo_ords",  "int", 1, "parameter_fixed", "none", "node", 0}, //number of time delay histogram ordinates */
+    { 27,  "szq",              "double", 1, "parameter_fixed", "none", "node", 0 },
+    { 28,  "tl",               "double", 1, "parameter_fixed", "none", "node", 0 },
+    { 29,  "max_contrib_area", "double", 1, "parameter_fixed", "none", "node", 0 }, //could be option
+    { 30,  "land_surface_water__water_balance_volume", "double", 1, "output_to_file", "m", "node", 0 }, //bal //residual of the water balance
+    { 31,  "soil_water__domain_volume_deficit",        "double", 1, "output_to_bmi", "m", "node", 0 }, //sbar //catchment average soil moisture deficit
+    //------------------------------------------------
+    // Pointers to dynamically dimensioned 1D arrays
+    // Will replace size of 1 with size in comment
+    // once those vars are defined.
+    //------------------------------------------------
+    // A trailing asterisk indicates that the var
+    // is actually a pointer to the given type.
+    //------------------------------------------------ 
+    { 32,  "land_surface_water__runoff_mass_flux", "double*", 1, "output_to_bmi", "m h-1", "node", 0 }, // n_steps //Q //simulated discharge
+    { 33,  "Qobs",                     "double*", 1, "input_from_file", "m h-1", "node", 0 },  // n_steps
+    { 34,  "atmosphere_water__liquid_equivalent_precipitation_rate", "double*", 1, "input_from_bmi", "m h-1", "node", 0 },  // n_steps //rain //inputs.dat
+    { 35,  "water_potential_evaporation_flux",                       "double*", 1, "input_from_bmi", "m h-1", "node", 0 },  // n_steps //pe //inputs.dat
+    { 36,  "contrib_area",             "double*", 1, "state", "none", "node", 0 },    // n_steps
+    { 37,  "stor_unsat_zone",          "double*", 1, "state", "m", "node", 0 },  // max_atb_incs
+    { 38,  "deficit_root_zone",        "double*", 1, "state", "m", "node", 0 },  // max_atb_incs
+    { 39,  "deficit_local",            "double*", 1, "state", "m", "node", 0 },  // max_atb_incs
+    { 40,  "time_delay_histogram",     "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_td_ords
+    { 41,  "dist_area_lnaotb",         "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_n_incs
+    { 42,  "lnaotb",                   "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_n_incs
+    { 43,  "cum_dist_area_with_dist",  "double*", 1, "parameter_fixed", "none", "node", 0 },  // max_n_subcats
+    { 44,  "dist_from_outlet",         "double*", 1, "parameter_fixed", "m", "node", 0 },      // max_n_subcats   
+    //---------------------- 
+    // Other internal vars
+    //----------------------
+    { 45,  "num_sub_catchments",       "int", 1, "array_length", "none", "node", 0 }, //subcat.dat
+    { 46,  "max_atb_increments",       "int", 1, "array_length", "none", "node", 0 },
+    { 47,  "max_num_subcatchments",    "int", 1, "array_length", "none", "node", 0 },
+    { 48,  "max_time_delay_ordinates", "int", 1, "array_length", "none", "node", 0 },
+    { 49,  "Qout",                     "double", 1, "state", "m h-1", "node", 0 }, // Output var  //runoff at timestep further converted using width func
+    //---------------------- 
+    // BMI vars
+    //----------------------    
+    { 50,  "current_time_step",        "int", 1, "time_info", "none", "node", 0 },    // BMI var
+    //-----------------
+    // State var sums
+    //-----------------
+    { 51,  "land_surface_water__domain_time_integral_of_precipitation_volume_flux", "double", 1, "diagnostic", "m", "node", 0 },
+    { 52,  "land_surface_water__domain_time_integral_of_evaporation_volume_flux",   "double", 1, "diagnostic", "m", "node", 0 },
+    { 53,  "land_surface_water__domain_time_integral_of_runoff_volume_flux",        "double", 1, "diagnostic", "m", "node", 0 },
+    { 54,  "soil_water__domain_root-zone_volume_deficit",                           "double", 1, "diagnostic", "m", "node", 0 },
+    { 55,  "soil_water__domain_unsaturated-zone_volume",                            "double", 1, "diagnostic", "m", "node", 0 },
+    //----------------------    
+    // External/forcing vars
+    //----------------------
+    { 56, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",             "double", 1, "output_to_file", "m", "node", 0 },
+    { 57, "land_surface_water__baseflow_volume_flux",                              "double", 1, "output_to_file", "m", "node", 0 },
+    { 58, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux", "double", 1, "output_to_file", "m h-1", "node", 0 },
+    { 59, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",        "double", 1, "output_to_file", "m h-1", "node", 0 },
+    { 60, "land_surface_water__potential_evaporation_volume_flux",                 "double", 1, "output_to_file", "m h-1", "node", 0 },
+    { 61, "stand_alone",                                                           "int",    1, "option", "none", "node", 0 }
+    // { 62, "obs_values",      "double", 1 },    
+    // { 63, "double_arr_test", "double", 3 }             
 };
 
-static const char *output_var_types[OUTPUT_VAR_NAME_COUNT] = {
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double"
+static const char *model_var_roles[] = {
+    "array_length",
+    "constant",
+    "diagnostic",
+    "directory",
+    "filename",
+    "file_offset",
+    "info_string",
+    "input_from_bmi",
+    "input_from_file",
+    "not_set",
+    "option",
+    "output_to_bmi",
+    "output_to_file",
+    "parameter_fixed",
+    "parameter_adjustable",
+    "state",
+    "time_info"
 };
 
-static const int output_var_item_count[OUTPUT_VAR_NAME_COUNT] = {
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
-};
-
-static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m",
-        "m h-1",
-        "m",
-        "m",
-        "m",
-        "m",
-        "m",
-        "m"
-};
-
-static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-};
-
-static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node"
-};
-
-static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {
-        "atmosphere_water__liquid_equivalent_precipitation_rate",
-        "water_potential_evaporation_flux"
-};
-
-static const char *input_var_types[INPUT_VAR_NAME_COUNT] = {
-        "double",
-        "double"
-};
-
-static const char *input_var_units[INPUT_VAR_NAME_COUNT] = {
-        "kg m-2",
-        "m s-1"
-};
-
-static const int input_var_item_count[INPUT_VAR_NAME_COUNT] = {
-        1,
-        1
-};
-
-static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {
-        0,
-        0
-};
-
-static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
-        "node",
-        "node"
-};
+// These replace hard-coded #DEFINE so you don't have to keep updating, yey
+int VAR_NAME_COUNT = sizeof(var_info)/sizeof(var_info[0]);
+int VAR_ROLE_COUNT = sizeof(model_var_roles)/sizeof(model_var_roles[0]);
 
 int read_init_config(const char* config_file, topmodel_model* model) {
     
@@ -251,7 +265,7 @@ int init_config(const char* config_file, topmodel_model* model)
         
         /* Set nstep and dt*/
         model->nstep = 1;
-        model->dt = 1;
+        model->dt = 1.0;
 
         /* allocate memory for "arrays" */
         d_alloc(&model->rain,model->nstep);
@@ -430,18 +444,20 @@ static int Update_until (Bmi *self, double t)
         return BMI_FAILURE;
 
     {
-      int n;
-      double frac;
-      const double n_steps = (t - now) / dt;
-      for (n=0; n<(int)n_steps; n++) {
+    
+    int n;
+    double frac;
+    const double n_steps = (t - now) / dt;
+    for (n=0; n<(int)n_steps; n++) {
         Update(self);
-      }
-
-      frac = n_steps - (int)n_steps;
-      ((topmodel_model *)self->data)->dt = frac * dt;
-      Update (self);
-      ((topmodel_model *)self->data)->dt = dt;
-
+    }
+    frac = n_steps - (int)n_steps;
+    if (frac > 0){
+        ((topmodel_model *)self->data)->dt = frac * dt;
+        Update (self);
+        ((topmodel_model *)self->data)->dt = dt;
+    }
+    
     }
 
     return BMI_SUCCESS;
@@ -515,7 +531,9 @@ static int Finalize (Bmi *self)
 
 static int Get_var_type (Bmi *self, const char *name, char * type)
 {
-    // Check to see if in output array first
+    // JG 10.07.21: DONE
+
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             strncpy(type, output_var_types[i], BMI_MAX_TYPE_NAME);
@@ -528,7 +546,16 @@ static int Get_var_type (Bmi *self, const char *name, char * type)
             strncpy(type, input_var_types[i], BMI_MAX_TYPE_NAME);
             return BMI_SUCCESS;
         }
+    }*/
+
+    // NEW BMI EXTENSION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(type, var_info[i].type, BMI_MAX_TYPE_NAME);
+            return BMI_SUCCESS;
+        }    
     }
+    
     // If we get here, it means the variable name wasn't recognized
     type[0] = '\0';
     return BMI_FAILURE;
@@ -536,8 +563,9 @@ static int Get_var_type (Bmi *self, const char *name, char * type)
 
 static int Get_var_grid(Bmi *self, const char *name, int *grid)
 {
+    // JG 10.07.21: DONE
 
-    // Check to see if in output array first
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             *grid = output_var_grids[i];
@@ -550,7 +578,16 @@ static int Get_var_grid(Bmi *self, const char *name, int *grid)
             *grid = input_var_grids[i];
             return BMI_SUCCESS;
         }
+    }*/
+    
+    // NEW BMI EXTENSION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            *grid = var_info[i].grid;
+            return BMI_SUCCESS;
+        }    
     }
+
     // If we get here, it means the variable name wasn't recognized
     grid[0] = '\0';
     return BMI_FAILURE;
@@ -564,7 +601,8 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         return BMI_FAILURE;
     }
 
-    if (strcmp (type, "double") == 0) {
+    // NEW BMI EXTENSION
+    if ((strcmp (type, "double") == 0) | (strcmp (type, "double*") == 0)) {
         *size = sizeof(double);
         return BMI_SUCCESS;
     }
@@ -584,15 +622,25 @@ static int Get_var_itemsize (Bmi *self, const char *name, int * size)
         *size = sizeof(long);
         return BMI_SUCCESS;
     }
+    // NEW BMI EXTENSION
+    // Note: This returns sizeof 1; Get_var_nbytes() considers length/size
+    // JG TODO: Confirm OK?
+    else if ((strcmp (type, "FILE") == 0) | (strcmp (type, "string") == 0)) {
+        *size = sizeof(char);
+        return BMI_SUCCESS;
+    }
     else {
         *size = 0;
         return BMI_FAILURE;
     }
+ 
 }
 
 static int Get_var_location (Bmi *self, const char *name, char * location)
 {
-    // Check to see if in output array first
+    // JG 10.07.21: DONE
+
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             strncpy(location, output_var_locations[i], BMI_MAX_LOCATION_NAME);
@@ -605,7 +653,16 @@ static int Get_var_location (Bmi *self, const char *name, char * location)
             strncpy(location, input_var_locations[i], BMI_MAX_LOCATION_NAME);
             return BMI_SUCCESS;
         }
+    }*/
+
+    // NEW BMI EXTENSION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(location, var_info[i].location, BMI_MAX_LOCATION_NAME);
+            return BMI_SUCCESS;
+        }    
     }
+    
     // If we get here, it means the variable name wasn't recognized
     location[0] = '\0';
     return BMI_FAILURE;
@@ -613,7 +670,9 @@ static int Get_var_location (Bmi *self, const char *name, char * location)
 
 static int Get_var_units (Bmi *self, const char *name, char * units)
 {
-    // Check to see if in output array first
+    // JG 10.07.21: DONE
+
+/*    // Check to see if in output array first
     for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, output_var_names[i]) == 0) {
             strncpy(units, output_var_units[i], BMI_MAX_UNITS_NAME);
@@ -626,7 +685,16 @@ static int Get_var_units (Bmi *self, const char *name, char * units)
             strncpy(units, input_var_units[i], BMI_MAX_UNITS_NAME);
             return BMI_SUCCESS;
         }
+    }*/
+
+    // NEW BMI EXTENSION
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(units, var_info[i].units, BMI_MAX_UNITS_NAME);
+            return BMI_SUCCESS;
+        }    
     }
+
     // If we get here, it means the variable name wasn't recognized
     units[0] = '\0';
     return BMI_FAILURE;
@@ -634,12 +702,14 @@ static int Get_var_units (Bmi *self, const char *name, char * units)
 
 static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
 {
-    int item_size;
-    int item_size_result = Get_var_itemsize(self, name, &item_size);
+    // JG 10.07.21: Not 100% on this one, why condition < 1?
+
+    int each_item_size;
+    int item_size_result = Get_var_itemsize(self, name, &each_item_size);
     if (item_size_result != BMI_SUCCESS) {
         return BMI_FAILURE;
     }
-    int item_count = -1;
+/*    int item_count = -1;
     for (int i = 0; i < INPUT_VAR_NAME_COUNT; i++) {
         if (strcmp(name, input_var_names[i]) == 0) {
             item_count = input_var_item_count[i];
@@ -655,12 +725,133 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
         }
     }
     if (item_count < 1)
-        item_count = ((topmodel_model *) self->data)->nstep;
+        item_count = ((topmodel_model *) self->data)->nstep;*/
 
-    *nbytes = item_size * item_count;
-    return BMI_SUCCESS;
+    // NEW BMI EXTENSION
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+
+    //-----------------------------------------------------
+    // NOTE:  TOPMODEL uses d_alloc() to allocate memory
+    //        for arrays, but adds 1 to the array size
+    //        and then loop counts start at 1 not 0.
+    //        Also, d_alloc() is often called with a +1.
+    //        So we need to add 1 to all of these.
+    //-----------------------------------------------------
+    unsigned int title_size = 257;   // see topmodel.h; char array
+    unsigned int n_steps       = topmodel->nstep+1;
+    unsigned int max_n_subcats = topmodel->max_num_subcatchments+1;
+    unsigned int max_n_incs    = topmodel->max_atb_increments+1;
+    unsigned int max_atb_incs  = topmodel->max_atb_increments+1;
+    unsigned int max_td_ords   = topmodel->max_time_delay_ordinates+1;
+  
+
+    // JG TODO: change these to strcmp() vs index?
+
+    //-------------------------------------------------
+    // Overwrite the sizes that are not 1 (now known)
+    //-------------------------------------------------
+    var_info[6].size  = title_size;     // title
+    var_info[7].size  = title_size;     // subcat
+    //---------------------------------------------    
+    var_info[32].size = n_steps;        // Q
+    var_info[33].size = n_steps;        // Qobs
+    var_info[34].size = n_steps;        // rain
+    var_info[35].size = n_steps;        // pe
+    var_info[36].size = n_steps;        // contrib_area
+    var_info[37].size = max_atb_incs;   // stor_unsat_zone
+    var_info[38].size = max_atb_incs;   // deficit_root_zone
+    var_info[39].size = max_atb_incs;   // deficit_local
+    var_info[40].size = max_td_ords;    // time_delay_histogram
+    var_info[41].size = max_n_incs;     // dist_area_lnaotb
+    var_info[42].size = max_n_incs;     // lnaotb
+    var_info[43].size = max_n_subcats;  // cum_dist_area_with_dist
+    var_info[44].size = max_n_subcats;  // dist_from_outlet
+
+    // No we know #ofElems, so xBy each item_size    
+    int item_count;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            item_count = var_info[i].size;
+            *nbytes = each_item_size * item_count;
+            return BMI_SUCCESS;
+        }    
+    }
+
+    return BMI_FAILURE;
 }
 
+/* OWP Custom BMI Enhancements */
+static int Get_var_length (Bmi *self, const char *name, int * elements)
+{
+    // Returns size of varibleable array
+    // consider get_var_size?
+
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+
+    //-----------------------------------------------------
+    // NOTE:  TOPMODEL uses d_alloc() to allocate memory
+    //        for arrays, but adds 1 to the array size
+    //        and then loop counts start at 1 not 0.
+    //        Also, d_alloc() is often called with a +1.
+    //        So we need to add 1 to all of these.
+    //-----------------------------------------------------
+    unsigned int title_size = 257;   // see topmodel.h; char array
+    unsigned int n_steps       = topmodel->nstep+1;
+    unsigned int max_n_subcats = topmodel->max_num_subcatchments+1;
+    unsigned int max_n_incs    = topmodel->max_atb_increments+1;
+    unsigned int max_atb_incs  = topmodel->max_atb_increments+1;
+    unsigned int max_td_ords   = topmodel->max_time_delay_ordinates+1;
+  
+
+    // JG TODO: change these to strcmp() vs index?
+
+    //-------------------------------------------------
+    // Overwrite the sizes that are not 1 (now known)
+    //-------------------------------------------------
+    var_info[6].size  = title_size;     // title
+    var_info[7].size  = title_size;     // subcat
+    //---------------------------------------------    
+    var_info[32].size = n_steps;        // Q
+    var_info[33].size = n_steps;        // Qobs
+    var_info[34].size = n_steps;        // rain
+    var_info[35].size = n_steps;        // pe
+    var_info[36].size = n_steps;        // contrib_area
+    var_info[37].size = max_atb_incs;   // stor_unsat_zone
+    var_info[38].size = max_atb_incs;   // deficit_root_zone
+    var_info[39].size = max_atb_incs;   // deficit_local
+    var_info[40].size = max_td_ords;    // time_delay_histogram
+    var_info[41].size = max_n_incs;     // dist_area_lnaotb
+    var_info[42].size = max_n_incs;     // lnaotb
+    var_info[43].size = max_n_subcats;  // cum_dist_area_with_dist
+    var_info[44].size = max_n_subcats;  // dist_from_outlet
+
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            *elements = var_info[i].size;
+            return BMI_SUCCESS;
+        }
+    }
+  
+    return BMI_FAILURE;
+}
+
+/* OWP Custom BMI Enhancements */
+static int Get_var_role (Bmi *self, const char *name, char * role)
+{
+
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(name, var_info[i].name) == 0) {
+            strncpy(role, var_info[i].role, BMI_MAX_ROLE_NAME);
+            return BMI_SUCCESS;
+        }    
+    }
+    
+    // If we get here, it means the variable name wasn't recognized
+    role[0] = '\0';
+    return BMI_FAILURE;
+}
 
 // ***********************************************************
 // ********* BMI: VARIABLE GETTER & SETTER FUNCTIONS *********
@@ -668,125 +859,321 @@ static int Get_var_nbytes (Bmi *self, const char *name, int * nbytes)
 
 static int Get_value_ptr (Bmi *self, const char *name, void **dest)
 {
-    // Qout
-    if (strcmp (name, "Qout") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> Qout;
-        return BMI_SUCCESS;
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+
+    // Use CSDMS standard names ONLY when role is 
+    // INPUT_TO_BMI or OUPUT_TO_BMI
+
+    //-------------------------------------
+    //             ARRAY_LENGTH
+    //-------------------------------------
+    /*  0 num_sub_catchments
+      1 max_atb_increments
+      2 max_num_subcatchments
+      3 max_time_delay_ordinates
+    */
+
+    if (strcmp (name, "num_sub_catchments") == 0) {
+        *dest = (void*)&topmodel->num_sub_catchments;
     }
-    // p
-    if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> p;
-        return BMI_SUCCESS;
-    // ep    
+    else if (strcmp (name, "max_atb_increments") == 0) {
+        *dest = (void*)&topmodel->max_atb_increments;
     }
-    if (strcmp (name, "land_surface_water__potential_evaporation_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> ep;
-        return BMI_SUCCESS;
+    else if (strcmp (name, "max_num_subcatchments") == 0) {
+        *dest = (void*)&topmodel->max_num_subcatchments;
     }
-    // Q[it]
-    if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> Q[1];
-        return BMI_SUCCESS;
-    }
-    // quz
-    if (strcmp (name, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> quz;
-        return BMI_SUCCESS;
-    }
-    // qb
-    if (strcmp (name, "land_surface_water__baseflow_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> qb;
-        return BMI_SUCCESS;
-    }
-    // sbar
-    if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> sbar;
-        return BMI_SUCCESS;
-    }
-    // qof
-    if (strcmp (name, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> qof;
-        return BMI_SUCCESS;
-    }
-    // sump
-    if (strcmp (name, "land_surface_water__domain_time_integral_of_precipitation_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> sump;
-        return BMI_SUCCESS;
-    }
-    // sumae
-    if (strcmp (name, "land_surface_water__domain_time_integral_of_evaporation_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> sumae;
-        return BMI_SUCCESS;
-    }// sumq
-    if (strcmp (name, "land_surface_water__domain_time_integral_of_runoff_volume_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> sumq;
-        return BMI_SUCCESS;
-    }
-    // sumrz
-    if (strcmp (name, "soil_water__domain_root-zone_volume_deficit") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> sumrz;
-        return BMI_SUCCESS;
-    }
-    // sumuz
-    if (strcmp (name, "soil_water__domain_unsaturated-zone_volume") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> sumuz;
-        return BMI_SUCCESS;
-    }
-    // bal
-    if (strcmp (name, "land_surface_water__water_balance_volume") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> bal;
-        return BMI_SUCCESS;
+    else if (strcmp (name, "max_time_delay_ordinates") == 0) {
+        *dest = (void*)&topmodel->max_time_delay_ordinates;
     }
 
+
+    //-------------------------------------
+    //             DIAGNOSTIC
+    //-------------------------------------
+    // sump
+    else if (strcmp (name, "land_surface_water__domain_time_integral_of_precipitation_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> sump;
+    }
+    // sumae
+    else if (strcmp (name, "land_surface_water__domain_time_integral_of_evaporation_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> sumae;
+    }// sumq
+    else if (strcmp (name, "land_surface_water__domain_time_integral_of_runoff_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> sumq;
+    }
+    // sumrz
+    else if (strcmp (name, "soil_water__domain_root-zone_volume_deficit") == 0) {
+        *dest = (void*)&topmodel-> sumrz;
+    }
+    // sumuz
+    else if(strcmp (name, "soil_water__domain_unsaturated-zone_volume") == 0) {
+        *dest = (void*)&topmodel-> sumuz;
+    }
+
+    //-------------------------------------
+    //              FILE_OFFSET
+    //-------------------------------------
+    else if (strcmp (name, "control_fptr") == 0) {
+        *dest = (void*)topmodel-> control_fptr;
+    }
+    else if (strcmp (name, "input_fptr") == 0) {
+        *dest = (void*)topmodel-> input_fptr;
+    }
+    else if (strcmp (name, "subcat_fptr") == 0) {
+        *dest = (void*)topmodel-> subcat_fptr;
+    }
+    else if (strcmp (name, "params_fptr") == 0) {
+        *dest = (void*)topmodel-> params_fptr;
+    }
+    else if (strcmp (name, "output_fptr") == 0) {
+        *dest = (void*)topmodel-> output_fptr;
+    }
+    else if (strcmp (name, "out_hyd_fptr") == 0) {
+        *dest = (void*)topmodel-> out_hyd_fptr;
+    }
+
+    //-------------------------------------
+    //             INFO_STRING
+    //-------------------------------------
+    else if (strcmp (name, "title") == 0) {
+        *dest = (void*)(topmodel-> title);
+    }
+    else if (strcmp (name, "subcat") == 0) {
+        *dest = (void*)topmodel-> subcat;
+    }
+
+    //-------------------------------------
+    // INPUT_FROM_BMI - CSDMS Standard Names    
+    //-------------------------------------
     // STANDALONE Note: 
     //      When TRUE/1 there are no bmi inputs being passed
     //      defs here speak to "scalar"  
     //      TODO: add logic to only apply these defs for framework runs 
-    if (strcmp (name, "water_potential_evaporation_flux") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel-> pe[1];
+    else if (strcmp (name, "water_potential_evaporation_flux") == 0) {
+        *dest = (void*)topmodel-> pe;
         //*dest = (void*)(topmodel->pe + topmodel->current_time_step);
-        
-        return BMI_SUCCESS;
     }
 
-    if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
-        topmodel_model *topmodel;
-        topmodel = (topmodel_model *) self->data;
-        *dest = (void*)&topmodel->rain[1];
-        return BMI_SUCCESS;
+    else if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate") == 0) {
+        *dest = (void*)topmodel->rain;
     }
 
-    return BMI_FAILURE;
+    //-------------------------------------
+    //           INPUT_FROM_FILE    
+    //-------------------------------------
+    else if (strcmp (name, "Qobs") == 0) {
+        *dest = (void*)topmodel->Qobs;
+    }
+
+    //-------------------------------------
+    //              OPTION    
+    //-------------------------------------
+    
+    /*  0 yes_print_output
+      1 imap
+      2 infex
+      3 stand_alone*/
+
+    else if (strcmp (name, "yes_print_output") == 0) {
+        *dest = (void*)&topmodel->yes_print_output;
+    }
+    else if (strcmp (name, "imap") == 0) {
+        *dest = (void*)&topmodel->imap;
+    }
+    else if (strcmp (name, "infex") == 0) {
+        *dest = (void*)&topmodel->infex;
+    }
+    else if (strcmp (name, "stand_alone") == 0) {
+        *dest = (void*)&topmodel->stand_alone;
+    }
+
+
+    //-------------------------------------
+    // OUTPUT_TO_BMI - CSDMS Standard Names    
+    //-------------------------------------
+    // Q[it]
+    else if (strcmp (name, "land_surface_water__runoff_mass_flux") == 0) {
+        *dest = (void*)topmodel-> Q;
+    }
+    // sbar
+    else if (strcmp (name, "soil_water__domain_volume_deficit") == 0) {
+        *dest = (void*)&topmodel-> sbar;
+    }
+
+    //-------------------------------------
+    //           OUTPUT_TO_FILE    
+    //-------------------------------------
+    // p
+    else if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> p;
+    // ep    
+    }
+    else if (strcmp (name, "land_surface_water__potential_evaporation_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> ep;
+    }
+    // quz
+    else if (strcmp (name, "soil_water_root-zone_unsat-zone_top__recharge_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> quz;
+    }
+    // qb
+    else if (strcmp (name, "land_surface_water__baseflow_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> qb;
+    }
+    // qof
+    else if (strcmp (name, "land_surface_water__domain_time_integral_of_overland_flow_volume_flux") == 0) {
+        *dest = (void*)&topmodel-> qof;
+    }
+    // bal
+    else if (strcmp (name, "land_surface_water__water_balance_volume") == 0) {
+        *dest = (void*)&topmodel-> bal;
+    }
+
+    //-------------------------------------
+    //            PARAMETER_FIXED    
+    //-------------------------------------
+    /*  0 num_channels
+      1 num_topodex_values
+      2 t0
+      3 area
+      4 num_delay
+      5 num_time_delay_histo_ords
+      6 szq
+      7 tl
+      8 time_delay_histogram
+      9 dist_area_lnaotb
+      10 lnaotb
+      11 cum_dist_area_with_dist
+      12 dist_from_outlet
+      13 max_contrib_area*/
+    else if (strcmp (name, "num_channels") == 0) {
+        *dest = (void*)&topmodel-> num_channels;
+    }
+    else if (strcmp (name, "num_topodex_values") == 0) {
+        *dest = (void*)&topmodel-> num_topodex_values;
+    }
+    else if (strcmp (name, "t0") == 0) {
+        *dest = (void*)&topmodel-> t0;
+    }
+    else if (strcmp (name, "area") == 0) {
+        *dest = (void*)&topmodel-> area;
+    }
+    else if (strcmp (name, "num_delay") == 0) {
+        *dest = (void*)&topmodel-> num_delay;
+    }
+    else if (strcmp (name, "num_time_delay_histo_ords") == 0) {
+        *dest = (void*)&topmodel-> num_time_delay_histo_ords;
+    }
+    else if (strcmp (name, "szq") == 0) {
+        *dest = (void*)&topmodel-> szq;
+    }
+    else if (strcmp (name, "tl") == 0) {
+        *dest = (void*)&topmodel-> tl;
+    }
+    else if (strcmp (name, "time_delay_histogram") == 0) {
+        *dest = (void*)topmodel-> time_delay_histogram;
+    }
+    else if (strcmp (name, "dist_area_lnaotb") == 0) {
+        *dest = (void*)topmodel-> dist_area_lnaotb;
+    }
+    else if (strcmp (name, "lnaotb") == 0) {
+        *dest = (void*)topmodel-> lnaotb;
+    }
+    else if (strcmp (name, "cum_dist_area_with_dist") == 0) {
+        *dest = (void*)topmodel-> cum_dist_area_with_dist;
+    }
+    else if (strcmp (name, "dist_from_outlet") == 0) {
+        *dest = (void*)topmodel-> dist_from_outlet;
+    }
+    else if (strcmp (name, "max_contrib_area") == 0) {
+        *dest = (void*)&topmodel-> max_contrib_area;
+    }
+
+    //-------------------------------------
+    //         PARAMETER_ADJUSTABLE    
+    //-------------------------------------
+    /*  0 szm
+      1 td
+      2 srmax
+      3 xk0
+      4 hf
+      5 dth*/
+    // qof
+    else if (strcmp (name, "szm") == 0) {
+        *dest = (void*)&topmodel-> szm;
+    }
+    else if (strcmp (name, "td") == 0) {
+        *dest = (void*)&topmodel-> td;
+    }
+    else if (strcmp (name, "srmax") == 0) {
+        *dest = (void*)&topmodel-> srmax;
+    }
+    else if (strcmp (name, "xk0") == 0) {
+        *dest = (void*)&topmodel-> xk0;
+    }
+    else if (strcmp (name, "hf") == 0) {
+        *dest = (void*)&topmodel-> hf;
+    }
+    else if (strcmp (name, "dth") == 0) {
+        *dest = (void*)&topmodel-> dth;
+    }
+    else if (strcmp (name, "qof") == 0) {
+        *dest = (void*)&topmodel-> qof;
+    }
+    //-------------------------------------
+    //                STATE    
+    //-------------------------------------
+    /*  0 Q0
+      1 sr0
+      2 contrib_area
+      3 stor_unsat_zone
+      4 deficit_root_zone
+      5 deficit_local
+      6 Qout
+    */
+    else if (strcmp (name, "Q0") == 0) {
+        *dest = (void*)&topmodel-> Q0;
+    }
+    else if (strcmp (name, "sr0") == 0) {
+        *dest = (void*)&topmodel-> sr0;
+    }
+    else if (strcmp (name, "contrib_area") == 0) {
+        *dest = (void*)topmodel-> contrib_area;
+    }
+    else if (strcmp (name, "stor_unsat_zone") == 0) {
+        *dest = (void*)topmodel-> stor_unsat_zone;
+    }
+    else if (strcmp (name, "deficit_root_zone") == 0) {
+        *dest = (void*)topmodel-> deficit_root_zone;
+    }
+    else if (strcmp (name, "deficit_local") == 0) {
+        *dest = (void*)topmodel-> deficit_local;
+    }
+    else if (strcmp (name, "Qout") == 0) {
+        *dest = (void*)&topmodel-> Qout;
+    }
+
+    //-------------------------------------
+    //              TIME_INFO    
+    //-------------------------------------
+    /*  0 dt
+      1 nstep
+      2 current_time_step
+    */
+    else if (strcmp (name, "dt") == 0) {
+        *dest = (void*)&topmodel-> dt;
+    }
+    else if (strcmp (name, "nstep") == 0) {
+        *dest = (void*)&topmodel-> nstep;
+    }
+    else if (strcmp (name, "current_time_step") == 0) {
+        *dest = (void*)&topmodel-> current_time_step;
+    }
+/*    else {
+        return BMI_FAILURE;
+    }*/
+
+    return BMI_SUCCESS;
 }
 
 static int Get_value_at_indices (Bmi *self, const char *name, void *dest, int * inds, int len)
@@ -831,16 +1218,52 @@ static int Get_value(Bmi * self, const char * name, void *dest)
 
 static int Set_value (Bmi *self, const char *name, void *array)
 {
-    void * dest = NULL;
+    
+/*    void * dest = NULL;
     int nbytes = 0;
 
     if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
-        return BMI_FAILURE;
+    return BMI_FAILURE;
 
     if (self->get_var_nbytes(self, name, &nbytes) == BMI_FAILURE)
-        return BMI_FAILURE;
+    return BMI_FAILURE;
 
-    memcpy (dest, array, nbytes);
+    memcpy (dest, array, nbytes);*/
+
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
+    
+    if (strcmp (name, "control_fptr") == 0) {
+        topmodel->control_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "input_fptr") == 0) {
+        topmodel->input_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "subcat_fptr") == 0) {
+        topmodel->subcat_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "params_fptr") == 0) {
+        topmodel->params_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "output_fptr") == 0) {
+        topmodel->output_fptr = fopen("/dev/null", "w");
+    }
+    else if (strcmp (name, "out_hyd_fptr") == 0) {
+        topmodel->out_hyd_fptr = fopen("/dev/null", "w");
+    }
+    else {
+
+        void * dest = NULL;
+        int nbytes = 0;
+
+        if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
+            return BMI_FAILURE;
+
+        if (self->get_var_nbytes(self, name, &nbytes) == BMI_FAILURE)
+            return BMI_FAILURE;
+
+        memcpy (dest, array, nbytes);
+    }
 
     return BMI_SUCCESS;
 }
@@ -867,6 +1290,7 @@ static int Set_value_at_indices (Bmi *self, const char *name, int * inds, int le
     }
     return BMI_SUCCESS;
 }
+ 
 
 // ***********************************************************
 // ************ BMI: MODEL INFORMATION FUNCTIONS *************
@@ -878,31 +1302,256 @@ static int Get_component_name (Bmi *self, char * name)
     return BMI_SUCCESS;
 }
 
+// NEW BMI EXTENSION 
+static int Get_bmi_version (Bmi *self, char * version)
+{
+    strncpy (version, "2.0.1 NOAA-OWP", BMI_MAX_VERSION_NAME);
+    return BMI_SUCCESS;
+}
+
+// NEW BMI EXTENSION 
+static int Get_model_var_roles (Bmi *self, char ** roles)
+{
+    for (int i = 0; i < VAR_ROLE_COUNT; i++) {
+        strncpy (roles[i], model_var_roles[i], BMI_MAX_ROLE_NAME);
+    }
+    return BMI_SUCCESS;
+}
+static int Get_model_var_count (Bmi *self, const char *role, int *count)
+{
+    
+    // If role is "all", don't filter just return VAR_NAME_COUNT
+    if (strcmp(role, "all") == 0) {
+        *count = VAR_NAME_COUNT;
+        return BMI_SUCCESS;
+    }    
+
+    // This block code uses get_model_var_roles to check if *role
+    // is valid, but maybe overkill?
+
+/*    int is_role = 0;
+    // Otherise, check if role is valid first
+    // Get_model_var_roles would be "cleanest"?
+    
+    // Setup array size...
+    char **role_list = NULL;
+    role_list = (char**) malloc (sizeof(char *) * VAR_ROLE_COUNT);
+    
+    // Setup array element size... sigh
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        role_list[i] = (char*) malloc (sizeof(char) * BMI_MAX_ROLE_NAME);
+    }
+    
+    // Check if get_model_var_roles is okay
+    int status = Get_model_var_roles(self, role_list);
+    if (status == BMI_FAILURE){
+        free(role_list);
+        return BMI_FAILURE;
+    }
+
+    // Now finally, check if role exists yey
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        if (strcmp(role, role_list[i]) == 0){
+            is_role = 1;
+        }
+    }
+
+    free(role_list);
+    // Loop thru and count vars with this role
+    if (is_role == 1){
+        int this_count = 0;
+        for (int i = 0; i < VAR_NAME_COUNT; i++) {
+            if (strcmp(role, var_info[i].role) == 0) {
+                this_count++;
+            }    
+        }
+        *count = this_count;
+        return BMI_SUCCESS;
+    }
+        */
+
+    // Loop thru and count vars with this role
+    int this_count = 0;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(role, var_info[i].role) == 0) {
+            this_count++;
+        }    
+    }
+
+    if (this_count > 0) {
+        *count = this_count;
+        return BMI_SUCCESS;
+    }    
+    
+    // If we get here, it means the role wasn't recognized
+    *count = 0;
+    return BMI_SUCCESS;
+    //return BMI_FAILURE;
+
+}
+
+static int Get_model_var_names (Bmi *self, const char *role, char **names)
+{
+    
+    // If role is "all", don't filter just return all
+    if (strcmp(role, "all") == 0) {
+        for (int i=0; i<VAR_NAME_COUNT; i++){
+            strncpy(names[i], var_info[i].name, BMI_MAX_VAR_NAME);
+        }
+    return BMI_SUCCESS;      
+    }
+
+    // This block code uses get_model_var_roles to check if *role
+    // is valid, but maybe overkill?
+
+/*    int is_role = 0;
+    // Otherise, check if role is valid first
+    
+    // Setup array size...
+    char **role_list = NULL;
+    role_list = (char**) malloc (sizeof(char *) * VAR_ROLE_COUNT);
+    
+    // Setup array element size... sigh
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        role_list[i] = (char*) malloc (sizeof(char) * BMI_MAX_ROLE_NAME);
+    }
+    
+    // Check if get_model_var_roles is okay
+    int status = Get_model_var_roles(self, role_list);
+    if (status == BMI_FAILURE){
+        free(role_list);
+        return BMI_FAILURE;
+    }
+
+    // Now finally, check if role exists yey
+    for (int i=0; i<VAR_ROLE_COUNT; i++){
+        if (strcmp(role, role_list[i]) == 0){
+            is_role = 1;
+        }
+    }
+
+    // Loop thru and get var names with this role
+    if (is_role == 1){
+        int this_index = -1;
+        for (int i = 0; i < VAR_NAME_COUNT; i++) {
+            if (strcmp(role, var_info[i].role) == 0) {
+                this_index++;
+                strncpy (names[this_index], var_info[i].name, BMI_MAX_VAR_NAME);   
+            }    
+        }
+        return BMI_SUCCESS;
+    }*/
+
+    // Loop thru and get var names with this role
+    int this_index = -1;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp(role, var_info[i].role) == 0) {
+            this_index++;
+            strncpy (names[this_index], var_info[i].name, BMI_MAX_VAR_NAME);   
+        }    
+    }
+
+    return BMI_SUCCESS;
+    
+/*    if (this_index > -1) return BMI_SUCCESS;
+        
+    // If we get here, it means the role wasn't recognized
+    return BMI_FAILURE;*/
+
+}      
+
+// This is now loops thru var_info struct
 static int Get_input_item_count (Bmi *self, int * count)
 {
-    *count = INPUT_VAR_NAME_COUNT;
-    return BMI_SUCCESS;
+/*    int input_count;
+    int input_count_result = Get_model_var_count(self, &input_count, "input");
+    if (input_count_result != BMI_SUCCESS) {
+        return BMI_FAILURE;
+    }
+    *count = input_count;
+    return BMI_SUCCESS;*/
+
+    // Loop thru and count vars with this role = "input"
+    int input_count = 0;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("input_from_bmi", var_info[i].role) == 0) {
+            input_count++;
+        }    
+    }
+
+    *count = input_count;
+    return BMI_SUCCESS; //even if count = 0
+  
 }
 
 static int Get_input_var_names (Bmi *self, char ** names)
 {
-    for (int i = 0; i < INPUT_VAR_NAME_COUNT; i++) {
+/*    for (int i = 0; i < INPUT_VAR_NAME_COUNT; i++) {
         strncpy (names[i], input_var_names[i], BMI_MAX_VAR_NAME);
     }
+    return BMI_SUCCESS;*/
+
+    // NEW BMI EXTENSION - this uses new get_model_var
+/*    char * input_names;
+    int input_names_result = Get_model_var_names(self, &&input_names, "input");
+    if (input_names_result != BMI_SUCCESS) {
+        return BMI_FAILURE;
+    }
+    **names = input_names;
+    return BMI_SUCCESS; 
+*/
+
+
+    // now loops thru var_info struct
+    int idx = -1; 
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("input_from_bmi", var_info[i].role) == 0){
+            idx++;
+            strncpy (names[idx], var_info[i].name, BMI_MAX_VAR_NAME);
+        }
+    }    
+
     return BMI_SUCCESS;
 }
 
+// This is now loops thru var_info struct
 static int Get_output_item_count (Bmi *self, int * count)
 {
-    *count = OUTPUT_VAR_NAME_COUNT;
-    return BMI_SUCCESS;
+/*    int output_count;
+    int output_count_result = Get_model_var_count(self, &output_count, "output");
+    if (output_count_result != BMI_SUCCESS) {
+        return BMI_FAILURE;
+    }
+    *count = output_count;
+    return BMI_SUCCESS;*/
+
+    // Loop thru and count vars with this role = "input"
+    int output_count = 0;
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("output_to_bmi", var_info[i].role) == 0) {
+            output_count++;
+        }    
+    }
+
+    *count = output_count;
+    return BMI_SUCCESS; //even if count = 0
 }
 
 static int Get_output_var_names (Bmi *self, char ** names)
 {
-    for (int i = 0; i < OUTPUT_VAR_NAME_COUNT; i++) {
+/*    for (int i = 0; i < VAR_NAME_COUNT; i++) {
         strncpy (names[i], output_var_names[i], BMI_MAX_VAR_NAME);
-    }
+    }*/
+    
+    // now loops thru var_info struct
+    int idx = -1; 
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp("output_to_bmi", var_info[i].role) == 0){
+            idx++;
+            strncpy (names[idx], var_info[i].name, BMI_MAX_VAR_NAME);
+        }
+    }  
+
     return BMI_SUCCESS;
 }
 
@@ -1051,6 +1700,10 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->finalize = Finalize;
 
         model->get_component_name = Get_component_name;
+        model->get_bmi_version = Get_bmi_version;           //OWP CUSTOM
+        model->get_model_var_count = Get_model_var_count;   //OWP CUSTOM
+        model->get_model_var_roles = Get_model_var_roles;   //OWP CUSTOM
+        model->get_model_var_names = Get_model_var_names;   //OWP CUSTOM
         model->get_input_item_count = Get_input_item_count;
         model->get_output_item_count = Get_output_item_count;
         model->get_input_var_names = Get_input_var_names;
@@ -1062,6 +1715,9 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->get_var_units = Get_var_units;
         model->get_var_nbytes = Get_var_nbytes;
         model->get_var_location = Get_var_location;
+
+        model->get_var_role =       Get_var_role;           //OWP CUSTOM
+        model->get_var_length =     Get_var_length;         //OWP CUSTOM
 
         model->get_current_time = Get_current_time;
         model->get_start_time = Get_start_time;

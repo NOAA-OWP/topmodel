@@ -7,13 +7,7 @@
 
 
 int
-main(int argc, const char *argv[]){
-
-    // Check for configuration file arg
-    if(argc<=1){
-        printf("\nmust include configuration file path...exiting\n\n");
-        exit(1);
-    }
+main(void){
 
     printf("\nBEGIN BMI UNIT TEST\n*******************\n");
 
@@ -32,7 +26,7 @@ main(int argc, const char *argv[]){
     // Test BMI: CONTROL FUNCTION initialize()
     {
         printf(" initializing...");
-        const char *cfg_file = argv[1];
+        const char *cfg_file = "./data/topmod_unit_test.run";
         printf(" configuration found: %s\n", cfg_file);
         status = model->initialize(model, cfg_file);
         if (status == BMI_FAILURE) return BMI_FAILURE;
@@ -51,7 +45,7 @@ main(int argc, const char *argv[]){
     {
         status = model->get_component_name(model, name);
         if (status == BMI_FAILURE) return BMI_FAILURE;
-        printf(" componet_name: %s\n", name);
+        printf(" component name: %s\n", name);
     }
     // Test get_input_item_count()
     {
@@ -239,7 +233,7 @@ main(int argc, const char *argv[]){
 
     // Test BMI: GET VALUE FUNCTIONS
     printf("\nTEST BMI GETTER SETTER FUNCTIONS\n********************************\n");
-    int test_nstep=10;
+    int test_nstep=1;
     double now;
     printf(" updating... timesteps in test loop: %i\n", test_nstep);
     for (int n=1;n<=test_nstep;n++) // shorter time loop for testing
