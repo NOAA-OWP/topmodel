@@ -13,13 +13,13 @@ LFLAGS =
 LIBS = -lm
 
 # define the C source files
-SRCS = main_test_unit_bmi.c ../src/bmi_topmodel.c ../src/topmodel.c
+SRCS = main_unit_test_bmi.c ../src/bmi_topmodel.c ../src/topmodel.c
 
 # define the C object files 
 OBJS = $(SRCS:.c=.o)
 
 # define the executable file 
-MAIN = run_unit_bmi_test
+MAIN = run_bmi_unit_test
 
 .PHONY: depend clean
 
