@@ -39,6 +39,7 @@ else {
 ```
 
 Be aware the other input data files, `params.dat` and `subcat.dat` remain unaffected by this flag.
+More details about all inputs be found [here](./INPUT_FILES_EXPLAINED.md).
 
 ### Model Clock Time
 Recall that the model run function `topmod()` is now devoid of a time-loop as outlined in [BMI_ADAPTION](./BMI_ADAPTION.md).
@@ -86,5 +87,6 @@ if (topmodel->stand_alone == TRUE){
 
 Once a model is BMI-enabled, its BMI model control functions will be used to run it whether or not it is in `stand_alone` mode.  
 Simple if-then-else statements condition the model's behavior based on this toggle.
+[OUTPUT_FILES_EXPLAINED](./OUTPUT_FILES_EXPLAINED.md) provides thorough details for all output varibles.
 
 
