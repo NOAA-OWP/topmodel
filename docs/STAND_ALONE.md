@@ -85,6 +85,6 @@ if (topmodel->stand_alone == TRUE){
 ```
 
 Once a model is BMI-enabled, its BMI model control functions will be used to run it whether or not it is in `stand_alone` mode.  
-Simple if-then-else statements condition the model's behavior based on this toggle
+Simple if-then-else statements condition the model's behavior based on this toggle.
 
 

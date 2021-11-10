@@ -18,8 +18,6 @@ main(void){
     Bmi *model = (Bmi *) malloc(sizeof(Bmi));
 
     // Register BMI model
-    /* TODO: check if this bmi function needs to be model specific?
-            or can be called 'regester_bmi()'?*/
     printf(" registering BMI model...\n");
     register_bmi_topmodel(model);
 
@@ -172,7 +170,7 @@ main(void){
 
     // Test BMI: MODEL GRID FUNCTIONS
     printf("\nTEST BMI GRID FUNCTIONS\n***********************\n");
-    int grid_id = 0; //TODO: impliment for multiple grids, for now we know 0
+    int grid_id = 0;
     int grid_rank, grid_size;
     char grid_type[BMI_MAX_COMPONENT_NAME];
     printf( " grid id %i\n", grid_id);
