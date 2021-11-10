@@ -21,6 +21,6 @@ originally developed by
 - [BMI_ADAPTION](./docs/BMI_ADAPTION.md): Details of how TOPMODEL source code was adapted and extended to BMI
 - [STAND_ALONE](./docs/STAND_ALONE.md): A new Boolean toggle introduced
 - [OUTPUT_FILES_EXPLAINED](./docs/OUTPUT_FILES_EXPLAINED.md)
+- [INPUT_FILES_EXPLAINED](./docs/INPUT_FILES_EXPLAINED.md)
 - [BMI_UNIT_TEST](./test/README.md)
-- [SERIALIZATION](./test_serialize/README.md): Core BMI extended to support serialization and deserialization
 - [PARAMS](./params/README.md): Parameter generation workflow
