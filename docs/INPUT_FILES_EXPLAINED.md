@@ -52,6 +52,20 @@ See [`subcat.dat`](../data/subcat.dat).
   <img src="https://github.com/madMatchstick/topmodel/blob/doc-update-bmi-v2.0/docs/img/subcat_dat.PNG" width=75% height=75% >
 </p>
 
+| Variable | Datatype | Limits | Units | Description |
+| -------- | -------- | ------ | ----- | ----------- |
+| num_sub_catchments | *int* |   |   | number of subcatments; BMI adaption always sets to 1 as loop to be handled by framework  |
+| imap | *int* | Boolean  |   | ordinarily tells code to write map; NOT IMPLEMENTED |
+| yes_print_output | *int*  | Boolean |   | set equal to `1` to print output files |
+| subcat   | *char* | 256 |   | the name of each sub-catchment  |
+| num_topodex_values  | *int* |   |   | number of topodex histogram values |
+| area  | *double* | % | meters^2 | catchment area as % to whole catchment (set to 1) |
+| dist_area_lnaotb | *double* | % | meters | the distribution of area corresponding to ln(A/tanB) histo. |
+| lnaotb | *double* | % | meters | ln(a/tanB) values |
+| num_channels  | *int* |   |    | number of channels |
+| cum_dist_area_with_dist  | *double* | % | meters  | channel cum. distr. of area with distance |
+| dist_from_outlet | *double* | % | meters  | distance from outlet to point on channel with area known |
+
 ## Parameter Data
 See [`params.dat`](../data/params.dat).
 
