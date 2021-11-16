@@ -28,7 +28,7 @@ When testing outside of a true framework, we consider the behavior of BMI functi
 
 ## Comparison
 To compare bmi-enabled model results to output produced by original source code, we can run TOPMODEL in a `stand_alone` scenario. 
-BMI model control functions (`initialize()`, `update()`, and `finalize()`) are specialized to manage this conditional switch. 
+BMI model control functions (`bmi.initialize()`, `bmi.update()`, and `bmi.finalize()`) are specialized to manage this conditional switch. 
 Other BMI functions primarily support use within a model-coupling framework.
 Therefore, these “self-description” functions are unneeded for expected value tests.
 
@@ -43,7 +43,7 @@ The executable is configured for a `stand_alone` scenario and reads-in informati
 The two output files, `topmod.out` and `hyd.out` are identical to those produced by the original source code, prior to any BMI implementation.
 The results are a 1-1 match, as shown in the plots below.
 Instructions on how to run original TOPMODEL can be found [here](../refs/original_code_c/README.1ST).
-See [OUTPUT_FILES_EXPLAINED](../docs/OUTPUT_FILES_EXPLAINED.md) or [source code](../refs/original_code_c/tmod9502.c) for more information about output variable names and units.
+See [OUTPUT_FILES_EXPLAINED](../docs/OUTPUT_FILES_EXPLAINED.md) or [OUTPUT_FILES_EXPLAINED](../docs/OUTPUT_FILES_EXPLAINED.md) [source code](../refs/original_code_c/tmod9502.c) for more information about output variable names and units.
 The header file [`topmodel.h`](../include/topmodel.h) also includes comments of each variable, both input and output.  
 
 <img src="https://github.com/madMatchstick/topmodel/blob/doc-update-bmi-v2.0/docs/img/bmi_topmod_compare_hyd.png" width=50% height=50%> <img src="https://github.com/madMatchstick/topmodel/blob/doc-update-bmi-v2.0/docs/img/bmi_topmod_compare_scatter.png" width=49% height=49%>

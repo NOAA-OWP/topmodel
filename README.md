@@ -23,4 +23,4 @@ originally developed by
 - [OUTPUT_FILES_EXPLAINED](./docs/OUTPUT_FILES_EXPLAINED.md)
 - [INPUT_FILES_EXPLAINED](./docs/INPUT_FILES_EXPLAINED.md)
 - [BMI_UNIT_TEST](./test/README.md)
-- [PARAMS](./params/README.md): Parameter generation workflow
+- [PARAMS](./params/README.md): Parameter [`subcat.dat`](.data/subcat.dat) generation workflow
