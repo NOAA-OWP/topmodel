@@ -19,6 +19,14 @@ It contains observed data, `Qobs`, and simulated discharge,`Q`, as the image bel
   <img src="https://github.com/madMatchstick/topmodel/blob/doc-update-bmi-v2.0/docs/img/hyd_out.PNG" width=40% height=40% >
 </p>
 
+| Variable | Datatype | Units | Role | Description |
+| -------- | -------- | ----- | ---- | ----------- |
+| it  | *int* |   | time_info | current time step |
+| Qobs   | *double* |  meters/hour | output_to_file | observed discharge  |
+| Q      | *double* |  meters/hour | output_to_file\* | simulated discharge |
+
+\*Note: Variable role is "output_to_bmi" if not in stand-alone mode.
+
 ## Model Results
 See [`demo_topmod.out`](../refs/original_code_c/demo_topmod.out) for sample example model output.
 

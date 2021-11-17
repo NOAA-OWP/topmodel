@@ -22,5 +22,6 @@ originally developed by
 - [STAND_ALONE](./docs/STAND_ALONE.md): A new Boolean toggle introduced
 - [OUTPUT_FILES_EXPLAINED](./docs/OUTPUT_FILES_EXPLAINED.md)
 - [INPUT_FILES_EXPLAINED](./docs/INPUT_FILES_EXPLAINED.md)
+- [VARIABLE_ROLES](./docs/VARIABLE_ROLES.md)
 - [BMI_UNIT_TEST](./test/README.md)
 - [PARAMS](./params/README.md): Parameter [`subcat.dat`](.data/subcat.dat) generation workflow
