@@ -2,6 +2,7 @@
 Make and GCC compiler are required for unit testing.
 - [Component](#component)
 - [Comparison](#comparison)
+- [Stand Alone Flag](#stand-alone-flag)
 
 ## Component 
 We introduce several new components when extending computational models to BMI.  They are categorized as follows,  

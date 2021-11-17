@@ -6,9 +6,9 @@
 	- [Include Header File](#include-header-file)
 	- [File Stream Management](#file-stream-management)
 	- [Console Prints](#console-prints)
-	- [`topmod` Function](#topmod-function)
-	- [`results` Function](#results-function)
-	- [`water_balance` Function](#water_balance-function)
+	- [`topmod`](#topmod)
+	- [`results`](#results)
+	- [`water_balance`](#water_balance)
 
 ## Source Code 
 -	TOPMODEL [C version](../refs/original_code_c/tmod9502.c) converted by Fred Ogden ‘09.
@@ -26,7 +26,7 @@
 -	[`subcat.dat`](../data/subcat.dat): Subcatchment topographic data file (includes ln(a/tanB) dist.)
 -	[`params.dat`](../data/params.dat): Parameter based data file
 -	[`topmod.out`](../data/topmod.out): (Optional) model results file
--	[`hyd.out`](../data/params.dat): (Optional) hydrograph output file
+-	[`hyd.out`](../data/hyd.out): (Optional) hydrograph output file
 
 ## Summary of Functions and Workflow
 This nestest listing aims to demonstrate general flow of essential functions calls; i.e. where and when they are used under a mock `main.c` program or true framework setting.
@@ -70,7 +70,8 @@ All BMI functions are thoroughly documented by [CSDMS](https://bmi.readthedocs.i
 
 ## Summary of Changes
 Alterations to source code were necessary for Topmodel BMI extension.
-However, the development was pursued in such a manner that minimum adjustments were made and moreso, that model code would be recognizable by its original author.   
+However, the development was pursued in such a manner that minimum adjustments were made and moreso, that model code would be recognizable by its original author.
+Most code changes are commented with `// BMI Adaption:` so they are easily searchable.
 
 ### Include Header File
 All variable declarations and function prototypes (lines 153-222 in [source code](../refs/original_code_c/tmod9502.c#L153)) were separated into a header file `topmodel.h` for convenience.
@@ -119,16 +120,65 @@ Also, variable `isc` ([source code](../refs/original_code_c/tmod9502.c#212)) was
 	-	2: Model info (from source code)
 	-	3: BMI info (e.g. current timestep)	
 
-### topmod Function
--	Include ``current_time_step``  to `topmod()`.
--	Remove time-loop from `topmod()`; set ``it`` to ``current_time_step``.
+`yes_print_output` speaks to output file generation only. 
+
+### topmod
+-	Remove time-loop!!!
+-	Set iteration `it` to bmi's `current_time_step` if `stand_alone == TRUE`, otherwise set to `1`
+-	Counter++ is handled by `bmi.update()`
 -	Include state variables in model structure, declared in `topmodel.h`, & to be passed in `topmod()`
+- 	12 additional paramters required by model run function, `topmod()`,
+	-	```*sump```
+	-	```*sumae```
+	-	```*sumq```
+	-	```*sumrz```
+	-	```*sumuz```
+	-	```*quz```
+	-	```*qb```
+	-	```*qof```
+	-	```*p```
+	-	```*ep```
+	- 	```current_time_step```
+	-	```stand_alone```
+-	Isolate and remove balance term calculations (lines 520-544 in [source code](../refs/original_code_c/tmod9502.c#L520)) into separate function, [`water_balance()`](#water_balance)
+
+See [`topmodel.c`](../src/topmodel.c#102) for full definition.
+
+###	results 
+-	2 additional input function parameters,
+	-	`current_time_step` 
+	-	`yes_print_output`
+-	Set initial values for intitial time step only
+```
+	if (current_time_step == 1){
+	  f1=0.0;
+	  f2=0.0;
+	  sumq=0.0;
+	  ssq=0.0;
+	}
+```  
+-	Use `current_time_step` as model's iteration, `it`	
+-	Only print summary results at end of model run `nstep==current_time_step`
+-	Called during `bmi.update()`, after `topmod()`, when `stand_alone == TRUE`
+
+See [`topmodel.c`](../src/topmodel.c#833) for full definition.
+
+###	water_balance
+-	Manages calculations and outputs for 7 balance terms,
 	-	```sump```
 	-	```sumae```
 	-	```sumq```
-
-###	results Function
--	Include ``current_time_step`` to `results()`.
--	Only print summary results at end of model run `nstep==current_time_step`.
-
-###	water_balance Function
+	-	```sumrz```
+	-	```sumuz```
+	-	```sbar```
+	-	```bal```
+	-	```sbar```
+-	Called during `bmi.finalize()` based on option flags,
+    ```
+    if (model->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){        
+        
+        water_balance(model->output_fptr, model->yes_print_output,
+            model->subcat,&model->bal, &model->sbar, &model->sump, 
+            &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
+    }
+    ```
