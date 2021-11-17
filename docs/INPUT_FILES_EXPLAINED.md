@@ -28,7 +28,7 @@ More on `stand_alone` can be found [here](./STAND_ALONE.md).
 | \*output_fptr  | FILE   | 256 | file_offset | file pointer to `topmod.OUT`  |
 | \*out_hyd_fptr | FILE   | 256 | file_offset | file pointer to `hyd.OUT`     |
 
-Note: All file pointers must be a full relative path; e.g. `data/inputs.DAT`.
+Note\*: All file pointers must be a full relative path; e.g. `data/inputs.DAT`.
 
 ## Input Data
 See [`inputs.dat`](../data/inputs.dat).
@@ -41,11 +41,11 @@ See [`inputs.dat`](../data/inputs.dat).
 | -------- | -------- | ----- | ---- | ----------- |
 | nstep  | *int* |   | time_info | total number of simulation periods |
 | dt     | *int* | hours  | time_info | size of timestep  |
-| rain   | *double* |  meters/hour | input_from_file* | rainfall rate  |
-| pe     | *double* |  meters/hour | input_from_file* | potential evapotranspiration  |
-| Qobs   | *double* |  meters/hour | input_from_file* | observed discharge   |
+| rain   | *double* |  meters/hour | input_from_file\* | rainfall rate  |
+| pe     | *double* |  meters/hour | input_from_file\* | potential evapotranspiration  |
+| Qobs   | *double* |  meters/hour | input_from_file\* | observed discharge   |
 
-* Variable role is "input_from_bmi" if not in stand-alone mode.
+Note\*: Variable role is "input_from_bmi" if not in stand-alone mode.
 
 ## Subcatchment Data
 See [`subcat.dat`](../data/subcat.dat).
