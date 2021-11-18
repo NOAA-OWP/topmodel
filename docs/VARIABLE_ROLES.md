@@ -1,16 +1,16 @@
 # Variable Roles in the Basic Model Interface (BMI)
 
-Here, we use the term “variable” very broadly (as a “catch all”) for any type of variable that appears in a computer model.
-The purpose of this document is to define a set of distinct and non-overlapping “roles” that a variable can play in a model.
-The purpose of introducing variable roles is to support tasks such as serialization and calibration that require working with some subset of all model variables.
+Here, we use the term *variable* very broadly (as a “catch all”) for any type of variable that appears in a computer model.
+The purpose of this document is to define a set of distinct and non-overlapping *roles* that a variable can play in a model.
+Introducing variable roles allow support for tasks such as serialization and calibration that require working with some subset of all model variables.
 Note that a variable’s role may sometimes change based on a setting or option in the model’s configuration file.
 For example, some variables may only be computed and made available as outputs when a certain option is activated.
 
-0. **all**:   This special role name is used to refer to the set of all model variables, except for purely “local” variables that are only initialized and used within a function (like a loop counter) but are neither an argument nor return value of that function.
-This is the set of variables that must be serialized if we wish to save the complete “state” of the computer model.
-(Here, we are thinking of “state” in the computer science sense, as “remembered information” or a “stateful system”.)
+0. **all**:   This special role name is used to refer to the set of all model variables, except for purely local variables that are only initialized and used within a function (like a loop counter) but are neither an argument nor return value of that function.
+This is the set of variables that must be serialized if we wish to save the complete *state* of the computer model.
+(Here, we are thinking of *state* in the computer science sense, as “remembered information” or a “stateful system”.)
 Purely local variables do not need to be serialized since models are not serialized “mid function”, but only after a BMI `initialize()` or `update()` call.
-Note that this role name is not assigned to any variable in the model, but can be used in any BMI function that has a “role” argument; i.e.  `Get_model_var_count()` shown below.
+Note that this role name is not assigned to any variable in the model, but can be used in any BMI function that has a *role* argument; i.e.  `Get_model_var_count()` shown below.
 ```
 static int Get_model_var_count (Bmi *self, int * count, char *role)
 {
@@ -21,12 +21,11 @@ static int Get_model_var_count (Bmi *self, int * count, char *role)
     }  
 ```
 
-
 1. **array_length**:  Models often contain arrays (1D, 2D, 3D, etc.) and some of the variables in the model are used to set the dimensions of these arrays.
 They often have names that start with `num` or `n` or `max` as in `num_steps`, `num_items`, `ncols`, `nrows`, `nx`, `ny`, `nz`, `n_steps`, `max_length`, etc.
 
-2. **constant**:   These are physical or mathematical constants, like `pi`, the gravitational constant, `g”`, or the speed of light, `c`.
-This role is similar but distinct from the role of a “fixed parameter” (see below).
+2. **constant**:   These are physical or mathematical constants, like `pi`, the gravitational constant, `g`, or the speed of light, `c`.
+This role is similar but distinct from the role of a *fixed parameter* (see below).
 Einstein’s famous equation:   `e = m*c^2` contains `c`, the speed of light constant, but has `m `as the independent variable and `e` as the dependent variable.
 It can be useful to retrieve variables that have this role, since different models may use a different number of significant digits, or could contain typos, etc.
 
@@ -46,12 +45,12 @@ Note that this is not for file pointers.
 6. **file_offset**:  This refers to a variable that stores the offset, in bytes, of the current position of a file pointer.
 If a model is ever serialized while it is reading from or writing to an output file, this will be needed so that a new instance of the model can continue reading or writing from the same position in the file.
 
-7. **info_string**:   A string or `char[]` variable (non-numeric) that provides model details, such as `title` or `catchment_name`.
+7. **info_string**:   A *string* or *char[]* variable (non-numeric) that provides model details, such as `title` or `catchment_name`.
 This can also be used for a model version string, model name, author name, author email, or the name of a river basin, etc.
 
 8. **input_from_bmi**:  These are model input variables whose names are returned via the BMI `get_input_var_names()` function, or the new `get_var_names()` function with the role set to **input_from_bmi**.
 The framework may get the values of these variables from other BMI objects using their BMI `get_value()` function and then set them in this model using its BMI `set_value()` function.
-This will often include “forcing variables”, “climatic variables”, or “environmental variables” which may or may not vary with time.
+This will often include forcing variables, climatic variables, or environmental variables which may or may not vary with time.
 These variables (as exchange items) need to have standardized variable names to facilitate accurate model coupling, but they typically have a shorter, internal name.
 
 9. **input_from_file**:  Similar to **input_from_bmi**, except these variables are read from a file by the model itself.
@@ -73,24 +72,22 @@ These variables (as exchange items) need to have standardized variable names to 
 13. **output_to_file**:  These are output variables that the model writes to a file.
 These could potentially overlap with the **output_to_bmi** variables, but the goal is to allow only one role name for each variable.
 
-14. **parameter_adjustable**:  In mathematics (see References), the word parameter often has a specialized meaning and the phrases “control parameter”, “design parameter”, “fitting parameter” or “model parameter” are synonyms.
+14. **parameter_adjustable**:  In mathematics (see References), the word *parameter* often has a specialized meaning and the phrases “control parameter”, “design parameter”, “fitting parameter” or “model parameter” are synonyms.
 The simplest concrete example is the general equation for a line:  `y = m*x + b`.
 Here, `x` is the independent (or input) variable, `y` is the dependent (or output) variable and `m`and `b` are parameters (slope and y-intercept).
 To use the equation for a line, `m` and `b` are first set or fixed and then the equation is evaluated for different values of `x`.
 Another example is the general power-law equation:  `y = c * x^p`, where `c` is the coefficient and `p` is the power.
-When we use a general function class like this, we often “adjust” the parameters to “fit” data that we have for `x` and `y`.
-A distinguishing feature of parameters is that they are fixed at the beginning of a model run, but are often adjusted/varied between model runs to calibrate or “fit” the model so that predictions match observations as closely as possible.
+When we use a general function class like this, we often *adjust* the parameters to *fit* data that we have for `x` and `y`.
+A distinguishing feature of parameters is that they are fixed at the beginning of a model run, but are often adjusted/varied between model runs to calibrate or *fit* the model so that predictions match observations as closely as possible.
 A model should assign this role name to any parameter that it allows to be varied for calibration.
-
 Note:  It would be good to have a `get_var_min()` and `get_var_max()` function in BMI, especially for use with adjustable parameters.
-
-Note:  If no variables have this role, it indicates that the model cannot be calibrated.  A role name like **not_set** or “internal” could be used as a placeholder to simplify BMI implementation.
+Note:  If no variables have this role, it indicates that the model cannot be calibrated.
 
 15. **parameter_fixed**:  This role name is used for the purpose of indicating that the given model parameter is to be held fixed and not adjusted for model calibration.
 The only difference between the roles **fixed parameter** and **constant** is that the value of a fixed parameter could potentially be varied but is deliberately held fixed, while a constant always has a fixed value.
 Density of water could potentially qualify as having this role, since it is often assumed to have a fixed value even though it can change with temperature.
 
-16. **state**:  A computational model is usually trying to represent the “state” of some physical system, and to predict how the variables that describe this system state vary over time.
+16. **state**:  A computational model is usually trying to represent the *state* of some physical system, and to predict how the variables that describe this system state vary over time.
 For example, the air in a piston may be modeled with the Ideal Gas Law, `PV = nRT`, and the state of the piston-air system is described by the variables `P` (pressure), `V` (volume), `T` (temperature) and `n` (amount of substance) as well as the ideal gas constant, `R`.
 This example shows that state variables don’t necessarily change over time, because it is possible for two of these to be held fixed while the other two are allowed to vary.
 (They are still describing the system state when fixed.)
@@ -98,13 +95,12 @@ The system being modeled may have other properties that describe the system stat
 In a given model, a system state variable may be treated as either an independent (input) or dependent (output) variable.
 So input and output variables often qualify as state variables, but this role name is reserved for any system state variables that are *not* treated as model input or output variables.
 The potential and kinetic energies of a projectile provide another example of state variables.
-“State space” refers to the set of all possible states that a system can be in (i.e. all valid combinations of state variables), which is often both infinite and constrained.
+*State space* refers to the set of all possible states that a system can be in (i.e. all valid combinations of state variables), which is often both infinite and constrained.
 
-17. **time_info**:   Computational models that predict values of variables at future times from initial values using some set of equations are often called “time-stepping” models.
-At a minimum, a timestep size and a number of timesteps or a “time index” are required.
+17. **time_info**:   Computational models that predict values of variables at future times from initial values using some set of equations are often called *time-stepping* models.
+At a minimum, a timestep size and a number of timesteps or a *time index* are required.
 But many models also include “clock time”, calendar dates or ISO 8601 standard “datetimes”.
 There can also be a `start_time`, `current_time`, `end_time`, or `run_time`.
-
 
 ## References
 
