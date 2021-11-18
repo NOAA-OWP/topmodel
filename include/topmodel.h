@@ -50,7 +50,7 @@ extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat,
                 double **cum_dist_area_with_dist, double *tl, 
                 double **dist_from_outlet, int maxsubcatch, int maxincr);
                   
-extern void expinf(int irof, int it, int rint, double df, double cumf,
+extern void expinf(int irof, int it, int rint, double *df, double *cumf,
                 double dt,double xk0, double szm, double hf);                  
 
 extern void results(FILE *output_fptr, FILE *out_hyd_fptr,

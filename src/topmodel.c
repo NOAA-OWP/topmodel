@@ -187,7 +187,7 @@ if(infex==1)
     {
     /*  Adjust Rainfall rate from m/time step to m/h */
     rint=*p/dt;
-    expinf(irof,it,rint,df,cumf,dt,xk0,szm,hf);
+    expinf(irof,it,rint,&df,&cumf,dt,xk0,szm,hf);
     /*  DF is volumetric increment of infiltration and is returned in m/DT */
     rex=*p-df;
     *p-=rex;
@@ -695,8 +695,8 @@ return;
 }
 
 
-extern void expinf(int irof, int it, int rint, double df, double cumf,
-                   double dt,double xk0, double szm, double hf)
+extern void expinf(int irof, int it, int rint, double* df, double* cumf,
+                   double dt, double xk0, double szm, double hf)
 {
 /**************************************************************
 
@@ -706,6 +706,9 @@ extern void expinf(int irof, int it, int rint, double df, double cumf,
   EXPONENTIAL DECREASE IN KSAT WITH DEPTH GREEN-AMPT MODEL. 
 
 **************************************************************/
+
+// BMI Adaption: df and cumf are now passed as pointers
+
 double sum,fc,func,cd,xke,e,tp,r2,f1;
 double dfunc,fx,add,fac,constant,f,f2,xkf,szf,dth;
 int i,j;
@@ -720,23 +723,23 @@ xkf=xk0;
 if(irof!=1)
   {
   /* ponding has not yet occured */   
-  if(cumf>0.0)
+  if(*cumf>0.0)
     {
     /*  FIRST TIME STEP, OVERFLOW IF CUMF=0, GO DIRECT TO F2 CALCULATION */
     /*  INITIAL ESTIMATE OF TIME TO PONDING */
-    f1=cumf;
+    f1=*cumf;
     r2=-xkf*szf*(cd+f1)/(1.0-exp(szf*f1));
     if(r2<rint)
       {
       /*  PONDING STARTS AT BEGINNING OF TIME STEP */
       tp=((double)it-1.0)*dt;
       irof=1;
-      f=cumf;
+      f=*cumf;
       }
     }
   if(irof!=1)
     {
-    f2=cumf+dt*rint;
+    f2=*cumf+dt*rint;
     r2=-xkf*szf*(cd+f2)/(1.0-exp(szf*f2));
     //--------------------------------------------------- 
     // Bug fix: "fabs(f2<1.0e-09) -> "fabs(f2)<1.0e-09"
@@ -744,11 +747,11 @@ if(irof!=1)
     if( fabs(f2)<1.0e-09 || r2>rint )
       {
       irof=0;
-      df=rint*dt;
-      cumf+=df;
+      *df=rint*dt;
+      *cumf+=*df;
       return;  /* no ponding during time step */
       }
-    f=cumf+r2*dt;
+    f=*cumf+r2*dt;
     for(i=1;i<=20;i++)
       {    
       r2=-xkf*szf*(cd+f)/(1.0-exp(szf*f));
@@ -770,7 +773,7 @@ if(irof!=1)
         exit(-9);  /* stop the program */
         }
       }
-    tp=((double)it-1.0)*dt+(f-cumf)/rint;
+    tp=((double)it-1.0)*dt+(f-*cumf)/rint;
     }
   if(tp<=(double)it*dt)
     {
@@ -809,21 +812,21 @@ if(tp<=(double)it*dt)
     func=-(log(fc)-(log(fc)+sum)/exp(szf*cd)-constant)/(xkf*szf)-
                                                         ((double)it*dt-tp);
     dfunc=(exp(szf*f)-1.0)/(xkf*szf*fc);
-    df=-func/dfunc;
-    f+=df;
-    if(fabs(df)<e) break;
+    *df=-func/dfunc;
+    f+=*df;
+    if(fabs(*df)<e) break;
     if(i==20)
       {
       printf("Max number of iterations exceeded\n");
       exit(-9);  /* stop the program */
       }
     }
-  if(f<(cumf+rint))
+  if(f<(*cumf+rint))
     {
-    df=f-cumf;
-    cumf=f;
+    *df=f-*cumf;
+    *cumf=f;
     /*  SET UP INITIAL ESTIMATE FOR NEXT TIME STEP */
-    f+=df;
+    f+=*df;
     return;
     }
   }
