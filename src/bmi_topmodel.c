@@ -9,8 +9,11 @@
   
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
-        "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",   //p
-        "land_surface_water__potential_evaporation_volume_flux",            //ep
+        // 11.18.2021 Edit: Just use the same input name as these two are ==  
+        "atmosphere_water__liquid_equivalent_precipitation_rate",     //p
+        "water_potential_evaporation_flux",                           //ep
+        //"atmosphere_water__domain_time_integral_of_rainfall_volume_flux",   //p
+        //"land_surface_water__potential_evaporation_volume_flux",            //ep
         "land_surface_water__runoff_mass_flux",                             //Q[it]
         "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",        //qz
         "land_surface_water__baseflow_volume_flux",                         //qb
@@ -120,8 +123,8 @@ static const char *input_var_types[INPUT_VAR_NAME_COUNT] = {
 };
 
 static const char *input_var_units[INPUT_VAR_NAME_COUNT] = {
-        "kg m-2",
-        "m s-1"
+        "m h-1",
+        "m h-1"
 };
 
 static const int input_var_item_count[INPUT_VAR_NAME_COUNT] = {
