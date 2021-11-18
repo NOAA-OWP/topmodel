@@ -15,7 +15,7 @@
 -	Previous is an adaptation from Keith Beven’s 1985 [FORTRAN version](../refs/original_code_fortran/TMOD9502.f).
 
 ## Listing of Files
--	[`topmodel.c`](../src/topmodel.c): Modified from orginal source
+-	[`topmodel.c`](../src/topmodel.c): Modified from original source
 -	[`bmi_topmodel.c`](../src/bmi_topmodel.c): Core BMI v2.0 functions defined by developer
 -	[`main.c`](../src/main.c): *Pseudo-framework* for standalone BMI development and testing, calling model control functions
 -	[`topmodel.h`](../include/topmodel.h): Function/subroutine prototypes and model structure declaration
@@ -53,7 +53,7 @@ All BMI functions are thoroughly documented by [CSDMS](https://bmi.readthedocs.i
 
 | Function | Purpose | tmod9502.c? | topmodel-bmi? | Notes |
 | -------- | ------- | ----------- | ------------- | ----- |
-| `main()` | *Psuedo-framework* for building and running model control functions | [yes](../refs/original_code_c/tmod9502.c#L151) | [yes](../src/main.c#17) | Completely "absorbed" into BMI functions as explained in this document |
+| `main()` | *Pseudo-framework* for building and running model control functions | [yes](../refs/original_code_c/tmod9502.c#L151) | [yes](../src/main.c#17) | Completely "absorbed" into BMI functions as explained in this document |
 | `bmi.register_bmi_topmodel()` | allocates memory and generates BMI object class | no | [yes](../src/bmi_topmodel.c#L1044) | Core BMI v2.0; See [Header File](#include-header-file) |
 | `bmi.initialize()` | accepts configuration file path and completes other initial tasks | no | [yes](../src/bmi_topmodel.c#L352) | Core BMI v2.0 |
 | `bmi.init_config()` | reads-in data for all input files | no | [yes](../src/bmi_topmodel.c#L240) | Developer-defined to BMI space; also see [INPUT_FILES_EXPLAINED](./INPUT-FILES_EXPLAINED.md) |
@@ -127,7 +127,7 @@ Also, variable `isc` ([source code](../refs/original_code_c/tmod9502.c#212)) was
 -	Set iteration `it` to bmi's `current_time_step` if `stand_alone == TRUE`, otherwise set to `1`
 -	Counter++ is handled by `bmi.update()`
 -	Include state variables in model structure, declared in `topmodel.h`, & to be passed in `topmod()`
-- 	12 additional paramters required by model run function, `topmod()`,
+- 	12 additional parameters required by model run function, `topmod()`,
 	-	```*sump```
 	-	```*sumae```
 	-	```*sumq```
@@ -140,7 +140,7 @@ Also, variable `isc` ([source code](../refs/original_code_c/tmod9502.c#212)) was
 	-	```*ep```
 	- 	```current_time_step```
 	-	```stand_alone```
--	Isolate and remove balance term calculations (lines 520-544 in [source code](../refs/original_code_c/tmod9502.c#L520)) into separate function, [`water_balance()`](#water_balance)
+-	Isolate and remove balance term calculations (lines 520-544 in [source code](../refs/original_code_c/tmod9502.c#L520)) into a separate function, [`water_balance()`](#water_balance)
 
 See [`topmodel.c`](../src/topmodel.c#102) for full definition.
 
@@ -157,7 +157,7 @@ See [`topmodel.c`](../src/topmodel.c#102) for full definition.
 	  ssq=0.0;
 	}
 ```  
--	Use `current_time_step` as model's iteration, `it`	
+-	Use `current_time_step` as the model's iteration, `it`	
 -	Only print summary results at end of model run `nstep==current_time_step`
 -	Called during `bmi.update()`, after `topmod()`, when `stand_alone == TRUE`
 
