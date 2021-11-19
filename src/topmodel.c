@@ -340,36 +340,6 @@ for(ia=1;ia<=num_topodex_values;ia++)
 
   }
 
-//(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
-// TODO: Confirm these values are correct outside of initial value (validated-okay) 
-// and final (validated-okay)
-
-/*  BMI Adaption: Compute and print summary summations only at end of model run */
-/*  TODO: Find and replace line string in out file for any current_time_step? */
-/*if (current_time_step == 100)
-  {
-
-  //(*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
-
-#if TOPMODEL_DEBUG >=1  
-  printf("\nWater Balance for Subcatchment: %s\n",subcat);
-  printf(
-  "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
-  printf("%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
-          (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
-#endif
-
-  if (yes_print_output==TRUE)
-    {
-    fprintf(output_fptr,"\nWater Balance for Subcatchment: %s\n",subcat);
-    fprintf(output_fptr,
-    "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
-    fprintf(output_fptr,"%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
-           (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
-    fprintf(output_fptr,"Maximum contributing area %12.5lf\n",max_contrib_area);
-    }
-  }*/
-
 return;
 
 }
@@ -396,7 +366,6 @@ extern void water_balance(FILE *output_fptr, int yes_print_output,
     "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
     fprintf(output_fptr,"%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
            (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
-    //fprintf(output_fptr,"Maximum contributing area %12.5lf\n",max_contrib_area);
     }
 
 return;
@@ -835,7 +804,7 @@ return;
 
 extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
                  int nstep, double *Qobs, double *Q, 
-                 int current_time_step, int yes_print_output )
+                 int yes_print_output)
 {
 /***************************************************************
       SUBROUTINE RESULTS
@@ -844,41 +813,29 @@ extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
   AND DOES OBJECTIVE FUNCTION CALCULATIONS 
   *************************************************************/
 
-/* BMI Adaption: include current_time_step yes_print_output as function input parameter*/
+/* BMI Adaption: include additional function input parameters:
+    yes_print_output
+*/
   
-double f1,f2,sumq,ssq,vare,varq,qbar,nse;
-int it;
-
-/* BMI Adaption: Set initial values for intital time step only */
-if (current_time_step == 1){
+  double f1,f2,sumq,ssq,vare,varq,qbar,nse;
+  int it;
   f1=0.0;
   f2=0.0;
   sumq=0.0;
   ssq=0.0;
-}  
 
-/* BMI Adaption: Set iteration to current_time_step*/
-it = current_time_step;
-
-/* BMI Adaption: Apply yes_print_output to hyd.out too*/
-if (yes_print_output == TRUE){
-  fprintf(out_hyd_fptr,"%d %lf %lf\n",it,Qobs[it],Q[it]);  
-}
-
-/*  BMI Adaption: Compute and print summary summations only at end of model run */
-/*  TODO: Find and replace line string in out file for any current_time_step*/
-if (current_time_step == nstep) {
-
-  for(it=1;it<=current_time_step;it++)
-    {
+  for(it=1;it<=nstep;it++){
     sumq+=Qobs[it];
     ssq+=Qobs[it]*Qobs[it];
     f1+=pow((Q[it]-Qobs[it]),2.0);
     f2=f2 + fabs(Q[it]-Qobs[it]);
+    if (yes_print_output == TRUE){
+      fprintf(out_hyd_fptr,"%d %lf %lf\n",it,Qobs[it],Q[it]);
     }
-  qbar=sumq/(double)current_time_step;
-  varq=(ssq/(double)current_time_step -qbar*qbar);
-  vare=f1/(double)current_time_step;
+  }
+  qbar=sumq/(double)nstep;
+  varq=(ssq/(double)nstep -qbar*qbar);
+  vare=f1/(double)nstep;
   nse=1.0-vare/varq;
 
 /* BMI Adaption: Console prints based on macro setting*/
@@ -896,7 +853,6 @@ if (current_time_step == nstep) {
     fprintf(output_fptr,"Mean Obs Q %e   Variance Obs Q %e\n",qbar,varq);
     fprintf(output_fptr,"    Error Variance %e\n",vare);
   }
-};
 
 return;
 }
