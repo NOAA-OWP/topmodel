@@ -972,16 +972,29 @@ static int Get_var_length (Bmi *self, const char *name, int * elements)
 /* OWP Custom BMI Enhancements */
 static int Get_var_role (Bmi *self, const char *name, char * role)
 {
+    topmodel_model *topmodel;
+    topmodel = (topmodel_model *) self->data;
 
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
             strncpy(role, var_info[i].role, BMI_MAX_ROLE_NAME);
-            return BMI_SUCCESS;
-        }    
+        //----------------------------------------------------
+        // Override some roles based on config file settings
+        //----------------------------------------------------               
+            if ((topmodel->stand_alone == TRUE) && (strcmp(role, "input_from_bmi") == 0)){
+                role = "input_from_file";
+            }
+        return BMI_SUCCESS;  
+        }  
+
     }
     
-    // If we get here, it means the variable name wasn't recognized
-    role[0] = '\0';
+    //--------------------------
+    // No match found for name
+    //--------------------------
+    printf("ERROR in get_var_role():\n");
+    printf("  No match for: %s\n\n", name); 
+    role = "not_set";
     return BMI_FAILURE;
 }
 
