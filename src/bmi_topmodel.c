@@ -385,6 +385,16 @@ static int Initialize (Bmi *self, const char *cfg_file)
     topmodel->sumae = 0.0;
     topmodel->sumq = 0.0;
 
+/*    irof=0;
+rex=0.0;
+cumf=0.0;
+max_contrib_area=0.0;
+sump=0.0;
+sumae=0.0;
+sumq=0.0;
+sae=0.0;*/
+
+
     return BMI_SUCCESS;
 }
 
@@ -420,22 +430,9 @@ static int Update (Bmi *self)
         &topmodel->sump,&topmodel->sumae,&topmodel->sumq,&topmodel->sumrz,&topmodel->sumuz,
         &topmodel->quz, &topmodel->qb, &topmodel->qof, &topmodel->p, &topmodel->ep );
 
-    //--------------------------------------------------
-    // This should be moved into the Finalize() method
-    //--------------------------------------------------
-    // results() 
-    // 1. generates hydrograph out file (hyd.out)
-    // 2. computes objective function stats
-    //        - print to console
-    //        - print to main out file (topmod.out)
-    // Logic for each is handled indiv w.i. funct,
-    // but wouldn't hurt to check conditions here as framework
-    // will likely not even need to jump into results()
-    if (topmodel->stand_alone == TRUE){
-    results(topmodel->output_fptr, topmodel->out_hyd_fptr, topmodel->nstep, 
-        topmodel->Qobs, topmodel->Q, 
-        topmodel->current_time_step, topmodel->yes_print_output);
-    }
+    if ((topmodel->stand_alone == FALSE) & (topmodel->yes_print_output == TRUE)){
+        fprintf(topmodel->out_hyd_fptr,"%d %lf %lf\n",topmodel->current_time_step,topmodel->Qobs[1],topmodel->Q[1]);
+    }      
 
     return BMI_SUCCESS;
 }
@@ -471,62 +468,67 @@ static int Update_until (Bmi *self, double t)
 
 static int Finalize (Bmi *self)
 {
-  if (self){
-    topmodel_model* model = (topmodel_model *)(self->data);
+    if (self){
+        topmodel_model* model = (topmodel_model *)(self->data);
 
-    //-----------------------------------------------------------
-    // When running in stand-alone mode, the original "results"
-    // method should be called here in the Finalize() method,
-    // not in Update_until(). It could also be called when in
-    // framework-controlled mode.
-    //-----------------------------------------------------------
-    //if (model->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){
-    //results(model->output_fptr,model->out_hyd_fptr,model->nstep, 
-    //    model->Qobs, model->Q, 
-    //    model->current_time_step, model->yes_print_output);
-    
-    if (model->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){        
+        if (model->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){        
+            
+            water_balance(model->output_fptr, model->yes_print_output,
+                model->subcat,&model->bal, &model->sbar, &model->sump, 
+                &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
+
+            // this is technically needed, yes
+            if(model->yes_print_output==TRUE){
+                fprintf(model->output_fptr,"Maximum contributing area %12.5lf\n",model->max_contrib_area);
+            }
+
+            //-----------------------------------------------------------
+            // When running in stand-alone mode, the original "results"
+            // method should be called here in the Finalize() method,
+            // not in Update_until(). It could also be called when in
+            // framework-controlled mode.
+            //-----------------------------------------------------------
+            if (model->stand_alone == TRUE){
+                results(model->output_fptr,model->out_hyd_fptr,model->nstep, 
+                model->Qobs, model->Q, model->yes_print_output);                 
+            }
+        }    
+
+        if( model->Q != NULL )
+            free(model->Q);
+        if( model->Qobs != NULL )
+            free(model->Qobs);
+        if( model->rain != NULL )
+            free(model->rain);
+        if( model->pe != NULL )
+            free(model->pe);
+        if( model->contrib_area != NULL )
+            free(model->contrib_area);
+        if( model->stor_unsat_zone != NULL )
+            free(model->stor_unsat_zone);
+        if( model->deficit_root_zone != NULL )
+            free(model->deficit_root_zone);
+        if( model->deficit_local != NULL )
+            free(model->deficit_local);
+        if( model->time_delay_histogram != NULL )
+            free(model->time_delay_histogram);
+        if( model->dist_area_lnaotb != NULL )
+            free(model->dist_area_lnaotb);
+        if( model->lnaotb != NULL )
+            free(model->lnaotb);
+        if( model->cum_dist_area_with_dist != NULL )
+            free(model->cum_dist_area_with_dist);
+        if( model->dist_from_outlet != NULL)
+            free(model->dist_from_outlet);
+
+        // Close output files only if opened in first place
+        if(model->yes_print_output == TRUE){
+            fclose(model->output_fptr);
+            fclose(model->out_hyd_fptr);
+        }
         
-        water_balance(model->output_fptr, model->yes_print_output,
-            model->subcat,&model->bal, &model->sbar, &model->sump, 
-            &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
+        free(self->data);
     }
-
-    if( model->Q != NULL )
-        free(model->Q);
-    if( model->Qobs != NULL )
-        free(model->Qobs);
-    if( model->rain != NULL )
-        free(model->rain);
-    if( model->pe != NULL )
-        free(model->pe);
-    if( model->contrib_area != NULL )
-        free(model->contrib_area);
-    if( model->stor_unsat_zone != NULL )
-        free(model->stor_unsat_zone);
-    if( model->deficit_root_zone != NULL )
-        free(model->deficit_root_zone);
-    if( model->deficit_local != NULL )
-        free(model->deficit_local);
-    if( model->time_delay_histogram != NULL )
-        free(model->time_delay_histogram);
-    if( model->dist_area_lnaotb != NULL )
-        free(model->dist_area_lnaotb);
-    if( model->lnaotb != NULL )
-        free(model->lnaotb);
-    if( model->cum_dist_area_with_dist != NULL )
-        free(model->cum_dist_area_with_dist);
-    if( model->dist_from_outlet != NULL)
-        free(model->dist_from_outlet);
-
-    // Close output files only if opened in first place
-    if(model->yes_print_output == TRUE){
-        fclose(model->output_fptr);
-        fclose(model->out_hyd_fptr);
-    }
-    
-    free(self->data);
-  }
     return BMI_SUCCESS;
 }
 
