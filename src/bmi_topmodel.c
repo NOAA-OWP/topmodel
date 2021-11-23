@@ -679,17 +679,19 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         return BMI_SUCCESS;
     }
     // p
-    if (strcmp (name, "atmosphere_water__domain_time_integral_of_rainfall_volume_flux") == 0) {
+    if (strcmp (name, "atmosphere_water__liquid_equivalent_precipitation_rate_out") == 0) {
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> p;
+        //*dest = (void*)&topmodel->rain[1]; Note: these are the same ==, either would work
         return BMI_SUCCESS;
     // ep    
     }
-    if (strcmp (name, "land_surface_water__potential_evaporation_volume_flux") == 0) {
+    if (strcmp (name, "water_potential_evaporation_flux_out") == 0) {
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> ep;
+        //*dest = (void*)&topmodel-> pe[1]; Note: these are the same ==
         return BMI_SUCCESS;
     }
     // Q[it]
