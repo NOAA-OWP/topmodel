@@ -17,11 +17,11 @@ originally developed by
 [Beven & Kirby (1979)](https://www.tandfonline.com/doi/abs/10.1080/02626667909491834).
 
 ### Links and Documentation
-- [INSTALL](./INSTALL.md)
+- [INSTALL](./INSTALL.md): How to build and run topmodel-bmi
 - [BMI_ADAPTION](./docs/BMI_ADAPTION.md): Details of how TOPMODEL source code was adapted and extended to BMI
-- [STAND_ALONE](./docs/STAND_ALONE.md): A new Boolean toggle introduced
-- [OUTPUT_FILES_EXPLAINED](./docs/OUTPUT_FILES_EXPLAINED.md)
-- [INPUT_FILES_EXPLAINED](./docs/INPUT_FILES_EXPLAINED.md)
-- [VARIABLE_ROLES](./docs/VARIABLE_ROLES.md)
-- [BMI_UNIT_TEST](./test/README.md)
-- [PARAMS](./params/README.md): Parameter [`subcat.dat`](.data/subcat.dat) generation workflow
+- [STAND_ALONE](./docs/STAND_ALONE.md): Outlines a newly introduced Boolean toggle
+- [OUTPUT_FILES_EXPLAINED](./docs/OUTPUT_FILES_EXPLAINED.md): Explanation of model output file(s) and results variables
+- [INPUT_FILES_EXPLAINED](./docs/INPUT_FILES_EXPLAINED.md): Explanation of model input file(s) and associated variables
+- [VARIABLE_ROLES](./docs/VARIABLE_ROLES.md): Description of variable role categories
+- [BMI_UNIT_TEST](./test/README.md): Instructions on how to run various unit testing scripts
+- [PARAMS](./params/README.md): Demonstrates parameter [`subcat.dat`](.data/subcat.dat) generation workflow
