@@ -10,8 +10,8 @@
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
         // 11.18.2021 Edit: Just use the same input name as these two are ==  
-        "atmosphere_water__liquid_equivalent_precipitation_rate",     //p
-        "water_potential_evaporation_flux",                           //ep
+        "atmosphere_water__liquid_equivalent_precipitation_rate_out",     //p
+        "water_potential_evaporation_flux_out",                           //ep
         //"atmosphere_water__domain_time_integral_of_rainfall_volume_flux",   //p
         //"land_surface_water__potential_evaporation_volume_flux",            //ep
         "land_surface_water__runoff_mass_flux",                             //Q[it]
