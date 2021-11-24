@@ -63,11 +63,11 @@ See [`subcat.dat`](../data/subcat.dat).
 | subcat   | *char* | 256 |   | info_string |   | the name of each sub-catchment  |
 | num_topodex_values  | *int* |   |   | parameter_fixed | rainfall-runoff | number of topodex histogram values |
 | area  | *double* | 0-1 |  | parameter_fixed |   | catchment area as % to whole catchment (set to 1) |
-| dist_area_lnaotb | *double* | 0-1 | meters | parameter_fixed | rainfall-runoff | the distribution of area corresponding to ln(A/tanB) histo. |
-| lnaotb | *double* | 0-1 |  | parameter_fixed | rainfall-runoff | ln(a/tanB) values |
+| dist_area_lnaotb | *double* | 0-1 |  | parameter_fixed | rainfall-runoff | the distribution of area corresponding to ln(A/tanB) histo. |
+| lnaotb | *double* |  |  | parameter_fixed | rainfall-runoff | ln(a/tanB) values; TWI |
 | num_channels  | *int* |   |    | parameter_fixed | overland flow | number of channels |
-| cum_dist_area_with_dist  | *double* | % |  | parameter_fixed | overland flow | channel cum. distr. of area with distance |
-| dist_from_outlet | *double* | 0-1 |  | parameter_fixed | overland flow | distance from outlet to point on channel with area known |
+| cum_dist_area_with_dist  | *double* | 0-1 |  | parameter_fixed | overland flow | channel cum. distr. of area with distance |
+| dist_from_outlet | *double* |  | meters | parameter_fixed | overland flow | distance from outlet to point on channel with area known |
 
 ## Parameter Data
 See [`params.dat`](../data/params.dat).
