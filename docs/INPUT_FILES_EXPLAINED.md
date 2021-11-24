@@ -28,7 +28,7 @@ More on `stand_alone` can be found [here](./STAND_ALONE.md).
 | \*output_fptr  | FILE   | 256 | file_offset | file pointer to `topmod.OUT`  |
 | \*out_hyd_fptr | FILE   | 256 | file_offset | file pointer to `hyd.OUT`     |
 
-Note\*: All file pointers must be a full relative path; e.g. `data/inputs.DAT`.
+\*Note: All file pointers must be a full relative path; e.g. `data/inputs.DAT`.
 
 ## Input Data
 See [`inputs.dat`](../data/inputs.dat).
@@ -45,10 +45,11 @@ See [`inputs.dat`](../data/inputs.dat).
 | pe     | *double* |  meters/hour | input_from_file\* | potential evapotranspiration  |
 | Qobs   | *double* |  meters/hour | input_from_file\* | observed discharge   |
 
-Note\*: Variable role is "input_from_bmi" if not in stand-alone mode.
+\*Note: Variable role is "input_from_bmi" if not in stand-alone mode.
 
 ## Subcatchment Data
 See [`subcat.dat`](../data/subcat.dat).
+\*Note: This file can be generated in workflow outlined [here](../params/README.md).
 
 <p align="center">
   <img src="https://github.com/madMatchstick/topmodel/blob/doc-update-bmi-v2.0/docs/img/subcat_dat.PNG" width=75% height=75% >
@@ -61,12 +62,12 @@ See [`subcat.dat`](../data/subcat.dat).
 | yes_print_output | *int*  | Boolean |   | option |   | set equal to `1` to print output files |
 | subcat   | *char* | 256 |   | info_string |   | the name of each sub-catchment  |
 | num_topodex_values  | *int* |   |   | parameter_fixed | rainfall-runoff | number of topodex histogram values |
-| area  | *double* | % | meters^2 | parameter_fixed |   | catchment area as % to whole catchment (set to 1) |
-| dist_area_lnaotb | *double* | % | meters | parameter_fixed | rainfall-runoff | the distribution of area corresponding to ln(A/tanB) histo. |
-| lnaotb | *double* | % | meters | parameter_fixed | rainfall-runoff | ln(a/tanB) values |
+| area  | *double* | 0-1 |  | parameter_fixed |   | catchment area as % to whole catchment (set to 1) |
+| dist_area_lnaotb | *double* | 0-1 | meters | parameter_fixed | rainfall-runoff | the distribution of area corresponding to ln(A/tanB) histo. |
+| lnaotb | *double* | 0-1 |  | parameter_fixed | rainfall-runoff | ln(a/tanB) values |
 | num_channels  | *int* |   |    | parameter_fixed | overland flow | number of channels |
-| cum_dist_area_with_dist  | *double* | % | meters | parameter_fixed | overland flow | channel cum. distr. of area with distance |
-| dist_from_outlet | *double* | % | meters | parameter_fixed | overland flow | distance from outlet to point on channel with area known |
+| cum_dist_area_with_dist  | *double* | % |  | parameter_fixed | overland flow | channel cum. distr. of area with distance |
+| dist_from_outlet | *double* | 0-1 |  | parameter_fixed | overland flow | distance from outlet to point on channel with area known |
 
 ## Parameter Data
 See [`params.dat`](../data/params.dat).
