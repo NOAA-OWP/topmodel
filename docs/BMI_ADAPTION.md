@@ -113,7 +113,7 @@ Also, variable `isc` ([source code](../refs/original_code_c/tmod9502.c#212)) was
 - 	All output files (`topmod.out` and `hyd.out`), if opened, are closed during `bmi.finalize()` 
 
 ### Console Prints
-`printf()` statements now handled by `TOPMODEL_DEBUG` found in [`topmodel.h`](../include/topmodel.h#L18).  Note: Macro uses greater than or equal to logic `>=`; i.e. a setting of `2` will include `0`, `1`, & `2`. Verbosity levels are, 
+`printf()` statements are now handled by `TOPMODEL_DEBUG` found in [`topmodel.h`](../include/topmodel.h#L18).  Note: Macro uses greater than or equal to logic `>=`; i.e. a setting of `2` will include `0`, `1`, & `2`. Verbosity levels are, 
 
 	-	0: Nothing
 	-	1: Error messages (& exit program) 
@@ -123,7 +123,7 @@ Also, variable `isc` ([source code](../refs/original_code_c/tmod9502.c#212)) was
 `yes_print_output` speaks to output file generation only. 
 
 ### topmod
--	Remove time-loop!!!
+-	Removed time-loop!!!
 -	Set iteration `it` to bmi's `current_time_step` if `stand_alone == TRUE`, otherwise set to `1`
 -	Counter++ is handled by `bmi.update()`
 -	Include state variables in model structure, declared in `topmodel.h`, & to be passed in `topmod()`
