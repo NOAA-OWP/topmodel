@@ -9,7 +9,7 @@ In `stand_alone` mode, the model will read required input data from files on its
 Specifically, `inputs()` from source code [`tmod9502.c`](../refs/original_code_c) reads in this data and allocates memory for output arrays accordingly. 
 However, this function is only called when `stand_alone = TRUE`.
 Otherwise, input values and memory allocation are initialized by model code but only for later management (via `set_value()`) by a framework driver.
-Conditioning is handled within BMI's `initialize()` as seen in [this](../src/bmi_topmodel.c#L245) `if/else` block below.
+Conditioning is handled within BMI's `initialize()` as seen in [this](../src/bmi_topmodel.c#L247) `if/else` block below.
 ```
 if (model->stand_alone == TRUE){
   /* READ IN nstep, DT and RAINFALL, PE, QOBS INPUTS */
@@ -76,7 +76,7 @@ The behavior of model clock time, conditioned via `stand_alone`, is handled by `
 ## Outputs
 `Qout` remains the main output variable for the model, regardless of `stand_alone` mode.
 However, output files `topmod.out` and `hyd.out` are only considered when `stand_alone = TRUE`.
-These outputs, as well as other end-of-run model statistics, are handled via `results()` within in BMI's `update()` found [here](../src/bmi_topmodel.c#L414)
+These outputs, as well as other end-of-run model statistics, are handled via `results()` within in BMI's `update()` found [here](../src/bmi_topmodel.c#L415)
 ```
 if (topmodel->stand_alone == TRUE){
   results(topmodel->output_fptr, topmodel->out_hyd_fptr, topmodel->nstep, 

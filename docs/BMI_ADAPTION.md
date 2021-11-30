@@ -54,19 +54,19 @@ All BMI functions are thoroughly documented by [CSDMS](https://bmi.readthedocs.i
 | Function | Purpose | tmod9502.c? | topmodel-bmi? | Notes |
 | -------- | ------- | ----------- | ------------- | ----- |
 | `main()` | *Pseudo-framework* for building and running model control functions | [yes](../refs/original_code_c/tmod9502.c#L151) | [yes](../src/main.c#17) | Completely "absorbed" into BMI functions as explained in this document |
-| `bmi.register_bmi_topmodel()` | allocates memory and generates BMI object class | no | [yes](../src/bmi_topmodel.c#L1044) | Core BMI v2.0; See [Header File](#include-header-file) |
-| `bmi.initialize()` | accepts configuration file path and completes other initial tasks | no | [yes](../src/bmi_topmodel.c#L352) | Core BMI v2.0 |
-| `bmi.init_config()` | reads-in data for all input files | no | [yes](../src/bmi_topmodel.c#L240) | Developer-defined to BMI space; also see [INPUT_FILES_EXPLAINED](./INPUT-FILES_EXPLAINED.md) |
-| `bmi.read_init_config()` | reads-in info from configuration and sets appropriate file handles and pointers | no* | [yes](../src/bmi_topmodel.c#L142) | Developer-defined to BMI space; *encompasses lines 231-254 in [source code](../refs/original_code_c/tmod9502.c#L231) |
-| `inputs()` | reads-in data from file `inputs.dat` (forcings and time info) | [yes](../refs/original_code_c/tmod9502.c#L548) | [yes](../src/topmodel.c#L406) | Function definition identical to source code |
+| `bmi.register_bmi_topmodel()` | allocates memory and generates BMI object class | no | [yes](../src/bmi_topmodel.c#L1047) | Core BMI v2.0; See [Header File](#include-header-file) |
+| `bmi.initialize()` | accepts configuration file path and completes other initial tasks | no | [yes](../src/bmi_topmodel.c#L355) | Core BMI v2.0 |
+| `bmi.init_config()` | reads-in data for all input files | no | [yes](../src/bmi_topmodel.c#L243) | Developer-defined to BMI space; also see [INPUT_FILES_EXPLAINED](./INPUT-FILES_EXPLAINED.md) |
+| `bmi.read_init_config()` | reads-in info from configuration and sets appropriate file handles and pointers | no* | [yes](../src/bmi_topmodel.c#L145) | Developer-defined to BMI space; *encompasses lines 231-254 in [source code](../refs/original_code_c/tmod9502.c#L231) |
+| `inputs()` | reads-in data from file `inputs.dat` (forcings and time info) | [yes](../refs/original_code_c/tmod9502.c#L576) | [yes](../src/topmodel.c#L406) | Function definition identical to source code |
 | `tread()` | reads-in data from file `subcat.dat` (topographic index distribution and channel info) | [yes](../refs/original_code_c/tmod9502.c#L275) | [yes](../src/topmodel.c#L444) | Function definition identical to source code |
-| `init()` | reads-in parameter data from file `params.dat` | [yes](../refs/original_code_c/tmod9502.c#L666) | [yes](../src/bmi_topmodel.c#L281) | Function definition identical to source code |
-| `bmi.update()` | advances the model by a single time step | no | [yes](../src/bmi_topmodel.c#L375) | Core BMI v2.0 |
-| `topmod()` | model run function | [yes](../refs/original_code_c/tmod9502.c#L288) | [yes](../src/topmodel.c#L542) | See [`topmod` Function](#topmod-function) for full details |
+| `init()` | reads-in parameter data from file `params.dat` | [yes](../refs/original_code_c/tmod9502.c#L666) | [yes](../src/topmodel.c#L542) | Function definition identical to source code |
+| `bmi.update()` | advances the model by a single time step | no | [yes](../src/bmi_topmodel.c#L378) | Core BMI v2.0 |
+| `topmod()` | model run function | [yes](../refs/original_code_c/tmod9502.c#L310) | [yes](../src/topmodel.c#L102) | See [`topmod`](#topmod) for full details |
 | `expinf()` | calculates infiltration excess runoff via Green-ampt routine | [yes](../refs/original_code_c/tmod9502.c#L817) | [yes](../src/topmodel.c#L698) | Function definition identical to source code |
-| `results()` | prints model results to console/file(s) and calculations objective functions | [yes](../refs/original_code_c/tmod9502.c#L459) | [yes](../src/topmodel.c#L388) | See [`results` Function](#results-function) for full details |
-| `bmi.finalize()` | deallocates memory, closes all files | no | [yes](../src/bmi_topmodel.c#L450) | Core BMI v2.0 |
-| `water_balance()` | calculates water balance statistics | no | [yes](../src/bmi_topmodel.c#L377) | Not a part of BMI but added to `topmodel.c` for convenience; see [`water_balance`](#water_balance-function) for full details |
+| `results()` | prints model results to console/file(s) and calculations objective functions | [yes](../refs/original_code_c/tmod9502.c#L949) | [yes](../src/topmodel.c#L836) | See [`results`](#results) for full details |
+| `bmi.finalize()` | deallocates memory, closes all files | no | [yes](../src/bmi_topmodel.c#L453) | Core BMI v2.0 |
+| `water_balance()` | calculates water balance statistics | no | [yes](../src/topmodel.c#L377) | Not a part of BMI but added to `topmodel.c` for convenience; see [`water_balance`](#water_balance) for full details |
 
 ## Summary of Changes
 Alterations to source code were necessary for Topmodel BMI extension.
