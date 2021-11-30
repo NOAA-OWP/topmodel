@@ -8,7 +8,7 @@ For example, some variables may only be computed and made available as outputs w
 
 0. **all**:   This special role name is used to refer to the set of all model variables, except for purely local variables that are only initialized and used within a function (like a loop counter) but are neither an argument nor return value of that function.
 This is the set of variables that must be serialized if we wish to save the complete *state* of the computer model.
-(Here, we are thinking of *state* in the computer science sense, as “remembered information” or a “stateful system”.)
+(Here, we are referring to *state* in the computer science sense, as “remembered information” or a “stateful system”.)
 Purely local variables do not need to be serialized since models are not serialized “mid function”, but only after a BMI `initialize()` or `update()` call.
 Note that this role name is not assigned to any variable in the model, but can be used in any BMI function that has a *role* argument; i.e.  `Get_model_var_count()` shown below.
 ```

@@ -39,7 +39,7 @@ else {
 ```
 
 Be aware the other input data files, `params.dat` and `subcat.dat` remain unaffected by this flag.
-More details about all inputs be found [here](./INPUT_FILES_EXPLAINED.md).
+More details about all inputs can be found [here](./INPUT_FILES_EXPLAINED.md).
 
 ### Model Clock Time
 Recall that the model run function `topmod()` is now devoid of a time-loop as outlined in [BMI_ADAPTION](./BMI_ADAPTION.md).
