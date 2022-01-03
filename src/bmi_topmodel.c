@@ -152,138 +152,6 @@ static const char *model_var_roles[] = {
 // These replace hard-coded #DEFINE so you don't have to keep updating, yey
 int VAR_NAME_COUNT = sizeof(var_info)/sizeof(var_info[0]);
 int VAR_ROLE_COUNT = sizeof(model_var_roles)/sizeof(model_var_roles[0]);
-  
-/*static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
-        "Qout",
-        "atmosphere_water__domain_time_integral_of_rainfall_volume_flux",   //p
-        "land_surface_water__potential_evaporation_volume_flux",            //ep
-        "land_surface_water__runoff_mass_flux",                             //Q[it]
-        "soil_water_root-zone_unsat-zone_top__recharge_volume_flux",        //qz
-        "land_surface_water__baseflow_volume_flux",                         //qb
-        "soil_water__domain_volume_deficit",                                //sbar
-        "land_surface_water__domain_time_integral_of_overland_flow_volume_flux",    //qof
-        "land_surface_water__domain_time_integral_of_precipitation_volume_flux",    //sump
-        "land_surface_water__domain_time_integral_of_evaporation_volume_flux",      //sumae
-        "land_surface_water__domain_time_integral_of_runoff_volume_flux",           //sumq
-        "soil_water__domain_root-zone_volume_deficit",  //sumrz
-        "soil_water__domain_unsaturated-zone_volume",   //sumuz
-        "land_surface_water__water_balance_volume"      //bal
-};
-
-static const char *output_var_types[OUTPUT_VAR_NAME_COUNT] = {
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double",
-        "double"
-};
-
-static const int output_var_item_count[OUTPUT_VAR_NAME_COUNT] = {
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
-};
-
-static const char *output_var_units[OUTPUT_VAR_NAME_COUNT] = {
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m h-1",
-        "m",
-        "m h-1",
-        "m",
-        "m",
-        "m",
-        "m",
-        "m",
-        "m"
-};
-
-static const int output_var_grids[OUTPUT_VAR_NAME_COUNT] = {
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
-};
-
-static const char *output_var_locations[OUTPUT_VAR_NAME_COUNT] = {
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node",
-        "node"
-};
-
-static const char *input_var_names[INPUT_VAR_NAME_COUNT] = {
-        "atmosphere_water__liquid_equivalent_precipitation_rate",
-        "water_potential_evaporation_flux"
-};
-
-static const char *input_var_types[INPUT_VAR_NAME_COUNT] = {
-        "double",
-        "double"
-};
-
-static const char *input_var_units[INPUT_VAR_NAME_COUNT] = {
-        "kg m-2",
-        "m s-1"
-};
-
-static const int input_var_item_count[INPUT_VAR_NAME_COUNT] = {
-        1,
-        1
-};
-
-static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {
-        0,
-        0
-};
-
-static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
-        "node",
-        "node"
-};*/
 
 int read_init_config(const char* config_file, topmodel_model* model) {
     
@@ -998,6 +866,34 @@ static int Get_var_role (Bmi *self, const char *name, char * role)
     return BMI_FAILURE;
 }
 
+/* OWP Custom BMI Enhancements */
+static int Get_var_index (Bmi *self, const char *name, int *index)
+{
+    //-------------------------------------------------
+    // Note: This pulls information from the var_info
+    // structure defined at the top, which helps to 
+    // prevent implementation errors.   
+    //-------------------------------------------------
+    if (!self){
+        return BMI_FAILURE;   
+    }
+    
+    for (int i = 0; i < VAR_NAME_COUNT; i++) {
+        if (strcmp( var_info[i].name, name ) == 0){
+            *index = var_info[i].index;
+            return BMI_SUCCESS;
+        }
+    }
+
+    //--------------------------
+    // No match found for name
+    //--------------------------
+    printf("ERROR in get_var_index():\n");
+    printf("  No match for: %s\n\n", name);
+    *index = -1;
+    return BMI_FAILURE;
+}
+
 // ***********************************************************
 // ********* BMI: VARIABLE GETTER & SETTER FUNCTIONS *********
 // ***********************************************************
@@ -1605,7 +1501,6 @@ static int Get_model_var_names (Bmi *self, const char *role, char **names)
 
 }      
 
-
 // This is now loops thru var_info struct
 static int Get_input_item_count (Bmi *self, int * count)
 {
@@ -1862,6 +1757,7 @@ Bmi* register_bmi_topmodel(Bmi *model)
         model->get_var_nbytes = Get_var_nbytes;
         model->get_var_location = Get_var_location;
 
+        model->get_var_index =      Get_var_index;          //OWP CUSTOM 
         model->get_var_role =       Get_var_role;           //OWP CUSTOM
         model->get_var_length =     Get_var_length;         //OWP CUSTOM
 

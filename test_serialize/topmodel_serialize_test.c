@@ -76,7 +76,7 @@ int print_some(void *ptr_list[]){
 //------------------------------------------------------------------------
 int main(void)
 {
-  const char *cfg_file = "./data/topmod_serial.run";
+  const char *cfg_file = "./data/topmod.run";
   const char *ser_file = "./model_state.ser";  // make arg later
   int n_steps1  = 10; // n_steps for Model1 before serializing
   int n_steps2  = 50; // n_steps for models after deserializing
@@ -198,9 +198,9 @@ int main(void)
       }
       free (names_test_output);
     //-------------------------------------------- 
-    //puts("Testing bmi.get_var_index()...");
-    //model1->get_var_index(model1, name, &index);
-    //printf("  index = %d\n", index);
+    puts("Testing bmi.get_var_index()...");
+    model1->get_var_index(model1, name, &index);
+    printf("  index = %d\n", index);
     //-------------------------------------------- 
     puts("Testing bmi.get_var_grid()...");
     model1->get_var_grid(model1, name, &grid);
