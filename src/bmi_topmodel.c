@@ -16,15 +16,23 @@
 //----------------------------------------------
 // role is new to bmi enhancement
 // valid role options via 'model_var_roles' 
-//    "input",
-//    "output",
-//    "state",
-//    "param",
-//    "option",
+//    "array_length",
+//    "constant",
+//    "diagnostic",
+//    "directory",
 //    "filename",
-//    "description",
-//    "observation",
-//    "time"
+//    "file_offset",
+//    "info_string",
+//    "input_from_bmi",
+//    "input_from_file",
+//    "not_set",
+//    "option",
+//    "output_to_bmi",
+//    "output_to_file",
+//    "parameter_fixed",
+//    "parameter_adjustable",
+//    "state",
+//    "time_info"
 //----------------------------------------------
 // Note only 'input' and 'output' need to follow
 // CSDMS standard names. See
@@ -490,7 +498,7 @@ static int Finalize (Bmi *self)
         free(model->Q);
     if( model->Qobs != NULL )
         free(model->Qobs);
-    if( model->rain != NULL )
+    if( model->rain != NULL )   // NOTE: invalid pointer when standalone TRUE
         free(model->rain);
     if( model->pe != NULL )
         free(model->pe);
@@ -845,14 +853,26 @@ static int Get_var_role (Bmi *self, const char *name, char * role)
 
     for (int i = 0; i < VAR_NAME_COUNT; i++) {
         if (strcmp(name, var_info[i].name) == 0) {
+            //----------------------------------------------------
+            // Override some roles based on config file settings
+            //----------------------------------------------------
+            if (topmodel->stand_alone == TRUE) {              
+                // input_from_bmi --> input_from_file 
+                if (strcmp(var_info[i].role, "input_from_bmi") == 0){
+                    //role = "input_from_file";  //this doesn't work
+                    strncpy(role, "input_from_file", BMI_MAX_ROLE_NAME);
+                    return BMI_SUCCESS; 
+                }
+                // output_to_bmi --> output_to_file 
+                if (strcmp(var_info[i].role, "output_to_bmi") == 0){
+                    //role = "output_to_file";
+                    strncpy(role, "output_to_file", BMI_MAX_ROLE_NAME);
+                    return BMI_SUCCESS; 
+                }
+            }               
+
             strncpy(role, var_info[i].role, BMI_MAX_ROLE_NAME);
-        //----------------------------------------------------
-        // Override some roles based on config file settings
-        //----------------------------------------------------               
-            if ((topmodel->stand_alone == TRUE) && (strcmp(role, "input_from_bmi") == 0)){
-                role = "input_from_file";
-            }
-        return BMI_SUCCESS;  
+            return BMI_SUCCESS;  
         }  
 
     }
@@ -862,7 +882,8 @@ static int Get_var_role (Bmi *self, const char *name, char * role)
     //--------------------------
     printf("ERROR in get_var_role():\n");
     printf("  No match for: %s\n\n", name); 
-    role = "not_set";
+    //role = "not_set";
+    strncpy(role, "not_set", BMI_MAX_ROLE_NAME);
     return BMI_FAILURE;
 }
 

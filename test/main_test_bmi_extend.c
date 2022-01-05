@@ -172,7 +172,7 @@ main(void){
     char role[BMI_MAX_ROLE_NAME];
 
     // Loop through some variables and call get_var_*()
-    for (i=55; i<56; i++){
+    for (i=31; i<36; i++){
         const char *var_name = names_model_var[i];
         printf( " %s\n", var_name);
         // Test get_var_grid()
