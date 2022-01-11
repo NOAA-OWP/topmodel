@@ -1367,7 +1367,7 @@ static int Get_component_name (Bmi *self, char * name)
 // NEW BMI EXTENSION 
 static int Get_bmi_version (Bmi *self, char * version)
 {
-    strncpy (version, "2.0.1 NOAA-OWP", BMI_MAX_VERSION_NAME);
+    strncpy (version, "2.0_nGen_extension", BMI_MAX_VERSION_NAME);
     return BMI_SUCCESS;
 }
 
