@@ -6,6 +6,7 @@
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
+#define PARAM_VAR_NAME_COUNT 5
   
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
@@ -140,6 +141,22 @@ static const char input_var_grids[INPUT_VAR_NAME_COUNT] = {
 static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
         "node",
         "node"
+};
+
+static const char *param_var_names[PARAM_VAR_NAME_COUNT] = {
+    "szm",   // exponential scaling parameter for the decline of transmissivity with increase in storage deficit (m)
+    "td",    // unsaturated zone time delay per unit storage deficit (h)
+    "srmax", // maximum root zone storage deficit (m)
+    "sr0",   // initial root zone storage deficit below field capacity (m)
+    "xk0"    // surface soil hydraulic conductivity (m/h)
+};
+
+static const char *param_var_types[PARAM_VAR_NAME_COUNT] = {
+    "double",
+    "double",
+    "double",
+    "double",
+    "double"
 };
 
 int read_init_config(const char* config_file, topmodel_model* model) {
@@ -532,6 +549,13 @@ static int Get_var_type (Bmi *self, const char *name, char * type)
             return BMI_SUCCESS;
         }
     }
+    // Then check to see if in parameter array
+    for (int i = 0; i < PARAM_VAR_NAME_COUNT; i++) {
+        if (strcmp(name, param_var_names[i]) == 0) {
+            strncpy(type, param_var_types[i], BMI_MAX_TYPE_NAME);
+            return BMI_SUCCESS;
+        }
+    }
     // If we get here, it means the variable name wasn't recognized
     type[0] = '\0';
     return BMI_FAILURE;
@@ -770,6 +794,42 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> bal;
         return BMI_SUCCESS;
     }
+    // szm (parameter)
+    if (strcmp (name, "szm") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> szm;
+        return BMI_SUCCESS;
+    }
+    // td (parameter)
+    if (strcmp (name, "td") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> td;
+        return BMI_SUCCESS;
+    }
+    // srmax (parameter)
+    if (strcmp (name, "srmax") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> srmax;
+        return BMI_SUCCESS;
+    }
+    // sr0 (parameter)
+    if (strcmp (name, "sr0") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> sr0;
+        return BMI_SUCCESS;
+    }
+    // xk0 (parameter)
+    if (strcmp (name, "xk0") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> xk0;
+        return BMI_SUCCESS;
+    }
+    
 
     // STANDALONE Note: 
     //      When TRUE/1 there are no bmi inputs being passed
