@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 #include "../include/topmodel.h" 
 #include "../include/bmi.h" 
 #include "../include/bmi_topmodel.h"
-
 
 int
 main(void){
@@ -377,6 +377,23 @@ main(void){
     }
     free(names_out);
     free(names_in);
+
+    // JG Note: added 03.22.2022 to test added params get set values. 
+    // Params are not standard bmi i/o vars.
+    printf("\nTEST BMI MODEL PARAMETERS\n*************************\n");
+    //int expected_num_params = 5;
+    static const char *expected_param_names[5] = {"szm", "td", "srmax", "sr0", "xk0"};
+    double test_set_value = 4.2;
+    double test_get_value = 0.0;
+    for( int i = 0; i < 5; i++ ){
+        status = model->set_value(model, expected_param_names[i], &test_set_value);
+        //if (status == BMI_FAILURE)return BMI_FAILURE;
+        assert(status == BMI_SUCCESS);
+        status = model->get_value(model, expected_param_names[i], &test_get_value);
+        assert(status == BMI_SUCCESS);
+        assert(test_set_value == test_get_value);
+        printf(" get & set values match for parameter: %s \n", expected_param_names[i]);
+    }
     // Test BMI: CONTROL FUNCTION update_until()
     {
         int added_nstep=5;
