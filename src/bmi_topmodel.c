@@ -6,7 +6,7 @@
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
-#define PARAM_VAR_NAME_COUNT 5
+#define PARAM_VAR_NAME_COUNT 6
   
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
@@ -144,6 +144,7 @@ static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
 };
 
 static const char *param_var_names[PARAM_VAR_NAME_COUNT] = {
+    "t0",    // this is the areal average of ln(a/tanB)
     "szm",   // exponential scaling parameter for the decline of transmissivity with increase in storage deficit (m)
     "td",    // unsaturated zone time delay per unit storage deficit (h)
     "srmax", // maximum root zone storage deficit (m)
@@ -152,6 +153,7 @@ static const char *param_var_names[PARAM_VAR_NAME_COUNT] = {
 };
 
 static const char *param_var_types[PARAM_VAR_NAME_COUNT] = {
+    "double",
     "double",
     "double",
     "double",
@@ -827,6 +829,13 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         topmodel_model *topmodel;
         topmodel = (topmodel_model *) self->data;
         *dest = (void*)&topmodel-> xk0;
+        return BMI_SUCCESS;
+    }
+    // t0 (parameter)
+    if (strcmp (name, "t0") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> t0;
         return BMI_SUCCESS;
     }
     
