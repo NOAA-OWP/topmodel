@@ -144,7 +144,7 @@ static const char *input_var_locations[INPUT_VAR_NAME_COUNT] = {
 };
 
 static const char *param_var_names[PARAM_VAR_NAME_COUNT] = {
-    "t0",    // this is the areal average of ln(a/tanB)
+    "t0",    // downslope transmissivity when the soil is just saturated to the surface
     "szm",   // exponential scaling parameter for the decline of transmissivity with increase in storage deficit (m)
     "td",    // unsaturated zone time delay per unit storage deficit (h)
     "srmax", // maximum root zone storage deficit (m)

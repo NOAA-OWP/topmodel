@@ -80,7 +80,7 @@ See [`params.dat`](../data/params.dat).
 | -------- | -------- | ------ | ----- | ---- | ------- | ----------- |
 | subcat  | *char* | 256  |   | info_string |   | character title of subcatment; often same as model title  |
 | szm     | *double* |   | meters | parameter_fixed | rainfall-runoff | exponential scaling parameter for the decline of transmissivity with increase in storage deficit; units of depth  |
-| t0   | *double* |   |  ln(meters^2) | parameter_fixed |   | areal average of ln(a/tanB)  |
+| t0   | *double* |   |  meters/hour | parameter_adjustable |   | downslope transmissivity when the soil is just saturated to the surface  |
 | td   | *double* |   |  hours | parameter_adjustable | rainfall-runoff | unsaturated zone time delay per unit storage deficit  |
 | chv  | *double* |   |  meters/hour | parameter_fixed | overland flow | average channel flow velocity   |
 | rv   | *double* |   |  meters/hour | parameter_fixed | overland flow | internal overland flow routing velocity   |
