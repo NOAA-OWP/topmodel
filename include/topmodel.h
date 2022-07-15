@@ -97,7 +97,7 @@ struct TopModel_Struct{
 
   /******* Model parameters and input scalars ******/
   double szm;   /* this is the famous m parameter */
-  double t0;    /* this is the areal average of ln(a/tanB)  */
+  double t0;    /* downslope transmissivity when the soil is just saturated to the surface  */
   double td;    /* unsaturated zome time delay per unit storage deficit */
   double srmax; /* maximum root zone storage deficit */
   double Q0;    /* initial subsurface flow per unit area */
