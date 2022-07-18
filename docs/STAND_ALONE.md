@@ -75,13 +75,13 @@ The behavior of model clock time, conditioned via `stand_alone`, is handled by `
   
 ## Outputs
 `Qout` remains the main output variable for the model, regardless of `stand_alone` mode.
-However, output files `topmod.out` and `hyd.out` are only considered when `stand_alone = TRUE`.
-These outputs, as well as other end-of-run model statistics, are handled via `results()` within in BMI's `update()` found [here](../src/bmi_topmodel.c#L415)
+However, output files `topmod.out` and `hyd.out` are only considered when both `stand_alone` and `yes_print_output` are set to `TRUE`.
+Note that we recommend setting both variables to `FALSE` when running Topmodel in a true model-coupling framework. 
+These outputs, as well as other end-of-run model statistics, are handled via `results()` within in BMI's `finalize()` found [here](../src/bmi_topmodel.c#L491).
 ```
-if (topmodel->stand_alone == TRUE){
-  results(topmodel->output_fptr, topmodel->out_hyd_fptr, topmodel->nstep, 
-    topmodel->Qobs, topmodel->Q, 
-    topmodel->current_time_step, topmodel->yes_print_output);
+if (model->stand_alone == TRUE){
+  results(model->output_fptr,model->out_hyd_fptr,model->nstep, 
+  model->Qobs, model->Q, model->yes_print_output);                 
 }
 ```
 
