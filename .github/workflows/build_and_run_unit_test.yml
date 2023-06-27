@@ -1,6 +1,6 @@
 # Test changes that have been pushed to the master and dev branches
 
-name: Testing and Validation
+name: Topmodel BMI Unit Testing
 
 # Controls when the action will run.
 on:
