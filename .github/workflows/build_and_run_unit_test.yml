@@ -38,4 +38,11 @@ jobs:
         make clean
         make
         ./run_bmi_unit_test
-      
+        
+    - name: Build and Run Standalone  
+      run: |
+        cd src/
+        make clean
+        make
+        cd ..
+        ./run_bmi
