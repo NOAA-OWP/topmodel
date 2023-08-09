@@ -6,7 +6,7 @@
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
-#define PARAM_VAR_NAME_COUNT 6
+#define PARAM_VAR_NAME_COUNT 8
   
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
@@ -149,10 +149,14 @@ static const char *param_var_names[PARAM_VAR_NAME_COUNT] = {
     "td",    // unsaturated zone time delay per unit storage deficit (h)
     "srmax", // maximum root zone storage deficit (m)
     "sr0",   // initial root zone storage deficit below field capacity (m)
-    "xk0"    // surface soil hydraulic conductivity (m/h)
+    "xk0",   // surface soil hydraulic conductivity (m/h)
+    "chv",   // average channel velocity
+    "rv"     // internal overland flow routing velocity
 };
 
 static const char *param_var_types[PARAM_VAR_NAME_COUNT] = {
+    "double",
+    "double",
     "double",
     "double",
     "double",
@@ -840,6 +844,21 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> t0;
         return BMI_SUCCESS;
     }
+    // chv (parameter)
+    if (strcmp (name, "chv") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> chv;
+        return BMI_SUCCESS;
+    }
+    // rv (parameter)
+    if (strcmp (name, "rv") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> rv;
+        return BMI_SUCCESS;
+    }
+
     
 
     // STANDALONE Note: 
@@ -910,6 +929,8 @@ static int Set_value (Bmi *self, const char *name, void *array)
     void * dest = NULL;
     int nbytes = 0;
 
+    printf("\n\nrunning set_value\n\n");
+
     if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
         return BMI_FAILURE;
 
@@ -922,9 +943,11 @@ static int Set_value (Bmi *self, const char *name, void *array)
 }
 
 static int Set_value_at_indices (Bmi *self, const char *name, int * inds, int len, void *src)
+	//	topmodel_model* model)
 {
     void * to = NULL;
     int itemsize = 0;
+
 
     if (self->get_value_ptr (self, name, &to) == BMI_FAILURE)
         return BMI_FAILURE;
@@ -941,6 +964,103 @@ static int Set_value_at_indices (Bmi *self, const char *name, int * inds, int le
             memcpy ((char*)to + offset, ptr, itemsize);
         }
     }
+
+    /* Adding code to allow for chv to update when calibrating BChoat 2023/08/07
+     * chv and rv are calibratable params.
+     * num_time_delay_histo_ords, time_delay_histogram, and num_delay are input
+     * variables for topmod() */
+    if (strcmp(name, "chv") == 0 || strcmp (name, "rv") == 0){
+
+	double chv, rv;
+	double dt, tch[11], rvdt, chvdt, t0dt, time, a1, sumar, sum, ar2, a2;
+	double area, **time_delay_histogram, *dist_from_outlet, *Q, *Q0;
+	int i, j, ia, in, ir;
+	int *num_time_delay_histo_ords, *num_delay, max_time_delay_ordinates;
+	int num_channels, *cum_dist_area_with_dist;
+
+
+	if((*time_delay_histogram)==NULL)
+          {
+	  d_alloc(time_delay_histogram, max_time_delay_ordinates);
+          }
+
+	/*  Convert parameters to m/time step DT
+        *  with exception of XK0 which must stay in m/h
+        *                    Q0 is already in m/time step
+                             T0 is input as Ln(To) */
+        rvdt=rv*dt;
+        chvdt=chv*dt;
+
+	/*  CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
+        
+        tch[1]=dist_from_outlet[1]/chvdt;
+        for(j=2;j<=num_channels;j++)
+          {
+          tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
+          }
+        (*num_time_delay_histo_ords)=(int)tch[num_channels];
+        
+        
+        if((double)(*num_time_delay_histo_ords)<tch[num_channels]) 
+           {
+           (*num_time_delay_histo_ords)++;
+           }
+        
+        (*num_delay)=(int)tch[1];
+        (*num_time_delay_histo_ords)-=(*num_delay);
+        for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+          {
+          time=(double)(*num_delay)+(double)ir;
+          if(time>tch[num_channels])
+            {
+            (*time_delay_histogram)[ir]=1.0;
+            }
+          else
+            {
+            for(j=2;j<=num_channels;j++)
+              {
+              if(time<=tch[j])
+                {
+                (*time_delay_histogram)[ir]=
+                     cum_dist_area_with_dist[j-1]+
+                        (cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
+                                      (time-tch[j-1])/(tch[j]-tch[j-1]);
+                break;  /* exits this for loop */
+                }
+              }
+            }
+          }
+        a1=(*time_delay_histogram)[1];
+        sumar=(*time_delay_histogram)[1];
+        (*time_delay_histogram)[1]*=area;
+        if((*num_time_delay_histo_ords)>1)
+          {
+          for(ir=2;ir<=(*num_time_delay_histo_ords);ir++)
+            {
+            a2=(*time_delay_histogram)[ir];
+            (*time_delay_histogram)[ir]=a2-a1;
+            a1=a2;
+            sumar+=(*time_delay_histogram)[ir];
+            (*time_delay_histogram)[ir]*=area;
+            }
+          }
+        
+        
+        /*   Reinitialise discharge array */
+        sum=0.0;
+        for(i=1;i<=(*num_delay);i++)
+          {
+          Q[i]+=(*Q0)*area;
+          }
+              
+        for(i=1;i<=(*num_time_delay_histo_ords);i++)
+          {
+          sum+=(*time_delay_histogram)[i];
+          in=(*num_delay)+i;
+          Q[in]+=(*Q0)*(area-sum);
+          }
+    }
+          
     return BMI_SUCCESS;
 }
 
@@ -1114,6 +1234,8 @@ topmodel_model * new_bmi_topmodel()  //(void)?
     data->lnaotb = NULL;               // these are the ln(a/tanB) values
     data->cum_dist_area_with_dist = NULL;  // channel cum. distr. of area with distance
     data->dist_from_outlet = NULL;     // distance from outlet to point on channel with area known
+//    data->chv = NULL;		       // average channel velocity
+//    data->rv = NULL;		       // internal overland flow routing veoclity
     return data;
 }
 

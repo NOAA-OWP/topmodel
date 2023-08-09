@@ -34,7 +34,7 @@ extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
                    
 extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int yes_print_output,int infex, double dt, double szm,
-                double *stor_unsat_zone, double *deficit_root_zone,
+	        double *stor_unsat_zone, double *deficit_root_zone,
                 double *deficit_local, double *pe, double *rain,double xk0,double hf, 
                 double *dist_area_lnaotb, double tl, double *lnaotb, double td,
                 double srmax, double *contrib_area, double szq, double *Qout, 
@@ -104,6 +104,8 @@ struct TopModel_Struct{
   double sr0;   /* initial root zone storage deficit */
   double xk0;   /* surface soil hydraulic conductivity */
   double hf;    /* wetting front suction for G&A soln.  */
+  double chv;   /* average channel velocity. */
+  double rv;   /* internal overlandflow routing velocity */
   double dth;   /* water content change across the wetting front */
   double area;  /* catchment area */
 
