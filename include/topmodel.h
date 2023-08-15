@@ -104,8 +104,6 @@ struct TopModel_Struct{
   double sr0;   /* initial root zone storage deficit */
   double xk0;   /* surface soil hydraulic conductivity */
   double hf;    /* wetting front suction for G&A soln.  */
-  double chv;   /* average channel velocity. */
-  double rv;   /* internal overlandflow routing velocity */
   double dth;   /* water content change across the wetting front */
   double area;  /* catchment area */
 

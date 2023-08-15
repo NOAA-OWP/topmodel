@@ -508,9 +508,119 @@ if(yes_print_output==TRUE)
 return;
 }
 
+
+
+/* FUNCTION TO CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
+extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
+					double chvdt, double tch)
+{
+    tch[1]=dist_from_outlet[1]/chvdt;
+    for(j=2;j<=num_channels;j++)
+     {
+      tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
+     }
+
+    return;
+
+}
+
+/* FUNCTION TO CALCULATE THE TIME_DELAY_HISTOGRAM */
+
+extern void calc_time_delay_histogram(int *num_time_delay_histo_ords, int *num_delay,
+					int num_channels, double **time_delay_histogram,
+					double tch, double *cum_dist_area_with_dist)
+
+{
+
+// declare local variables
+double time, a1, sumar, a2
+int j, ir;
+
+    for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+      {
+      time=(double)(*num_delay)+(double)ir;
+      if(time>tch[num_channels])
+        {
+        (*time_delay_histogram)[ir]=1.0;
+        }
+      else
+        {
+        for(j=2;j<=num_channels;j++)
+          {
+          if(time<=tch[j])
+    	{
+    	(*time_delay_histogram)[ir]=
+    	     cum_dist_area_with_dist[j-1]+
+    		(cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
+    			      (time-tch[j-1])/(tch[j]-tch[j-1]);
+    	break;  /* exits this for loop */
+    	}
+          }
+        }
+      }
+
+    a1=(*time_delay_histogram)[1];
+    sumar=(*time_delay_histogram)[1];
+    (*time_delay_histogram)[1]*=area;
+    
+    if((*num_time_delay_histo_ords)>1)
+      {
+      for(ir=2;ir<=(*num_time_delay_histo_ords);ir++)
+        {
+        a2=(*time_delay_histogram)[ir];
+        (*time_delay_histogram)[ir]=a2-a1;
+        a1=a2;
+        sumar+=(*time_delay_histogram)[ir];
+        (*time_delay_histogram)[ir]*=area;
+        }
+      }
+
+    return;
+} 
+
+// FUNCTION TO INTIALIZE UNSAT STORAGE AND DEFICIT 
+extern void init_unsatstore_deficit(int num_topodex_values, double **store_unsat_zone,
+				double **deficit_root_zone, double *sr0,
+				double *sbar, double *szm, double *Q0, double *szq)
+{
+    for(ia=1;ia<=num_topodex_values;ia++)
+      {
+      (*stor_unsat_zone)[ia]=0.0;
+      (*deficit_root_zone)[ia]=(*sr0);
+      }
+    (*sbar)=-(*szm)*log((*Q0)/(*szq));
+
+    return;
+}
+
+// FUNCTION TO (RE)INITIALIZE DISCHARGE ARRAY
+extern void init_discharge_array(int *num_delay, double *Q, double *Q0, double area, 
+			int *num_time_delay_histo_ords, double **time_delay_histogram
+			)
+{
+ // declare local variables
+ double sum
+ int i, in
+ 
+
+    sum=0.0;
+
+    for(i=1;i<=(*num_delay);i++)
+      {
+      Q[i]+=(*Q0)*area;
+      }
+          
+    for(i=1;i<=(*num_time_delay_histo_ords);i++)
+      {
+      sum+=(*time_delay_histogram)[i];
+      in=(*num_delay)+i;
+      Q[in]+=(*Q0)*(area-sum);
+      }
+}
+
 extern void init(FILE *in_param_fptr,FILE *output_fptr,char *subcat, 
               int num_channels,int num_topodex_values,int yes_print_output,
-              double area,double **time_delay_histogram,
+              double area, double **time_delay_histogram,
               double *cum_dist_area_with_dist,double dt, double *szm, double *t0, 
               double tl, double *dist_from_outlet,double *td, double *srmax, 
               double *Q0,double *sr0, int *infex, double *xk0, double *hf, 
@@ -527,9 +637,9 @@ extern void init(FILE *in_param_fptr,FILE *output_fptr,char *subcat,
 ******************************************/
 double rv;   /* internal overland flow routing velocity */
 double chv;  /* average channel flow velocity */
-double tch[11],rvdt,chvdt,t0dt,time,a1,sumar;
-double sum,ar2,a2;
-int i,j,ia,in,ir;
+double tch[11],rvdt,chvdt,t0dt,sumar;
+double sum,ar2;
+int i,ia,in,ir;
 
 if((*stor_unsat_zone)==NULL)
   {
@@ -560,12 +670,16 @@ t0dt=(*t0)+log(dt);  /* was ALOG */
 (*szq)=exp(t0dt-tl);
 
 /*  CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
+convert_dist_to_histords(dist_from_outlet, num_channels, chvdt, tch)
 
-tch[1]=dist_from_outlet[1]/chvdt;
-for(j=2;j<=num_channels;j++)
-  {
-  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
-  }
+// possible function here =>
+//tch[1]=dist_from_outlet[1]/chvdt;
+//for(j=2;j<=num_channels;j++)
+//  {
+//  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
+//  }
+// possible end define tch function
+
 (*num_time_delay_histo_ords)=(int)tch[num_channels];
 
 
@@ -576,42 +690,52 @@ if((double)(*num_time_delay_histo_ords)<tch[num_channels])
 
 (*num_delay)=(int)tch[1];
 (*num_time_delay_histo_ords)-=(*num_delay);
-for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
-  {
-  time=(double)(*num_delay)+(double)ir;
-  if(time>tch[num_channels])
-    {
-    (*time_delay_histogram)[ir]=1.0;
-    }
-  else
-    {
-    for(j=2;j<=num_channels;j++)
-      {
-      if(time<=tch[j])
-        {
-        (*time_delay_histogram)[ir]=
-             cum_dist_area_with_dist[j-1]+
-                (cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
-                              (time-tch[j-1])/(tch[j]-tch[j-1]);
-        break;  /* exits this for loop */
-        }
-      }
-    }
-  }
-a1=(*time_delay_histogram)[1];
-sumar=(*time_delay_histogram)[1];
-(*time_delay_histogram)[1]*=area;
-if((*num_time_delay_histo_ords)>1)
-  {
-  for(ir=2;ir<=(*num_time_delay_histo_ords);ir++)
-    {
-    a2=(*time_delay_histogram)[ir];
-    (*time_delay_histogram)[ir]=a2-a1;
-    a1=a2;
-    sumar+=(*time_delay_histogram)[ir];
-    (*time_delay_histogram)[ir]*=area;
-    }
-  }
+
+// calculate the time_delay_histogram
+calc_time_delay_histogram(*num_time_delay_histo_ords, *num_delay, num_channels,
+	       		  **time_delay_histogram, tch, *cum_dist_area_with_dist)
+
+// possible function here =>
+//for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+//  {
+//  time=(double)(*num_delay)+(double)ir;
+//  if(time>tch[num_channels])
+//    {
+//    (*time_delay_histogram)[ir]=1.0;
+//    }
+//  else
+//    {
+//    for(j=2;j<=num_channels;j++)
+//      {
+//      if(time<=tch[j])
+//        {
+//        (*time_delay_histogram)[ir]=
+//             cum_dist_area_with_dist[j-1]+
+//                (cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
+//                              (time-tch[j-1])/(tch[j]-tch[j-1]);
+//        break;  /* exits this for loop */
+//        }
+//      }
+//    }
+//  }
+
+//a1=(*time_delay_histogram)[1];
+//sumar=(*time_delay_histogram)[1];
+//(*time_delay_histogram)[1]*=area;
+//
+//if((*num_time_delay_histo_ords)>1)
+//  {
+//  for(ir=2;ir<=(*num_time_delay_histo_ords);ir++)
+//    {
+//    a2=(*time_delay_histogram)[ir];
+//    (*time_delay_histogram)[ir]=a2-a1;
+//    a1=a2;
+//    sumar+=(*time_delay_histogram)[ir];
+//    (*time_delay_histogram)[ir]*=area;
+//    }
+//  }
+// possible end function here
+
 if(yes_print_output==TRUE)
   {
   fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
@@ -630,29 +754,38 @@ if(yes_print_output==TRUE)
  *  Q0 IS THE INITIAL DISCHARGE FOR THIS SUBCATCHMENT  
  *
  *  INITIALISE STORES */
-for(ia=1;ia<=num_topodex_values;ia++)
-  {
-  (*stor_unsat_zone)[ia]=0.0;
-  (*deficit_root_zone)[ia]=(*sr0);
-  }
-(*sbar)=-(*szm)*log((*Q0)/(*szq));
+init_unsatstore_deficit(num_topodex_values, **store_unsat_zone,
+				**deficit_root_zone, *sr0,
+				*sbar, *szm, *Q0, *szq)
+
+//for(ia=1;ia<=num_topodex_values;ia++)
+//  {
+//  (*stor_unsat_zone)[ia]=0.0;
+//  (*deficit_root_zone)[ia]=(*sr0);
+//  }
+//(*sbar)=-(*szm)*log((*Q0)/(*szq));
 
 /*   Reinitialise discharge array */
-sum=0.0;
-for(i=1;i<=(*num_delay);i++)
-  {
-  Q[i]+=(*Q0)*area;
-  }
-      
-for(i=1;i<=(*num_time_delay_histo_ords);i++)
-  {
-  sum+=(*time_delay_histogram)[i];
-  in=(*num_delay)+i;
-  Q[in]+=(*Q0)*(area-sum);
-  }
+init_discharge_array(*num_delay, *Q, *Q0, area, 
+			*num_time_delay_histo_ords, **time_delay_histogram
+			)
+
+//sum=0.0;
+//for(i=1;i<=(*num_delay);i++)
+//  {
+//  Q[i]+=(*Q0)*area;
+//  }
+//      
+//for(i=1;i<=(*num_time_delay_histo_ords);i++)
+//  {
+//  sum+=(*time_delay_histogram)[i];
+//  in=(*num_delay)+i;
+//  Q[in]+=(*Q0)*(area-sum);
+//  }
       
 /*  Initialise water balance.  BAL is positive for storage */
 (*bal)=-(*sbar)-(*sr0);
+
 if(yes_print_output==TRUE)
   {
   fprintf(output_fptr,"Initial BAL         %12.5f\n",(*bal));
