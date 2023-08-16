@@ -637,12 +637,6 @@ extern void init_water_balance(double **deficit_local, int max_atb_increments,
 
     t0dt=(*t0)+log(dt);  /* was ALOG */
 
-    /*  INITIALISE deficit_root_zone AND Q0 VALUES HERE
-    *  SR0 IS INITIAL ROOT ZONE STORAGE DEFICIT BELOW FIELD CAPACITY
-    *  Q0 IS THE INITIAL DISCHARGE FOR THIS SUBCATCHMENT  
-    */
- 
-
     /*  Calculate SZQ parameter */
     (*szq)=exp(t0dt-tl);
 
