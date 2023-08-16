@@ -509,6 +509,11 @@ return;
 }
 
 
+/*********************************
+ * Define functions to be used in init() and in Set_value in bmi_topmodel.c
+ * to enable calibratable parameters to be updated
+ * **********************************/
+
 
 // FUNCTION TO CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES
 extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
