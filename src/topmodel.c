@@ -516,6 +516,7 @@ return;
 
 
 // FUNCTION TO CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES
+// outputs used in subsequent functions include tch
 extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
 					double chv, double rv, double dt, double tch[11])
 {
@@ -542,6 +543,9 @@ extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
 }
 
 // FUNCTION TO CALCULATE THE TIME_DELAY_HISTOGRAM
+// updates values associated with model structure
+// outputs used in TOPMOD() include num_time_delay_histo_ords, time_delay_histogram,
+// num_delay, and Q
 extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_channels, double area,
 				double tch[11], int *num_time_delay_histo_ords, int *num_delay,
 				double **time_delay_histogram, double *cum_dist_area_with_dist) 
@@ -586,7 +590,7 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
           if(time<=tch[j])
     	{
     	(*time_delay_histogram)[ir]=
-    	     cum_dist_area_with_dist[j-1]+
+    	     cum_dist_area_with_dist[j-1]
     		(cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
     			      (time-tch[j-1])/(tch[j]-tch[j-1]);
     	break;  /* exits this for loop */
@@ -616,6 +620,9 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
 
 // FUNCTION TO INTIALIZE UNSAT STORAGE AND DEFICIT 
 // also intitializes unsaturated zone storage and deficit
+// updates values associated with model structure
+// outputs used in TOPMOD() include sbar, bal, deficit_root_zone
+
 extern void init_water_balance(double **deficit_local, int max_atb_increments, 
 				int num_topodex_values, double dt, double *sr0, 
 				double *szm, double *Q0, double *t0, double tl,
@@ -655,6 +662,9 @@ extern void init_water_balance(double **deficit_local, int max_atb_increments,
 }
 
 // FUNCTION TO (RE)INITIALIZE DISCHARGE ARRAY
+// updates values associated with model structure 
+// outputs used in TOPMOD() include num_delay, Q, num_time_delay_histo_ords, 
+// time_delay_histogram
 extern void init_discharge_array(int *num_delay, double *Q, double *Q0, double area, 
 			int *num_time_delay_histo_ords, double **time_delay_histogram
 			)
