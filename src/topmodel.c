@@ -590,7 +590,7 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
           if(time<=tch[j])
     	{
     	(*time_delay_histogram)[ir]=
-    	     cum_dist_area_with_dist[j-1]
+    	     cum_dist_area_with_dist[j-1]+
     		(cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
     			      (time-tch[j-1])/(tch[j]-tch[j-1]);
     	break;  /* exits this for loop */
