@@ -6,7 +6,7 @@
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
-#define PARAM_VAR_NAME_COUNT 6
+#define PARAM_VAR_NAME_COUNT 8
   
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
@@ -149,10 +149,14 @@ static const char *param_var_names[PARAM_VAR_NAME_COUNT] = {
     "td",    // unsaturated zone time delay per unit storage deficit (h)
     "srmax", // maximum root zone storage deficit (m)
     "sr0",   // initial root zone storage deficit below field capacity (m)
-    "xk0"    // surface soil hydraulic conductivity (m/h)
+    "xk0",   // surface soil hydraulic conductivity (m/h)
+    "chv",   // average channel velcoity
+    "rv"     // internal overland flow routing velocity
 };
 
 static const char *param_var_types[PARAM_VAR_NAME_COUNT] = {
+    "double",
+    "double",
     "double",
     "double",
     "double",
@@ -840,6 +844,22 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> t0;
         return BMI_SUCCESS;
     }
+    // chv (parameter)
+    if (strcmp (name, "chv") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> chv;
+        return BMI_SUCCESS;
+    }
+    // rv (parameter)
+    if (strcmp (name, "rv") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> rv;
+        return BMI_SUCCESS;
+    }
+
+
     
 
     // STANDALONE Note: 
@@ -917,6 +937,25 @@ static int Set_value (Bmi *self, const char *name, void *array)
         return BMI_FAILURE;
 
     memcpy (dest, array, nbytes);
+
+    // check i name is a calibratable parameter with secondary dependencies
+    // chv (parameter)
+    if (strcmp (name, "chv") == 0 || strcmp (name, "rv") == 0) {
+	double rv;   /* internal overland flow routing velocity */
+        double chv;  /* average channel flow velocity */
+        double tch[11];
+        double sumar;
+ 
+       
+     	// convert from distance/area to histogram ordinate form
+        convert_dist_to_histords(model->dist_from_outlet, model->num_channels,
+				chv, rv, model->dt, tch)
+
+        // 		
+    
+        return BMI_SUCCESS;
+    }
+
 
     return BMI_SUCCESS;
 }
