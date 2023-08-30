@@ -106,6 +106,8 @@ struct TopModel_Struct{
   double hf;    /* wetting front suction for G&A soln.  */
   double dth;   /* water content change across the wetting front */
   double area;  /* catchment area */
+  double chv;   /* average channel flow velocity */
+  double rv;    /* internal overland flow routing velocity */
 
   /************ Other variables of note ************/
   int num_delay;          /* number of time steps lag (delay) in channel within catchment to outlet */

@@ -306,10 +306,11 @@ int init_config(const char* config_file, topmodel_model* model)
 
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
-        model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
-        &model->dth,&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
-        &model->szq,model->Q,&model->sbar,model->max_atb_increments,model->max_time_delay_ordinates,
-        &model->bal,&model->num_time_delay_histo_ords,&model->num_delay);
+        model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,
+	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
+        &model->dth,model->max_atb_increments,model->max_time_delay_ordinates,&model->num_time_delay_histo_ords,
+	&model->num_delay,&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
+        &model->szq,model->Q,&model->sbar, &model->bal);
     fclose(model->params_fptr);
 
 
@@ -937,26 +938,26 @@ static int Set_value (Bmi *self, const char *name, void *array)
         return BMI_FAILURE;
 
     memcpy (dest, array, nbytes);
-
-    // check i name is a calibratable parameter with secondary dependencies
-    // chv (parameter)
-    if (strcmp (name, "chv") == 0 || strcmp (name, "rv") == 0) {
-	double rv;   /* internal overland flow routing velocity */
-        double chv;  /* average channel flow velocity */
-        double tch[11];
-        double sumar;
- 
-       
-     	// convert from distance/area to histogram ordinate form
-        convert_dist_to_histords(model->dist_from_outlet, model->num_channels,
-				chv, rv, model->dt, tch)
-
-        // 		
-    
-        return BMI_SUCCESS;
-    }
-
-
+//
+//    // check i name is a calibratable parameter with secondary dependencies
+//    // chv (parameter)
+//    if (strcmp (name, "chv") == 0 || strcmp (name, "rv") == 0) {
+//	double rv;   /* internal overland flow routing velocity */
+//        double chv;  /* average channel flow velocity */
+//        double tch[11];
+//        double sumar;
+// 
+//       
+//     	// convert from distance/area to histogram ordinate form
+//        convert_dist_to_histords(model->dist_from_outlet, model->num_channels,
+//				chv, rv, model->dt, tch);
+//
+//        // 		
+//    
+//        return BMI_SUCCESS;
+//    }
+//
+//
     return BMI_SUCCESS;
 }
 
