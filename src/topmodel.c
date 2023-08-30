@@ -839,7 +839,7 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
  * @params[out] bal, pointer of type double, residual of water balance 
  * 
  */
-extern void initd(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
+extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
 	      double *cum_dist_area_with_dist, double dt, double *szm, double *t0, 
