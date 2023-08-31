@@ -749,8 +749,7 @@ extern void init_water_balance(int max_atb_increments,
 
 extern void init_discharge_array(int *num_delay, double *Q0, double area, 
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
-                        double *Q
-			)
+                        double *Q)
 {
     // declare local variables
     double sum;
@@ -768,7 +767,8 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
       sum+=(*time_delay_histogram)[i];
       in=(*num_delay)+i;
       Q[in]+=(*Q0)*(area-sum);
-      }
+      };
+    return;
 }
 
 
@@ -870,7 +870,7 @@ fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
        szm,t0,td,&chv,&rv,srmax,Q0,sr0,infex,xk0,hf,dth);
 
 
-/*  CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
+//Convert distance/area form to time delay histogram ordinates
 convert_dist_to_histords(dist_from_outlet, num_channels, chv, rv, dt, tch);
 
 // calculate the time_delay_histogram
@@ -892,7 +892,7 @@ if(yes_print_output==TRUE)
   fprintf(output_fptr,"\n");
   }
 
-/* INITIALIZE WATER BALANCE AND UNSATURATED STORAGE AND DEFICITS*/
+// Initialize water balance and unsatrutaed storage and deficits
 init_water_balance( max_atb_increments, num_topodex_values, 
 				dt, sr0, szm, Q0, t0, tl,
 				stor_unsat_zone, szq, 
