@@ -926,7 +926,7 @@ static int Get_value(Bmi * self, const char * name, void *dest)
     return BMI_SUCCESS;
 }
 
-static int Set_value (Bmi *self, const char *name, void *array)
+static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_model* model)
 {
     void * dest = NULL;
     int nbytes = 0;
@@ -938,26 +938,56 @@ static int Set_value (Bmi *self, const char *name, void *array)
         return BMI_FAILURE;
 
     memcpy (dest, array, nbytes);
-//
-//    // check i name is a calibratable parameter with secondary dependencies
-//    // chv (parameter)
-//    if (strcmp (name, "chv") == 0 || strcmp (name, "rv") == 0) {
+
+    // check if name is a calibratable parameter with secondary dependencies
+    // chv (parameter)
+    if (strcmp (name, "chv") == 0 || strcmp (name, "rv") == 0) {
+
+	topmodel_model *topmodel;
+	topmodel = (topmodel_model *) self->data;
+
+	void *ptr = NULL;
+	int status;
+	// use Get_value_ptr to assign vlaue to topmodel struct and get status
+	status = Get_value_ptr(self, name, &ptr);
+
+//	topmodel->chv=self->get_value(self, "chv", &topmodel->chv);
+//	topmodel->rv=self->get_value(self, "rv", &topmodel->rv);
+   
+	// ????  I think I should be reading in rv and tch (and other calibratable params from realization file????
 //	double rv;   /* internal overland flow routing velocity */
-//        double chv;  /* average channel flow velocity */
-//        double tch[11];
-//        double sumar;
-// 
-//       
-//     	// convert from distance/area to histogram ordinate form
-//        convert_dist_to_histords(model->dist_from_outlet, model->num_channels,
-//				chv, rv, model->dt, tch);
-//
-//        // 		
-//    
-//        return BMI_SUCCESS;
-//    }
-//
-//
+//      double chv;  /* average channel flow velocity */
+        double tch[11];
+        // double sumar;
+  		
+     	// convert from distance/area to histogram ordinate form
+        convert_dist_to_histords(topmodel->dist_from_outlet, topmodel->num_channels,
+				topmodel->cvh, topmodel->rv, topmodel->dt, tch);
+
+	// calculate the time_delay_histogram
+	calc_time_delay_histogram(topmodel->max_time_delay_ordinates, topmodel->num_channels, 
+	  			  topmodel->area, tch, 
+  				  topmodel->cum_dist_area_with_dist, 
+				  topmodel->num_time_delay_histo_ords,
+				  topmodel->num_delay, &topmodel->time_delay_histogram);
+	
+	// Initialize water balance and unsatrutaed storage and deficits
+	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
+					topmodel->dt, &topmodel->sr0, &topmodel->szm, 
+					&topmodel->Q0, &topmodel->t0, topmodel->tl,
+					&topmodel->stor_unsat_zone, &topmodel->szq, 
+					&topmodel->deficit_local, &topmodel->deficit_root_zone, 
+					&topmodel->sbar, &topmodel->bal);
+	
+	// Reinitialise discharge array
+	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
+				topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
+				topmodel->Q);	
+    
+        return BMI_SUCCESS;
+    }
+
+
     return BMI_SUCCESS;
 }
 
