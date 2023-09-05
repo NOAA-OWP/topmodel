@@ -300,12 +300,15 @@ int init_config(const char* config_file, topmodel_model* model)
         model->max_num_subcatchments,model->max_atb_increments);
     fclose(model->subcat_fptr);
 
+    
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
-        model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
-        &model->dth,&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
-        &model->szq,model->Q,&model->sbar,model->max_atb_increments,model->max_time_delay_ordinates,
-        &model->bal,&model->num_time_delay_histo_ords,&model->num_delay);
+        model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,
+	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
+        &model->dth,model->max_atb_increments,model->max_time_delay_ordinates,&model->num_time_delay_histo_ords,
+	&model->num_delay,&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
+        &model->szq,model->Q,&model->sbar, &model->bal);
+    
     fclose(model->params_fptr);
 
 
