@@ -18,16 +18,36 @@
 #define TOPMODEL_DEBUG 0
 
 /*** Function/subroutine prototypes ***/
-extern void init(FILE *in_param_fptr,FILE *output_fptr,char *subcat, 
-                int num_channels,int num_topodex_values,
-                int yes_print_output, double area,double **time_delay_histogram,
-                double *cum_dist_area_with_dist,double dt, double *szm, double *t0,
-                double tl, double *dist_from_outlet,double *td, double *srmax, 
-                double *Q0,double *sr0, int *infex, double *xk0, double *hf, 
-                double *dth,double **stor_unsat_zone,double **deficit_local,
-                double **deficit_root_zone,double *szq, double *Q,double *sbar,
-                int max_atb_increments, int max_time_delay_ordinates,
-                double *bal,int *num_time_delay_histo_ords, int *num_delay);
+extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
+		double chv, double rv, double dt, double tch[11]);
+
+extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_channels, double area,
+		double tch[11], double *cum_dist_area_with_dist,
+		int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram);
+
+extern void init_water_balance(int max_atb_increments, 
+				int num_topodex_values, double dt, double *sr0, 
+				double *szm, double *Q0, double *t0, double tl,
+				double **stor_unsat_zone, double *szq,
+				double **deficit_local, double **deficit_root_zone, 
+				double *sbar, double *bal);
+
+extern void init_discharge_array(int *num_delay, double *Q0, double area, 
+			int *num_time_delay_histo_ords, double **time_delay_histogram,
+                        double *Q);
+
+extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
+	      int num_channels, int num_topodex_values, int yes_print_output,
+	      double area, double **time_delay_histogram,
+	      double *cum_dist_area_with_dist, double dt, double *szm, double *t0, 
+              double tl, double *dist_from_outlet, double *td, double *srmax, 
+              double *Q0,double *sr0, int *infex, double *xk0, double *hf, 
+              double *dth,int max_atb_increments, int max_time_delay_ordinates,
+              int *num_time_delay_histo_ords,int *num_delay,
+	      double **stor_unsat_zone, double **deficit_local,
+              double **deficit_root_zone,double *szq, double *Q,
+              double *sbar, double *bal);
+
                  
 extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
                 double **pe, double **Qobs, double **Q, double **contrib_area);
@@ -106,6 +126,8 @@ struct TopModel_Struct{
   double hf;    /* wetting front suction for G&A soln.  */
   double dth;   /* water content change across the wetting front */
   double area;  /* catchment area */
+  double chv;   /* average channel flow velocity */
+  double rv;    /* internal overland flow routing velocity */
 
   /************ Other variables of note ************/
   int num_delay;          /* number of time steps lag (delay) in channel within catchment to outlet */
