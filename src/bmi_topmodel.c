@@ -1,6 +1,8 @@
 #include "../include/topmodel.h" 
 #include "../include/bmi.h" 
 #include "../include/bmi_topmodel.h"
+#include <stdio.h>
+
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
@@ -946,44 +948,68 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 	topmodel_model *topmodel;
 	topmodel = (topmodel_model *) self->data;
 
-	void *ptr = NULL;
-	int status;
+//	void *ptr = NULL;
+//	int status;
+	double *CHVptr = NULL;
+        double *RVptr = NULL;
+	int statusCHV;
+	int statusRV;
 	// use Get_value_ptr to assign vlaue to topmodel struct and get status
-	status = Get_value_ptr(self, name, &ptr);
+//	status = Get_value_ptr(self, name, &ptr);
+
+
+//	printf("topmodel->chv: %d\n", topmodel->chv)	;
+	// read in values for CHV and RV and cast as void to meet Get_value_ptr expectations
+	statusCHV = Get_value_ptr(self, "chv", (void**)&CHVptr);
+	statusRV = Get_value_ptr(self, "rv", (void**)&RVptr);
+
+	printf("chv status: %d\n", statusCHV);
+	printf("rv status: %d\n", statusRV);
+	printf("chvptr: %1f\n", *CHVptr);
+	printf("rvptr: %1f\n", *RVptr);
+
+
+	// update values of chv and rv in topmodel structure
+//	topmodel->chv=*CHVptr;
+//	topmodel->rv=*RVptr;
+	//printf("topmodel->chv: %d\n", topmodel->chv)	;
 
 //	topmodel->chv=self->get_value(self, "chv", &topmodel->chv);
 //	topmodel->rv=self->get_value(self, "rv", &topmodel->rv);
    
 	// ????  I think I should be reading in rv and tch (and other calibratable params from realization file????
 //	double rv;   /* internal overland flow routing velocity */
-//      double chv;  /* average channel flow velocity */
+//        double chv;  /* average channel flow velocity */
         double tch[11];
         // double sumar;
   		
      	// convert from distance/area to histogram ordinate form
         convert_dist_to_histords(topmodel->dist_from_outlet, topmodel->num_channels,
-				topmodel->cvh, topmodel->rv, topmodel->dt, tch);
+				*CHVptr, *RVptr, topmodel->dt, tch);
 
+	printf("convert_dist_to_histords ran");
 	// calculate the time_delay_histogram
 	calc_time_delay_histogram(topmodel->max_time_delay_ordinates, topmodel->num_channels, 
 	  			  topmodel->area, tch, 
   				  topmodel->cum_dist_area_with_dist, 
-				  topmodel->num_time_delay_histo_ords,
-				  topmodel->num_delay, &topmodel->time_delay_histogram);
-	
-	// Initialize water balance and unsatrutaed storage and deficits
-	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
-					topmodel->dt, &topmodel->sr0, &topmodel->szm, 
-					&topmodel->Q0, &topmodel->t0, topmodel->tl,
-					&topmodel->stor_unsat_zone, &topmodel->szq, 
-					&topmodel->deficit_local, &topmodel->deficit_root_zone, 
-					&topmodel->sbar, &topmodel->bal);
-	
-	// Reinitialise discharge array
-	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
-				topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
-				topmodel->Q);	
-    
+				  &topmodel->num_time_delay_histo_ords,
+				  &topmodel->num_delay, &topmodel->time_delay_histogram);
+
+	printf("calc_time_Delay_histogram ran");
+//	
+//	// Initialize water balance and unsatrutaed storage and deficits
+//	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
+//					topmodel->dt, &topmodel->sr0, &topmodel->szm, 
+//					&topmodel->Q0, &topmodel->t0, topmodel->tl,
+//					&topmodel->stor_unsat_zone, &topmodel->szq, 
+//					&topmodel->deficit_local, &topmodel->deficit_root_zone, 
+//					&topmodel->sbar, &topmodel->bal);
+//	
+//	// Reinitialise discharge array
+//	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
+//				topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
+//				topmodel->Q);	
+//    
         return BMI_SUCCESS;
     }
 
