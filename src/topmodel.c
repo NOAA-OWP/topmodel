@@ -523,18 +523,20 @@ return;
  * Based on the calculation of values going into output tch, it seems TOPMODEL assumes 
  * 	one main channel with up to 9 areas of overland flow contributing to the 
  * 	one main channel. tch[1] is the main channel, and tch[>1] are the areas of 
- * 	overland flow (BEC).
+ * 	overland flow (BChoat).
  *
  * There is one assumed velocity for the main channel and one assumed velocity applied
- * 	to all overland flow areas. (BEC)
+ * 	to all overland flow areas. (BChoat)
  *
  * It is not clear why tch is hardcoded as an array of a fixed length. This is also done
  * 	in the original fortran code on which Fred Ogden based this C-code. In Fortran
- * 	it is coded as a 10-dimensional array and tch(10), and here as tch[11]. It is also
- * 	not clear why it is 10 in fortran and 11 in C. Indexing in fortran and C is different,
- * 	fortran is 1 to n and in C is 0 to n-1, but defining arrays in both languages seems to
- * 	take an integer equal to the size of the array (e.g., tch(10), tch[10]. (BEC)
+ * 	it is coded as a 10-dimensional array and tch(10), and here as tch[11]. 
  * 	
+ * 	TCH(10) in Fortran gives you a ten element array indexed from 1..10. When this was ported, 
+ * 	the 1-based indexing was directly ported as well, so the tch buffer was over allocated by one, 
+ * 	giving an array indexed 0..10, but index 0 is ignored/unsued. (BChoat)
+ *
+ *
  *
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
  * 	distance from outlet to point on channel with area known (i.e., to a channel I think-BEC)
@@ -546,6 +548,8 @@ return;
 
  * @params(out] tch[11], double of length 11, holds histogram ordinates for each channel (I think-BEC)
  * 	tch is used as input in subsequent functions
+ * 	Note, that although tch is an 11 element vector, position 0 is ignored. It was 
+ * 	written this way when translated from the original code.
  */
 
 extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
@@ -578,8 +582,10 @@ extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
  * @params[in] num_channels, int, defined in subcat.dat file
  * @params[in] area, double between 0 and 1 defining catchment area as ratio of 
  * 	entire catchment
- * @params[in] tch[11], double if length 11, holds histogram ordinates for each channel
+ * @params[in] tch[11], double of length 11, holds histogram ordinates for each channel
  * 	output from conver_dist_to_histords()
+ * 	Note, that although tch is an 11 element vector, position 0 is ignored. It was 
+ * 	written this way when translated from the original code.
  * @params[in], cum_dist_area_with_dist, pointer of length num_channels-1 and type double,
  * 	cumulative distribution of area with dist_from_outlet. 
 
