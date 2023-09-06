@@ -1,7 +1,6 @@
 #include "../include/topmodel.h" 
 #include "../include/bmi.h" 
 #include "../include/bmi_topmodel.h"
-#include <stdio.h>
 
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
@@ -308,10 +307,11 @@ int init_config(const char* config_file, topmodel_model* model)
 
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
-        model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,
-	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
-        &model->dth,model->max_atb_increments,model->max_time_delay_ordinates,&model->num_time_delay_histo_ords,
-	&model->num_delay,&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
+        model->dt,model->tl,model->dist_from_outlet,model->max_atb_increments,
+	model->max_time_delay_ordinates,&model->num_time_delay_histo_ords,&model->num_delay,
+	&model->szm,&model->t0,&model->chv,&model->rv,&model->td, &model->srmax,
+	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,&model->dth,
+	&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
         &model->szq,model->Q,&model->sbar, &model->bal);
     fclose(model->params_fptr);
 
@@ -943,73 +943,72 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 
     // check if name is a calibratable parameter with secondary dependencies
     // chv (parameter)
-    if (strcmp (name, "chv") == 0 || strcmp (name, "rv") == 0) {
+//    if (strcmp (name, "chv") == 0) {
+
+    // define array holding calibratable parameter names
+    char *calibParams[] = {"szm", "sr0", "srmax", "td", "t0",
+         			"chv", "rv", "xk0", "hf", "dth"};
+    // get number of strings to use for loop
+    int numParams = sizeof(calibParams) / sizeof(calibParams[0]);
+
+    // check if any name is = any calibratable parameter
+    // create holder to check if name == any calibParam
+    int nameIsCalibParam = 0;
+    for (int i = 0; i<numParams; i++){
+ 	if (strcmp(name, calibParams[i]) == 0) {
+	    nameIsCalibParam = 1;
+	    break;
+        }
+    }
+
+    // if name is a calibratable parameter, then update outputs
+    if (nameIsCalibParam) {
+
+        // declare variables
+	double tch[11];
 
 	topmodel_model *topmodel;
 	topmodel = (topmodel_model *) self->data;
 
-//	void *ptr = NULL;
-//	int status;
-	double *CHVptr = NULL;
-        double *RVptr = NULL;
-	int statusCHV;
-	int statusRV;
-	// use Get_value_ptr to assign vlaue to topmodel struct and get status
-//	status = Get_value_ptr(self, name, &ptr);
 
+	// print updated calibratable parameters
+	printf("\n\nCalibratable Parameters:\n");
 
-//	printf("topmodel->chv: %d\n", topmodel->chv)	;
-	// read in values for CHV and RV and cast as void to meet Get_value_ptr expectations
-	statusCHV = Get_value_ptr(self, "chv", (void**)&CHVptr);
-	statusRV = Get_value_ptr(self, "rv", (void**)&RVptr);
+        printf("szm = %f\n", topmodel->szm);
+        printf("sr0 = %f\n", topmodel->sr0);
+        printf("srmax = %f\n", topmodel->srmax);
+        printf("td = %f\n", topmodel->td);
+        printf("t0 = %f\n", topmodel->t0);
+        printf("chv = %f\n", topmodel->chv);
+        printf("rv = %f\n\n", topmodel->rv);
 
-	printf("chv status: %d\n", statusCHV);
-	printf("rv status: %d\n", statusRV);
-	printf("chvptr: %1f\n", *CHVptr);
-	printf("rvptr: %1f\n", *RVptr);
-
-
-	// update values of chv and rv in topmodel structure
-//	topmodel->chv=*CHVptr;
-//	topmodel->rv=*RVptr;
-	//printf("topmodel->chv: %d\n", topmodel->chv)	;
-
-//	topmodel->chv=self->get_value(self, "chv", &topmodel->chv);
-//	topmodel->rv=self->get_value(self, "rv", &topmodel->rv);
-   
-	// ????  I think I should be reading in rv and tch (and other calibratable params from realization file????
-//	double rv;   /* internal overland flow routing velocity */
-//        double chv;  /* average channel flow velocity */
-        double tch[11];
-        // double sumar;
-  		
+	
      	// convert from distance/area to histogram ordinate form
         convert_dist_to_histords(topmodel->dist_from_outlet, topmodel->num_channels,
-				*CHVptr, *RVptr, topmodel->dt, tch);
+//				*CHVptr, topmodel->rv, topmodel->dt, tch);
+				&topmodel->chv, &topmodel->rv, topmodel->dt, tch);
 
-	printf("convert_dist_to_histords ran");
 	// calculate the time_delay_histogram
 	calc_time_delay_histogram(topmodel->max_time_delay_ordinates, topmodel->num_channels, 
 	  			  topmodel->area, tch, 
-  				  topmodel->cum_dist_area_with_dist, 
+ 				  topmodel->cum_dist_area_with_dist, 
 				  &topmodel->num_time_delay_histo_ords,
 				  &topmodel->num_delay, &topmodel->time_delay_histogram);
 
-	printf("calc_time_Delay_histogram ran");
-//	
-//	// Initialize water balance and unsatrutaed storage and deficits
-//	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
-//					topmodel->dt, &topmodel->sr0, &topmodel->szm, 
-//					&topmodel->Q0, &topmodel->t0, topmodel->tl,
-//					&topmodel->stor_unsat_zone, &topmodel->szq, 
-//					&topmodel->deficit_local, &topmodel->deficit_root_zone, 
-//					&topmodel->sbar, &topmodel->bal);
-//	
-//	// Reinitialise discharge array
-//	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
-//				topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
-//				topmodel->Q);	
-//    
+	
+	// Initialize water balance and unsatrutaed storage and deficits
+	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
+					topmodel->dt, &topmodel->sr0, &topmodel->szm, 
+					&topmodel->Q0, &topmodel->t0, topmodel->tl,
+					&topmodel->stor_unsat_zone, &topmodel->szq, 
+					&topmodel->deficit_local, &topmodel->deficit_root_zone, 
+					&topmodel->sbar, &topmodel->bal);
+	
+//      Reinitialise discharge array
+	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
+				&topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
+				topmodel->Q);	
+    
         return BMI_SUCCESS;
     }
 
