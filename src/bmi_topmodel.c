@@ -972,7 +972,8 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 
 
 	// print updated calibratable parameters
-	printf("\n\nCalibratable Parameters:\n");
+	printf("\n\nCalibratable Parameters After Updating From\n\
+                 Realization*.json:\n");
 
         printf("szm = %f\n", topmodel->szm);
         printf("sr0 = %f\n", topmodel->sr0);

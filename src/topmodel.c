@@ -886,7 +886,7 @@ printf("subcat: %s\n", subcat);
 fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
        szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth);
 
-printf("\n\nCalibratable Parameters:\n");
+printf("\n\nCalibratable Parameters From params*.dat:\n");
 
 printf("szm = %f\n", *szm);
 printf("sr0 = %f\n", *sr0);
