@@ -946,8 +946,11 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 //    if (strcmp (name, "chv") == 0) {
 
     // define array holding calibratable parameter names
-    char *calibParams[] = {"szm", "sr0", "srmax", "td", "t0",
-         			"chv", "rv", "xk0", "hf", "dth"};
+    char *calibParams[] = {"szm", "t0", "chv", "rv", "sr0",
+         			"xk0", "hf", "dth"}; // maybe remove - realted to GA only
+    // removed srmax and td from list of calibratable parameters since they already
+    // functioned as expected
+    // "srmax", "td"
     // get number of strings to use for loop
     int numParams = sizeof(calibParams) / sizeof(calibParams[0]);
 
