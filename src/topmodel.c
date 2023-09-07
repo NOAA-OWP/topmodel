@@ -566,8 +566,19 @@ extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
     tch[1]=dist_from_outlet[1]/chvdt;
     for(j=2;j<=num_channels;j++)
      {
+     // for trouble shooting
+     printf("num_channels: %d\n", num_channels);
+     printf("j: %d\n", j);
+
+     
       tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
      }
+
+    
+    // for trouble shooting
+    for (int i=0; i<11; i++) {
+	    printf("\ntch: %.2lf\n", tch[i]);
+    } 
 
     return;
 
@@ -602,7 +613,6 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
 				int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram) 
 
 {
-
     // declare local variables
     double time, a1, sumar, a2;
     int j, ir;
@@ -666,6 +676,7 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
         }
       }
 
+
     return;
 } 
 
@@ -690,6 +701,7 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
                         double *Q)
 {
+
     // declare local variables
     double sum;
     int i, in;
