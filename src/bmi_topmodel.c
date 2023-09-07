@@ -941,55 +941,133 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 
     memcpy (dest, array, nbytes);
 
-    // check if name is a calibratable parameter with secondary dependencies
-    // chv (parameter)
-//    if (strcmp (name, "chv") == 0) {
+    
+    ///////////////////////////////////
+    //Handle calibratable parameters///
+    ///////////////////////////////////
+
+    // Need to use some sotred variables in model data structure, so
+    // instantiate topmodel as 
+    // a pointer topmodel of type topmodel_model    
+    topmodel_model *topmodel;
+    // assign self->data to topmodel pointer
+    topmodel = (topmodel_model *) self->data;
+
+  
+    // CHECK IF/WHICH CALIBRATABLE PARAMETERS TO UPDATE
+
+    // GREEN-AMPT PARAMETERS
+
+    // create list of Green-Ampt related calibratable parameters
+    char *calibGAParams[] = {"xk0", "hf", "dth" "szm"};
+
+    // get number of strings to use for loop
+    int numGAParams = sizeof(calibGAParams) / sizeof(calibGAParams);
+
+    // check if name is == any calibratable parameters and infex == 1
+    int nameIsGACalibParam = 0;
+    for (int i = 0; i<numGAParams; i++){
+	    if (strcmp(name, calibGAParams[i]) == 0 && topmodel->infex == 1) {
+		    nameIsGACalibParam = 1;
+		    break;
+	    } else if (strcmp(name, calibGAParams[i]) == 0 && topmodel->infex == 0) {
+		    printf("CAUTION: Green-Ampt related variable defined in Realizations\n\
+				    but Green-Ampt is not turned on using infex variable");
+		    break;
+    	}
+    }
+
+    // DISCHARGE RELATED PARAMETERS
 
     // define array holding calibratable parameter names
-    char *calibParams[] = {"szm", "t0", "chv", "rv", "sr0",
-         			"xk0", "hf", "dth"}; // maybe remove - realted to GA only
-    // removed srmax and td from list of calibratable parameters since they already
-    // functioned as expected
-    // "srmax", "td"
-    // get number of strings to use for loop
-    int numParams = sizeof(calibParams) / sizeof(calibParams[0]);
+    char *calibQParams[] = {"szm", "t0", "chv", "rv", "sr0"};
 
-    // check if any name is = any calibratable parameter
-    // create holder to check if name == any calibParam
-    int nameIsCalibParam = 0;
-    for (int i = 0; i<numParams; i++){
- 	if (strcmp(name, calibParams[i]) == 0) {
-	    nameIsCalibParam = 1;
+    // get number of strings to use for loop
+    int numQParams = sizeof(calibQParams) / sizeof(calibQParams[0]);
+
+    // check if name is == any calibratable parameter
+    // create holder to check if name == any calibQParam
+    int nameIsCalibQParam = 0;
+    for (int i = 0; i<numQParams; i++){
+ 	if (strcmp(name, calibQParams[i]) == 0) {
+	    nameIsCalibQParam = 1;
 	    break;
         }
     }
 
+    
+    // WATER BALANCE RELATED PARAMETERS
+
+    // define array holding calibratable parameter names
+    char *calibWBParams[] = {"szm", "t0", "sr0"};
+
+    // get number of strings to use for loop
+    int numWBParams = sizeof(calibWBParams) / sizeof(calibWBParams[0]);
+
+    // check if name is == any calibratable parameter
+    // create holder to check if name == any calibWBParam
+    int nameIsCalibWBParam = 0;
+    for (int i = 0; i<numWBParams; i++){
+ 	if (strcmp(name, calibWBParams[i]) == 0) {
+	    nameIsCalibWBParam = 1;
+	    break;
+        }
+    }
+
+    // if any calibratable variables were provided in realization fill, then 
+    // print an update with the values being used.
+    if (nameIsGACalibParam || nameIsCalibQParam || nameIsCalibWBParam || \
+		    strcmp(name, "srmax") == 0 || strcmp(name, "td") == 0) {
+
+        printf("\n\n\nAT LEAST ONE OF THE FOLLOWING CALIBRATABLE PARAMETERS "
+			"WAS PROVIDED IN THE REALIZATION.JSON FILE!\n");
+
+	// print updated calibratable parameters
+        printf("\n\nCalibratable parameters related to ET and recharge:\n");
+	printf("srmax = %f\n", topmodel->srmax);
+        printf("td = %f\n", topmodel->td);
+
+
+	printf("\nCalibratable parameters related to Green-Ampt:\n");
+        printf("xk0 = %f\n", topmodel->xk0);
+	printf("hf = %f\n", topmodel->hf);
+	printf("dth = %f\n", topmodel->dth);
+	printf("szm = %f\n", topmodel->szm); // in water balance params too
+
+
+	printf("\nCalibratable parameters related to discharge:\n");
+        printf("chv = %f\n", topmodel->chv);
+        printf("rv = %f\n", topmodel->rv);
+
+
+	printf("\nCalibratable parameters related to water balance:\n");
+        printf("szm = %f\n", topmodel->szm); // in green-ampt params too
+        printf("sr0 = %f\n", topmodel->sr0);
+        printf("t0 = %f\n\n\n\n", topmodel->t0);
+
+    }
+
+    // UPDATE APPROPRIATE PARAMETERS
+
+    // GREEN-AMPT RELATED PARAMETERS
+
+    if (nameIsGACalibParam) {
+
+	printf("Green-Ampt Chunk - Currently unused, but called here");
+    }
+    
+
+    // DISCHARGE RELATED PARAMETERS
+
     // if name is a calibratable parameter, then update outputs
-    if (nameIsCalibParam) {
+    if (nameIsCalibQParam) {
 
         // declare variables
 	double tch[11];
 
-	topmodel_model *topmodel;
-	topmodel = (topmodel_model *) self->data;
-
-
-	// print updated calibratable parameters
-	printf("\n\nCalibratable Parameters After Updating From\n\
-                 Realization*.json:\n");
-
-        printf("szm = %f\n", topmodel->szm);
-        printf("sr0 = %f\n", topmodel->sr0);
-        printf("srmax = %f\n", topmodel->srmax);
-        printf("td = %f\n", topmodel->td);
-        printf("t0 = %f\n", topmodel->t0);
-        printf("chv = %f\n", topmodel->chv);
-        printf("rv = %f\n\n", topmodel->rv);
-
 	
      	// convert from distance/area to histogram ordinate form
         convert_dist_to_histords(topmodel->dist_from_outlet, topmodel->num_channels,
-//				*CHVptr, topmodel->rv, topmodel->dt, tch);
 				&topmodel->chv, &topmodel->rv, topmodel->dt, tch);
 
 	// calculate the time_delay_histogram
@@ -998,7 +1076,20 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
  				  topmodel->cum_dist_area_with_dist, 
 				  &topmodel->num_time_delay_histo_ords,
 				  &topmodel->num_delay, &topmodel->time_delay_histogram);
+	
+        // Reinitialise discharge array
+	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
+				&topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
+				topmodel->Q);	
+    }
 
+
+    // WATER BALANCE RELATED PARAMETERS
+
+    // if name is a calibratable parameter, then update outputs
+    if (nameIsCalibWBParam) {
+
+       
 	
 	// Initialize water balance and unsatrutaed storage and deficits
 	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
@@ -1006,19 +1097,13 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 					&topmodel->Q0, &topmodel->t0, topmodel->tl,
 					&topmodel->stor_unsat_zone, &topmodel->szq, 
 					&topmodel->deficit_local, &topmodel->deficit_root_zone, 
-					&topmodel->sbar, &topmodel->bal);
-	
-//      Reinitialise discharge array
-	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
-				&topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
-				topmodel->Q);	
-    
-        return BMI_SUCCESS;
+					&topmodel->sbar, &topmodel->bal);            
     }
-
 
     return BMI_SUCCESS;
 }
+
+
 
 static int Set_value_at_indices (Bmi *self, const char *name, int * inds, int len, void *src)
 {
