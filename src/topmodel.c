@@ -669,6 +669,48 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
     return;
 } 
 
+
+
+/** 
+ * Function to (re)initialize discharge array
+ * @params[in] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
+ * 	catchment to outlet. Output from calc_time_delay_histogram
+ * @params[in] Q0, pointer of type double, initial subsurface flow per unit area
+ * @params[in] area, pointer of type double between 0 and 1 defining catchment area as ratio of
+ * 	entire catchment
+ * @params[in] num_time_delay_histo_ords, pointer of type int, number of time delay histogram ordinates,
+ * 	output from calc_time_delay_histogram
+ * @parms[in], time_delay_histogram, double pointer of type double, time lag of outflows due to channel routing,
+ * 	output from calc_time_delay_histogram
+ *
+ * @params[out] Q, pointer of type double and length num_delay, simulated discharge
+ */
+
+extern void init_discharge_array(int *num_delay, double *Q0, double area, 
+			int *num_time_delay_histo_ords, double **time_delay_histogram,
+                        double *Q)
+{
+    // declare local variables
+    double sum;
+    int i, in;
+ 
+    sum=0.0;
+
+    for(i=1;i<=(*num_delay);i++)
+      {
+      Q[i]+=(*Q0)*area;
+      }
+          
+    for(i=1;i<=(*num_time_delay_histo_ords);i++)
+      {
+      sum+=(*time_delay_histogram)[i];
+      in=(*num_delay)+i;
+      Q[in]+=(*Q0)*(area-sum);
+      };
+    return;
+}
+
+
 /** 
  * Function to initialize unsaturated zone storage and deficit
  *
@@ -739,47 +781,6 @@ extern void init_water_balance(int max_atb_increments,
 }
 
 
-/** 
- * Function to (re)initialize discharge array
- *  @params[out] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
- * 	catchment to outlet. Output from calc_time_delay_histogram
- * @params[in] Q0, pointer of type double, initial subsurface flow per unit area
- * @params[in] area, pointer of type double between 0 and 1 defining catchment area as ratio of
- * 	entire catchment
- * @params[in] num_time_delay_histo_ords, pointer of type int, number of time delay histogram ordinates,
- * 	output from calc_time_delay_histogram
- * @parms[in], time_delay_histogram, double pointer of type double, time lag of outflows due to channel routing,
- * 	output from calc_time_delay_histogram
- *
- * @params[out] Q, pointer of type double and length num_delay, simulated discharge
- */
-
-extern void init_discharge_array(int *num_delay, double *Q0, double area, 
-			int *num_time_delay_histo_ords, double **time_delay_histogram,
-                        double *Q)
-{
-    // declare local variables
-    double sum;
-    int i, in;
- 
-    sum=0.0;
-
-    for(i=1;i<=(*num_delay);i++)
-      {
-      Q[i]+=(*Q0)*area;
-      }
-          
-    for(i=1;i<=(*num_time_delay_histo_ords);i++)
-      {
-      sum+=(*time_delay_histogram)[i];
-      in=(*num_delay)+i;
-      Q[in]+=(*Q0)*(area-sum);
-      };
-    return;
-}
-
-
-
 /**
  * Main initialize function. Calls convert_dist_to_histords(), calc_time_delay_histogram(), 
  * 	init_water_balance(), and init_discharge_array()
@@ -817,7 +818,8 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
  * 	of transmissivity with increase in storage deficit
  * @params[out] CALIBRATABLE t0, pointer of type double, downslope transmissivity when soil is just saturated
  * 	to the surface. 'input as LN(t0)
- * @params[out] CALIBRATABLE td, pointer of type double, unsaturated zone time delay per unit storage, provided in params.dat
+ * @params[out] CALIBRATABLE td, pointer of type double, unsaturated zone time delay for recharge to the 
+ * 	saturated zone per unit of deficit, provided in params.dat
  * 	Only read in within init(), not used.
  * @params[out] CALIBRATABLE chv, double of length one, the average channel velocity  (m/hr)
  * 	for main channel (I think-BChoat) 
@@ -886,15 +888,28 @@ printf("subcat: %s\n", subcat);
 fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
        szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth);
 
-printf("\n\nCalibratable Parameters From params*.dat:\n");
 
-printf("szm = %f\n", *szm);
-printf("sr0 = %f\n", *sr0);
+printf("\n\nCalibratable parameters from params*.dat:\n");
+
+printf("\nET and recharge:\n");
 printf("srmax = %f\n", *srmax);
 printf("td = %f\n", *td);
-printf("t0 = %f\n", *t0);
+
+printf("\nGreen-Ampt:\n");
+printf("xk0 = %f\n", *xk0);
+printf("hf = %f\n", *hf);
+printf("dth = %f\n", *dth);
+printf("szm = %f\n", *szm); // also in water balance params
+
+printf("\nDischarge:\n");
 printf("chv = %f\n", *chv);
-printf("rv = %f\n\n", *rv);
+printf("rv = %f\n", *rv);
+
+printf("\nWater balance:\n");
+printf("szm = %f\n", *szm); // also in green-ampt params
+printf("sr0 = %f\n", *sr0);
+printf("t0 = %f\n", *t0);
+
 
 //Convert distance/area form to time delay histogram ordinates
 convert_dist_to_histords(dist_from_outlet, num_channels, chv, rv, dt, tch);
@@ -918,16 +933,19 @@ if(yes_print_output==TRUE)
   fprintf(output_fptr,"\n");
   }
 
+
+// Reinitialise discharge array
+init_discharge_array(num_delay, Q0, area, 
+			num_time_delay_histo_ords, time_delay_histogram, 
+			Q);
+
+
 // Initialize water balance and unsatrutaed storage and deficits
 init_water_balance(max_atb_increments, num_topodex_values, 
 				dt, sr0, szm, Q0, t0, tl,
 				stor_unsat_zone, szq, 
 				deficit_local, deficit_root_zone, sbar, bal);
 
-// Reinitialise discharge array
-init_discharge_array(num_delay, Q0, area, 
-			num_time_delay_histo_ords, time_delay_histogram, 
-			Q);
 
 if(yes_print_output==TRUE)
   {
@@ -954,9 +972,20 @@ extern void expinf(int irof, int it, int rint, double* df, double* cumf,
 
 // BMI Adaption: df and cumf are now passed as pointers
 
+
 double sum,fc,func,cd,xke,e,tp,r2,f1;
 double dfunc,fx,add,fac,constant,f,f2,xkf,szf,dth;
 int i,j;
+
+//printf("running GA expinf function\n\n");
+//
+//printf("xk0 = %f\n", xk0);
+//printf("szm = %f\n", szm);
+//printf("hf = %f\n", hf);
+//printf("dth = %f\n", dth);
+
+
+
 
 e=0.00001;
 
