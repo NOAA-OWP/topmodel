@@ -566,19 +566,9 @@ extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
     tch[1]=dist_from_outlet[1]/chvdt;
     for(j=2;j<=num_channels;j++)
      {
-     // for trouble shooting
-     printf("num_channels: %d\n", num_channels);
-     printf("j: %d\n", j);
-
      
       tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
-     }
-
-    
-    // for trouble shooting
-    for (int i=0; i<11; i++) {
-	    printf("\ntch: %.2lf\n", tch[i]);
-    } 
+     } 
 
     return;
 
@@ -635,7 +625,6 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
     (*num_delay)=(int)tch[1];
     (*num_time_delay_histo_ords)-=(*num_delay);
     
-
 
     for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
       {
@@ -884,8 +873,6 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 
    READS PARAMETER DATA
 ******************************************/
-// double rv;   /* internal overland flow routing velocity */
-// double chv;  /* average channel flow velocity */
 double tch[11];
 double sumar;
 int ir;
@@ -907,18 +894,12 @@ printf("\nET and recharge:\n");
 printf("srmax = %f\n", *srmax);
 printf("td = %f\n", *td);
 
-printf("\nGreen-Ampt:\n");
-printf("xk0 = %f\n", *xk0);
-printf("hf = %f\n", *hf);
-printf("dth = %f\n", *dth);
-printf("szm = %f\n", *szm); // also in water balance params
-
 printf("\nDischarge:\n");
 printf("chv = %f\n", *chv);
 printf("rv = %f\n", *rv);
 
 printf("\nWater balance:\n");
-printf("szm = %f\n", *szm); // also in green-ampt params
+printf("szm = %f\n", *szm);
 printf("sr0 = %f\n", *sr0);
 printf("t0 = %f\n", *t0);
 
@@ -988,16 +969,6 @@ extern void expinf(int irof, int it, int rint, double* df, double* cumf,
 double sum,fc,func,cd,xke,e,tp,r2,f1;
 double dfunc,fx,add,fac,constant,f,f2,xkf,szf,dth;
 int i,j;
-
-//printf("running GA expinf function\n\n");
-//
-//printf("xk0 = %f\n", xk0);
-//printf("szm = %f\n", szm);
-//printf("hf = %f\n", hf);
-//printf("dth = %f\n", dth);
-
-
-
 
 e=0.00001;
 

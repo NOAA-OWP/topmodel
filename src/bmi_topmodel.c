@@ -928,7 +928,7 @@ static int Get_value(Bmi * self, const char * name, void *dest)
     return BMI_SUCCESS;
 }
 
-static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_model* model)
+static int Set_value (Bmi *self, const char *name, void *array)
 {
     void * dest = NULL;
     int nbytes = 0;
@@ -946,36 +946,8 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
     //Handle calibratable parameters///
     ///////////////////////////////////
 
-    // Need to use some sotred variables in model data structure, so
-    // instantiate topmodel as 
-    // a pointer topmodel of type topmodel_model    
-    topmodel_model *topmodel;
-    // assign self->data to topmodel pointer
-    topmodel = (topmodel_model *) self->data;
-
   
     // CHECK IF/WHICH CALIBRATABLE PARAMETERS TO UPDATE
-
-    // GREEN-AMPT PARAMETERS
-
-    // create list of Green-Ampt related calibratable parameters
-    char *calibGAParams[] = {"xk0", "hf", "dth" "szm"};
-
-    // get number of strings to use for loop
-    int numGAParams = sizeof(calibGAParams) / sizeof(calibGAParams);
-
-    // check if name is == any calibratable parameters and infex == 1
-    int nameIsGACalibParam = 0;
-    for (int i = 0; i<numGAParams; i++){
-	    if (strcmp(name, calibGAParams[i]) == 0 && topmodel->infex == 1) {
-		    nameIsGACalibParam = 1;
-		    break;
-	    } else if (strcmp(name, calibGAParams[i]) == 0 && topmodel->infex == 0) {
-		    printf("CAUTION: Green-Ampt related variable defined in Realizations\n\
-				    but Green-Ampt is not turned on using infex variable");
-		    break;
-    	}
-    }
 
     // DISCHARGE RELATED PARAMETERS
 
@@ -1016,8 +988,13 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 
     // if any calibratable variables were provided in realization fill, then 
     // print an update with the values being used.
-    if (nameIsGACalibParam || nameIsCalibQParam || nameIsCalibWBParam || \
+    if (nameIsCalibQParam || nameIsCalibWBParam || \
 		    strcmp(name, "srmax") == 0 || strcmp(name, "td") == 0) {
+
+        // instantiate topmodel as a pointer topmodel of type topmodel_model    
+        topmodel_model *topmodel;
+        // assign self->data to topmodel pointer
+        topmodel = (topmodel_model *) self->data;
 
         printf("\n\n\nAT LEAST ONE OF THE FOLLOWING CALIBRATABLE PARAMETERS "
 			"WAS PROVIDED IN THE REALIZATION.JSON FILE!\n");
@@ -1027,42 +1004,31 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
 	printf("srmax = %f\n", topmodel->srmax);
         printf("td = %f\n", topmodel->td);
 
-
-	printf("\nCalibratable parameters related to Green-Ampt:\n");
-        printf("xk0 = %f\n", topmodel->xk0);
-	printf("hf = %f\n", topmodel->hf);
-	printf("dth = %f\n", topmodel->dth);
-	printf("szm = %f\n", topmodel->szm); // in water balance params too
-
-
 	printf("\nCalibratable parameters related to discharge:\n");
         printf("chv = %f\n", topmodel->chv);
         printf("rv = %f\n", topmodel->rv);
 
 
 	printf("\nCalibratable parameters related to water balance:\n");
-        printf("szm = %f\n", topmodel->szm); // in green-ampt params too
-        printf("sr0 = %f\n", topmodel->sr0);
+        printf("szm = %f\n", topmodel->szm); 
+	printf("sr0 = %f\n", topmodel->sr0);
         printf("t0 = %f\n\n\n\n", topmodel->t0);
 
     }
 
     // UPDATE APPROPRIATE PARAMETERS
 
-    // GREEN-AMPT RELATED PARAMETERS
-
-    if (nameIsGACalibParam) {
-
-	printf("Green-Ampt Chunk - Currently unused, but called here");
-    }
-    
-
     // DISCHARGE RELATED PARAMETERS
 
     // if name is a calibratable parameter, then update outputs
     if (nameIsCalibQParam) {
 
-        // declare variables
+         // instantiate topmodel as a pointer topmodel of type topmodel_model    
+        topmodel_model *topmodel;
+        // assign self->data to topmodel pointer
+        topmodel = (topmodel_model *) self->data;
+
+	// declare variables
 	double tch[11];
 
 	
@@ -1089,7 +1055,11 @@ static int Set_value (Bmi *self, const char *name, void *array) //, topmodel_mod
     // if name is a calibratable parameter, then update outputs
     if (nameIsCalibWBParam) {
 
-       
+        // instantiate topmodel as a pointer topmodel of type topmodel_model    
+        topmodel_model *topmodel;
+        // assign self->data to topmodel pointer
+        topmodel = (topmodel_model *) self->data;
+
 	
 	// Initialize water balance and unsatrutaed storage and deficits
 	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
