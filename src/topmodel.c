@@ -522,7 +522,7 @@ return;
  * 
  * Converts parameters to m/time step DT
  * Based on the calculation of values going into output tch, it seems TOPMODEL assumes 
- * 	one main channel with up to 9 areas of overland flow contributing to the 
+ * 	one main channel with up to 9 areas (or small tributaries) of overland flow contributing to the 
  * 	one main channel. tch[1] is the main channel, and tch[>1] are the areas of 
  * 	overland flow (BChoat).
  *
