@@ -539,14 +539,14 @@ return;
  *
  *
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
- * 	distance from outlet to point on channel with area known (i.e., to a channel I think-BChoat)
+ * 	distance from outlet to point on channel with area known (i.e., to a channel BChoat)
  * @params[in] num_channels, integer, how many channels are present (m/hr)
  * @params[in] CALIBRATABLE chv, pointer of type double and length one, the average channel velocity  (m/hr)
- * 	for the main channel (I think-BChoat) 
+ * 	for the main channel (BChoat) 
  * @params[in] CALIBRATABLE rv, pointer of type double and length one, average internal overland flow routing velocity
  * @params[in] dt, double of length one, timestep in hours
 
- * @params(out] tch[11], double of length 11, holds histogram ordinates for each channel (I think-BChoat)
+ * @params(out] tch[11], double of length 11, holds histogram ordinates for each channel (BChoat)
  * 	tch is used as input in subsequent functions
  * 	Note, that although tch is an 11 element vector, position 0 is ignored. It was 
  * 	written this way when translated from the original code.
@@ -762,7 +762,7 @@ extern void init_water_balance(int max_atb_increments,
       }
 
 
-    t0dt=(*t0)+log(dt);  /* was ALOG */
+    t0dt=(*t0)+log(dt);  /* was ALOG was specific log function in fortran*/
 
     /*  Calculate SZQ parameter */
     (*szq)=exp(t0dt-tl);
@@ -802,7 +802,7 @@ extern void init_water_balance(int max_atb_increments,
  * @params[in] dt, double, timestep in hours
  * @params[in] tl, double, not well defined, but related to time lag
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
- * 	distance from outlet to point on channel with area known (i.e., to a channel I think-BChoat)
+ * 	distance from outlet to point on channel with area known (i.e., to a channel BChoat)
   * @params[in] max_atb_increments, int, defines size of one-dimensional double
  * 	precision arrays including stor_unsat_zone, deficit_root_zone, 
  * 	and deficit_local
@@ -823,7 +823,7 @@ extern void init_water_balance(int max_atb_increments,
  * 	saturated zone per unit of deficit, provided in params.dat
  * 	Only read in within init(), not used.
  * @params[out] CALIBRATABLE chv, double of length one, the average channel velocity  (m/hr)
- * 	for main channel (I think-BChoat) 
+ * 	for main channel (BChoat) 
  * @params[out] CALIBRATABLE rv, double of length one, average internal overland flow routing velocity
  * @params[out] CALIBRATABLE srmax, pointer of type double, maximum root zone storage deficit provided in params.dat
  * 	Only read in within init(), not used.
