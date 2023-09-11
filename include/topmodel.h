@@ -36,17 +36,6 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
                         double *Q);
 
-//extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
-//	      int num_channels, int num_topodex_values, int yes_print_output,
-//	      double area, double **time_delay_histogram,
-//	      double *cum_dist_area_with_dist, double dt, double *szm, double *t0, 
-//              double tl, double *dist_from_outlet, double *td, double *srmax, 
-//              double *Q0,double *sr0, int *infex, double *xk0, double *hf, 
-//              double *dth,int max_atb_increments, int max_time_delay_ordinates,
-//              int *num_time_delay_histo_ords,int *num_delay,
-//	      double **stor_unsat_zone, double **deficit_local,
-//              double **deficit_root_zone,double *szq, double *Q,
-//              double *sbar, double *bal);
 extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
