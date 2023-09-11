@@ -988,6 +988,8 @@ static int Set_value (Bmi *self, const char *name, void *array)
 
     // if any calibratable variables were provided in realization fill, then 
     // print an update with the values being used.
+    // srmax and td do not need to be updated, but are printed to confirm their
+    // presence in the realization.json file.
     if (nameIsCalibQParam || nameIsCalibWBParam || \
 		    strcmp(name, "srmax") == 0 || strcmp(name, "td") == 0) {
 

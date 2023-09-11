@@ -700,7 +700,7 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
 
     for(i=1;i<=(*num_delay);i++)
       {
-      Q[i]+=(*Q0)*area;
+      Q[i]+=(*Q0)*area; //TO-DO: check Q allocation size at initialization to fix memory allocation issue
       }
           
     for(i=1;i<=(*num_time_delay_histo_ords);i++)
@@ -759,7 +759,7 @@ extern void init_water_balance(int max_atb_increments,
       {
       d_alloc(stor_unsat_zone,max_atb_increments);
       d_alloc(deficit_root_zone,max_atb_increments);
-      d_alloc(deficit_local,max_atb_increments); // deficit_local is not used in init, does it still need to be intitialized here?
+      d_alloc(deficit_local,max_atb_increments); 
       }
 
 
