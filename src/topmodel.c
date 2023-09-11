@@ -612,15 +612,16 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
       }
 
 
+    // casting tch[num_channels] to int truncates tch[num_channels] 
+    // (e.g., 7.9 becomes 7)
     (*num_time_delay_histo_ords)=(int)tch[num_channels];
     
-    // why is this necessary with the line above that defines num_time_delay_histo_ords? 
-    // was included in original fortran code, so could be related to older fortran behavior?
+    // this is here to round up. Since casting tch as int effectively rounds down, 
+    // we add a value of 1 effectively rounding up.
     if((double)(*num_time_delay_histo_ords)<tch[num_channels]) 
        {
        (*num_time_delay_histo_ords)++;
        }
-    /////////////////////////////////i
 
     (*num_delay)=(int)tch[1];
     (*num_time_delay_histo_ords)-=(*num_delay);
@@ -762,7 +763,7 @@ extern void init_water_balance(int max_atb_increments,
       }
 
 
-    t0dt=(*t0)+log(dt);  /* was ALOG was specific log function in fortran*/
+    t0dt=(*t0)+log(dt);  /* was ALOG - specific log function in fortran*/
 
     /*  Calculate SZQ parameter */
     (*szq)=exp(t0dt-tl);
