@@ -539,7 +539,7 @@ return;
  *
  *
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
- * 	distance from outlet to point on channel with area known (i.e., to a channel BChoat)
+ * 	distance from outlet to point on channel with area known (i.e., to a channel; BChoat)
  * @params[in] num_channels, integer, how many channels are present (m/hr)
  * @params[in] CALIBRATABLE chv, pointer of type double and length one, the average channel velocity  (m/hr)
  * 	for the main channel (BChoat) 
@@ -555,8 +555,7 @@ return;
 extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
 					double *chv, double *rv, double dt, double tch[11])
 {    
-    // declare local variables
-    
+    // declare local variables 
     double chvdt, rvdt;
     int j;
     
@@ -615,7 +614,8 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
 
     (*num_time_delay_histo_ords)=(int)tch[num_channels];
     
-    /* why is this necessary with the line above that defines num_time_delay_histo_ords?*/ 
+    // why is this necessary with the line above that defines num_time_delay_histo_ords? 
+    // was included in original fortran code, so could be related to older fortran behavior?
     if((double)(*num_time_delay_histo_ords)<tch[num_channels]) 
        {
        (*num_time_delay_histo_ords)++;
@@ -802,7 +802,7 @@ extern void init_water_balance(int max_atb_increments,
  * @params[in] dt, double, timestep in hours
  * @params[in] tl, double, not well defined, but related to time lag
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
- * 	distance from outlet to point on channel with area known (i.e., to a channel BChoat)
+ * 	distance from outlet to point on channel with area known (i.e., to a channel; BChoat)
   * @params[in] max_atb_increments, int, defines size of one-dimensional double
  * 	precision arrays including stor_unsat_zone, deficit_root_zone, 
  * 	and deficit_local
