@@ -99,6 +99,14 @@
 *****************************************************************/
 #include "../include/topmodel.h"
 
+void shift_Q(double* Q, int num_ordinates){ //NJF Really don't like the +1 size assumption here
+  //memmove puts num_ordinates*sizeof(double) bytes starting at Q[1]
+  //into Q[0], effectively shifting the array by one
+  memmove(&Q[0], &Q[1], num_ordinates*sizeof(*Q));
+  //set the last value to 0.0
+  Q[num_ordinates] = 0.0;
+}
+
 extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 int yes_print_output,int infex, double dt, double szm,
                 double *stor_unsat_zone, double *deficit_root_zone,
