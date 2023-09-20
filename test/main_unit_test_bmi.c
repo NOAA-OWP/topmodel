@@ -375,7 +375,13 @@ main(void){
             }
         }
     }
+    for (i=0; i<count_out; i++){ 
+        free(names_out[i]);
+    }
     free(names_out);
+    for (i=0; i<count_in; i++){
+        free(names_in[i]);
+    }
     free(names_in);
 
     // JG Note: added 03.22.2022 to test added params get set values. 
@@ -410,6 +416,7 @@ main(void){
         printf("\n finalizing...\n");
         status = model->finalize(model);
         if (status == BMI_FAILURE) return BMI_FAILURE;
+        free(model);
         printf("\n******************\nEND BMI UNIT TEST\n\n");
     }
     return 0;
