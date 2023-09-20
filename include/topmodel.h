@@ -17,6 +17,12 @@
 // Note: All errors causing program to exit will print console message
 #define TOPMODEL_DEBUG 0
 
+//The following "limits" from the original beven code
+//are now treated as warnings
+#define WARN_NUM_SUBCATCHMENTS 10
+#define WARN_HISTOGRAM_ORDINATES 20
+#define WARN_TOPODEX_INCREMENTS 30
+
 /*** Function/subroutine prototypes ***/
 extern void convert_dist_to_histords(const double * const dist_from_outlet, const int num_channels,
 					const double * const chv, const double * const rv, const double dt, double* const tch);
