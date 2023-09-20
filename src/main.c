@@ -48,6 +48,13 @@ int main(void)
     // Gather number of steps from input file
     // when in standalone mode.
     n = topmodel->nstep;
+    //NJF in standalone mode, one MUST allocate Q for all time steps
+    //This should probably re-considered and additional validation done
+    //that the algorithms work as intended
+    //especially with the addition of `shift_Q` in the topmodel function
+    //but for now, this prevents a fault
+    if(topmodel->Q != NULL) free(topmodel->Q);
+    d_alloc(&topmodel->Q, n);
   }
   else{
     // Otherwise define loop here
