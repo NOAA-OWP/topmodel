@@ -22,7 +22,7 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
 					const double * const chv, const double * const rv, const double dt, double* const tch);
 
 extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_channels, double area,
-		double tch[11], double *cum_dist_area_with_dist,
+		double* tch, double *cum_dist_area_with_dist,
 		int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram);
 
 extern void init_water_balance(int max_atb_increments, 
