@@ -27,11 +27,11 @@
 extern void convert_dist_to_histords(const double * const dist_from_outlet, const int num_channels,
 					const double * const chv, const double * const rv, const double dt, double* const tch);
 
-extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_channels, double area,
+extern void calc_time_delay_histogram(int num_channels, double area,
 		double* tch, double *cum_dist_area_with_dist,
 		int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram);
 
-extern void init_water_balance(int max_atb_increments, 
+extern void init_water_balance(
 				int num_topodex_values, double dt, double *sr0, 
 				double *szm, double *Q0, double *t0, double tl,
 				double **stor_unsat_zone, double *szq,
@@ -46,10 +46,10 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
 	      double *cum_dist_area_with_dist, double dt, 
-              double tl, double *dist_from_outlet, int max_atb_increments, 
-	      int max_time_delay_ordinates, int *num_time_delay_histo_ords,int *num_delay,
+        double tl, double *dist_from_outlet, 
+	      int *num_time_delay_histo_ords,int *num_delay,
 	      double *szm, double *t0, double *chv, double *rv, double *td, double *srmax, 
-              double *Q0,double *sr0, int *infex, double *xk0, double *hf, double *dth,
+        double *Q0,double *sr0, int *infex, double *xk0, double *hf, double *dth,
 	      double **stor_unsat_zone, double **deficit_local,
         double **deficit_root_zone,double *szq,double **Q,
         double *sbar, double *bal);
@@ -75,7 +75,7 @@ extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat,
                 int *num_topodex_values,int *num_channels,double *area,
                 double **dist_area_lnaotb, double **lnaotb, int yes_print_output,
                 double **cum_dist_area_with_dist, double *tl, 
-                double **dist_from_outlet, int maxsubcatch, int maxincr);
+                double **dist_from_outlet);
                   
 extern void expinf(int irof, int it, int rint, double *df, double *cumf,
                 double dt,double xk0, double szm, double hf);                  
@@ -162,9 +162,7 @@ struct TopModel_Struct{
 
   /************** Other internal vars **************/
   int num_sub_catchments;
-  int max_atb_increments;
-  int max_num_subcatchments;
-  int max_time_delay_ordinates;
+
   // int isc   //subcat loop no longer handled by topmod()
 
   /******************** Returns ********************/
