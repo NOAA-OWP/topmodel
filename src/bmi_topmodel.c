@@ -294,22 +294,16 @@ int init_config(const char* config_file, topmodel_model* model)
         (model->contrib_area)[1]=0.0;
     }
 
-    // Set up maxes for subcat and params read-in functions
-    model-> max_atb_increments=30;
-    model-> max_num_subcatchments=10;
-    model-> max_time_delay_ordinates=20;
-
     tread(model->subcat_fptr,model->output_fptr,model->subcat,&model->num_topodex_values,&model->num_channels,
         &model->area,&model->dist_area_lnaotb,&model->lnaotb,model->yes_print_output,
-        &model->cum_dist_area_with_dist,&model->tl,&model->dist_from_outlet,
-        model->max_num_subcatchments,model->max_atb_increments);
+        &model->cum_dist_area_with_dist,&model->tl,&model->dist_from_outlet);
+
     fclose(model->subcat_fptr);
 
     
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
-        model->dt,model->tl,model->dist_from_outlet,model->max_atb_increments,
-	model->max_time_delay_ordinates,&model->num_time_delay_histo_ords,&model->num_delay,
+        model->dt,model->tl,model->dist_from_outlet,&model->num_time_delay_histo_ords,&model->num_delay,
 	&model->szm,&model->t0,&model->chv,&model->rv,&model->td, &model->srmax,
 	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,&model->dth,
 	&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
@@ -1040,12 +1034,12 @@ static int Set_value (Bmi *self, const char *name, void *array)
         convert_dist_to_histords(topmodel->dist_from_outlet, topmodel->num_channels,
 				&topmodel->chv, &topmodel->rv, topmodel->dt, tch);
 
-	// calculate the time_delay_histogram
-	calc_time_delay_histogram(topmodel->max_time_delay_ordinates, topmodel->num_channels, 
+        // calculate the time_delay_histogram
+        calc_time_delay_histogram(topmodel->num_channels, 
 	  			  topmodel->area, tch, 
  				  topmodel->cum_dist_area_with_dist, 
 				  &topmodel->num_time_delay_histo_ords,
-				  &topmodel->num_delay, &topmodel->time_delay_histogram);
+                  &topmodel->num_delay, &topmodel->time_delay_histogram);
         free(tch);
         // Reinitialise discharge array
         init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
@@ -1065,8 +1059,8 @@ static int Set_value (Bmi *self, const char *name, void *array)
         topmodel = (topmodel_model *) self->data;
 
 	
-	// Initialize water balance and unsatrutaed storage and deficits
-	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
+        // Initialize water balance and unsatrutaed storage and deficits
+        init_water_balance(topmodel->num_topodex_values, 
 					topmodel->dt, &topmodel->sr0, &topmodel->szm, 
 					&topmodel->Q0, &topmodel->t0, topmodel->tl,
 					&topmodel->stor_unsat_zone, &topmodel->szq, 
