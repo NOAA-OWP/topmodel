@@ -480,18 +480,14 @@ if((*lnaotb) == NULL){
 
 /*  num_topodex_values IS NUMBER OF A/TANB ORDINATES */
 /*  AREA IS SUBCATCHMENT AREA AS PROPORTION OF TOTAL CATCHMENT  */
+tarea = 0; //Accumulate area as it is read
 for(j=1;j<=(*num_topodex_values);j++)
   {
   fscanf(subcat_fptr,"%lf %lf",&(*dist_area_lnaotb)[j],&(*lnaotb)[j]);
+  tarea += (*dist_area_lnaotb)[j];
   }
 /*  dist_area_lnaotb IS DISTRIBUTION OF AREA WITH LN(A/TANB) */
 /*  lnaotb IS LN(A/TANB) VALUE */
-
-tarea = (*dist_area_lnaotb)[1];
-for(j=2;j<=(*num_topodex_values);j++)
-  {
-  tarea+=(*dist_area_lnaotb)[j];
-  }
 
 /*  CALCULATE AREAL INTEGRAL OF LN(A/TANB)
 *  NB.  a/tanB values should be ordered from high to low with lnaotb[1]
