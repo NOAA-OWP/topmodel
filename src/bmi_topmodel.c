@@ -432,7 +432,7 @@ static int Update (Bmi *self)
         &topmodel->sump,&topmodel->sumae,&topmodel->sumq,&topmodel->sumrz,&topmodel->sumuz,
         &topmodel->quz, &topmodel->qb, &topmodel->qof, &topmodel->p, &topmodel->ep );
 
-    if ((topmodel->stand_alone == FALSE) & (topmodel->yes_print_output == TRUE)){
+    if ((topmodel->stand_alone == FALSE) && (topmodel->yes_print_output == TRUE)){
         fprintf(topmodel->out_hyd_fptr,"%d %lf %lf\n",topmodel->current_time_step,topmodel->Qobs[1],topmodel->Q[1]);
     }      
 
