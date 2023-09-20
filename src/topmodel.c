@@ -671,22 +671,19 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
         }
       }
 
-    a1=(*time_delay_histogram)[1];
-    sumar=(*time_delay_histogram)[1];
-    (*time_delay_histogram)[1]*=area;
-    
-    if((*num_time_delay_histo_ords)>1)
-      {
-      for(ir=2;ir<=(*num_time_delay_histo_ords);ir++)
-        {
-        a2=(*time_delay_histogram)[ir];
-        (*time_delay_histogram)[ir]=a2-a1;
-        a1=a2;
-        sumar+=(*time_delay_histogram)[ir];
-        (*time_delay_histogram)[ir]*=area;
-        }
-      }
-
+    sumar = 0;
+    //Convert ordinates to cummulative area, should sum to 1
+    for(int i =  *num_time_delay_histo_ords; i > 1; i--){
+      (*time_delay_histogram)[i] -= (*time_delay_histogram)[i-1]*area;
+      (*time_delay_histogram)[i] *= area;
+      sumar += (*time_delay_histogram)[i];
+    }
+    sumar += (*time_delay_histogram)[1];
+    if(sumar < 0.99999 || sumar > 1.00001){
+      printf("ERROR: Histogram oridnates do not sum to 1.\n");
+      exit(-1); //FIXME this fuction should probably return an error code
+                //and the error be handled elsewhere, not just an exit here...
+    }
 
     return;
 } 
