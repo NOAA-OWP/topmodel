@@ -284,12 +284,15 @@ int init_config(const char* config_file, topmodel_model* model)
         d_alloc(&model->rain,model->nstep);
         d_alloc(&model->pe,model->nstep);
         d_alloc(&model->Qobs,model->nstep);   //TODO: Consider removing this all together when framework
+        //FIXME this is no longer useful, as the follow `init` will ultimatey
+        //reallocate Q to based on the number of computed histogram ordinates
         d_alloc(&model->Q,model->nstep);
         d_alloc(&model->contrib_area,model->nstep);
 
         (model->rain)[1]=0.0;
         (model->pe)[1]=0.0;
         (model->Qobs)[1]=0.0;
+        //FIXME not really useful, as `init` will reallocate and properly initialize
         (model->Q)[1]=0.0;
         (model->contrib_area)[1]=0.0;
     }
