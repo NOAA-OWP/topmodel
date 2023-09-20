@@ -601,9 +601,9 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
  * @params[in] num_channels, int, defined in subcat.dat file
  * @params[in] area, double between 0 and 1 defining catchment area as ratio of 
  * 	entire catchment
- * @params[in] tch[11], double of length 11, holds histogram ordinates for each channel
+ * @params[in] tch, double* of length num_channels, holds histogram ordinates for each channel
  * 	output from conver_dist_to_histords()
- * 	Note, that although tch is an 11 element vector, position 0 is ignored. It was 
+ * 	Note, position 0 is ignored. It was 
  * 	written this way when translated from the original code.
  * @params[in], cum_dist_area_with_dist, pointer of length num_channels-1 and type double,
  * 	cumulative distribution of area with dist_from_outlet. 
@@ -616,7 +616,7 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
  */ 
 
 extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_channels, double area,
-				double tch[11], double *cum_dist_area_with_dist,
+				double* tch, double *cum_dist_area_with_dist,
 				int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram) 
 
 {
@@ -632,6 +632,8 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
 
     // casting tch[num_channels] to int truncates tch[num_channels] 
     // (e.g., 7.9 becomes 7)
+    //Determine how many ROUTING ORDINATES 
+    //computed, essentially, by the `dist_from_outlet` of the FARTHEST channel segment
     (*num_time_delay_histo_ords)=(int)tch[num_channels];
     
     // this is here to round up. Since casting tch as int effectively rounds down, 
@@ -640,11 +642,12 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
        {
        (*num_time_delay_histo_ords)++;
        }
-
-    (*num_delay)=(int)tch[1];
+    //Determine the distance from outlet for first channel ordinate???
+    (*num_delay)=(int)tch[1]; 
     (*num_time_delay_histo_ords)-=(*num_delay);
     
 
+    //NJF so we build histogram with ordinates between 1 and "distance" between first and last channel
     for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
       {
       time=(double)(*num_delay)+(double)ir;
@@ -653,9 +656,9 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
         (*time_delay_histogram)[ir]=1.0;
         }
       else
-        {
+      {
         for(j=2;j<=num_channels;j++)
-          {
+        {
           if(time<=tch[j])
     	{
     	(*time_delay_histogram)[ir]=
