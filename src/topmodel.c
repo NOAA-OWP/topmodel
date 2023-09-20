@@ -142,6 +142,8 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 /* BMI Adaption: 
   current_time_step, *sump, *sumae, *sumq, stand_alone
   added as function input parameters */
+//shift Q array to align current time step
+shift_Q(Q, num_time_delay_histo_ords);
 
 double ex[31];
 int ia,ib,in,irof,it,ir;
@@ -308,7 +310,7 @@ if(irof==1) max_contrib_area=1.0;
 (*qb)=szq*exp(-(*sbar)/szm);
 (*sbar)+=(-(*quz)+(*qb));
 *Qout=(*qb)+(*qof);
-*sumq+=(*Qout); /* BMI Adaption: *sumq now as pointer var; incl in model struct */
+
 
 /*  CHANNEL ROUTING CALCULATIONS */
 /*  allow for time delay to catchment outlet num_delay as well as  */
@@ -320,9 +322,11 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
   {
   in=it+num_delay+ir-1;
   if(in>current_time_step) break;
-  Q[in]=(*Qout)*time_delay_histogram[ir];
+  //Accumulate previous time dealyed flow with current
+  Q[in]+=(*Qout)*time_delay_histogram[ir];
   }
-
+  //Add current time flow to mass balance variable
+  *sumq += Q[it];
 /* BMI Adaption: replace nstep with current_time_step */
 if(yes_print_output==TRUE && in<=current_time_step)
   { 
