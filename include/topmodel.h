@@ -34,7 +34,7 @@ extern void init_water_balance(int max_atb_increments,
 
 extern void init_discharge_array(int *num_delay, double *Q0, double area, 
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
-                        double *Q);
+                        double **Q);
 
 extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      int num_channels, int num_topodex_values, int yes_print_output,
@@ -45,8 +45,8 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      double *szm, double *t0, double *chv, double *rv, double *td, double *srmax, 
               double *Q0,double *sr0, int *infex, double *xk0, double *hf, double *dth,
 	      double **stor_unsat_zone, double **deficit_local,
-              double **deficit_root_zone,double *szq, double *Q,
-              double *sbar, double *bal);
+        double **deficit_root_zone,double *szq,double **Q,
+        double *sbar, double *bal);
 
                  
 extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
