@@ -548,7 +548,7 @@ return;
  * 	the 1-based indexing was directly ported as well, so the tch buffer was over allocated by one, 
  * 	giving an array indexed 0..10, but index 0 is ignored/unsued. (BChoat)
  *
- *
+ * NJF Refactored to dynamically allocate tch based on the number of channels provided
  *
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
  * 	distance from outlet to point on channel with area known (i.e., to a channel; BChoat)
@@ -558,15 +558,21 @@ return;
  * @params[in] CALIBRATABLE rv, pointer of type double and length one, average internal overland flow routing velocity
  * @params[in] dt, double of length one, timestep in hours
 
- * @params(out] tch[11], double of length 11, holds histogram ordinates for each channel (BChoat)
+ * @params[out] tch, double* of length num_channels, holds histogram ordinates for each channel (BChoat)
  * 	tch is used as input in subsequent functions
- * 	Note, that although tch is an 11 element vector, position 0 is ignored. It was 
+ * 	Note, position 0 is ignored. It was 
  * 	written this way when translated from the original code.
  */
 
-extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
-					double *chv, double *rv, double dt, double tch[11])
+extern void convert_dist_to_histords(const double * const dist_from_outlet, const int num_channels,
+					const double * const chv, const double * const rv, const double dt, double* const tch)
 {    
+    //This function ASSUMES tch is overallocated by 1 and is indexable from (1, num_channels)
+    //validate invariants
+    if(num_channels < 1){
+      printf("ERROR: convert_dist_to_histords, num channels < 1, must have at least one channel\n");
+      exit(-1); //TODO return int error code and handle error externally
+    }
     // declare local variables 
     double chvdt, rvdt;
     int j;
@@ -886,7 +892,7 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 
    READS PARAMETER DATA
 ******************************************/
-double tch[11];
+double tch[num_channels+1]; //+1 to maintain 1 based indexing used by other routines
 double sumar;
 int ir;
 
@@ -916,7 +922,7 @@ printf("szm = %f\n", *szm);
 printf("sr0 = %f\n", *sr0);
 printf("t0 = %f\n", *t0);
 
-
+//NJF num_channels is the value provided (SHOULD COME FROM TREAD)
 //Convert distance/area form to time delay histogram ordinates
 convert_dist_to_histords(dist_from_outlet, num_channels, chv, rv, dt, tch);
 

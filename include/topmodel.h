@@ -18,8 +18,8 @@
 #define TOPMODEL_DEBUG 0
 
 /*** Function/subroutine prototypes ***/
-extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
-		double *chv, double *rv, double dt, double tch[11]);
+extern void convert_dist_to_histords(const double * const dist_from_outlet, const int num_channels,
+					const double * const chv, const double * const rv, const double dt, double* const tch);
 
 extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_channels, double area,
 		double tch[11], double *cum_dist_area_with_dist,

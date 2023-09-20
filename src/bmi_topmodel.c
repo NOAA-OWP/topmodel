@@ -1030,8 +1030,9 @@ static int Set_value (Bmi *self, const char *name, void *array)
         // assign self->data to topmodel pointer
         topmodel = (topmodel_model *) self->data;
 
-	// declare variables
-	double tch[11];
+        // declare variables
+        double* tch; //FIXME put this in topmod struct and reuse it
+        d_alloc(&tch, topmodel->num_channels);
 
 	
      	// convert from distance/area to histogram ordinate form
@@ -1044,7 +1045,7 @@ static int Set_value (Bmi *self, const char *name, void *array)
  				  topmodel->cum_dist_area_with_dist, 
 				  &topmodel->num_time_delay_histo_ords,
 				  &topmodel->num_delay, &topmodel->time_delay_histogram);
-	
+        free(tch);
         // Reinitialise discharge array
 	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
 				&topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
