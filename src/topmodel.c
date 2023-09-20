@@ -145,7 +145,13 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 //shift Q array to align current time step
 shift_Q(Q, num_time_delay_histo_ords);
 
-double ex[31];
+double ex[num_topodex_values+1]; //+1 to maintin 1 based array indexing
+//NJF TODO consider warning on all program limits here since this is essentially
+//"the model" where those assumptions may not be valid...
+if(num_topodex_values > WARN_TOPODEX_INCREMENTS){
+  printf("WARNING: num_topodex_values, %d, is greater than %d\n",
+         num_topodex_values, WARN_TOPODEX_INCREMENTS);
+}
 int ia,ib,in,irof,it,ir;
 double rex,cumf,max_contrib_area,ea,rint,acm,df;
 double acf,uz,sae,of;
@@ -430,8 +436,7 @@ extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat,
                int *num_topodex_values,int *num_channels,double *area,
                double **dist_area_lnaotb,double **lnaotb, int yes_print_output,
                double **cum_dist_area_with_dist,double *tl,
-               double **dist_from_outlet, int max_num_subcatchments,
-               int max_num_increments)
+               double **dist_from_outlet)
 {
 /**************************************************************
 
@@ -442,19 +447,8 @@ extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat,
 double tarea,sumac;
 int j;
 
-
-if((*cum_dist_area_with_dist)==NULL)
-  {
-  d_alloc(cum_dist_area_with_dist,max_num_subcatchments+1);
-  d_alloc(dist_from_outlet,max_num_subcatchments+1);
-  }
-if((*dist_area_lnaotb)==NULL)
-  {
-  d_alloc(dist_area_lnaotb,max_num_increments+1);
-  d_alloc(lnaotb,max_num_increments+1);
-  }
-
-
+// NJF This won't work unless the first line of subcat file has already been consumed
+// Should probably document this behavior for this function...
 fgets(subcat,256,subcat_fptr); /* do twice to read in line-feed */
 fgets(subcat,256,subcat_fptr);
 
@@ -464,14 +458,25 @@ if (yes_print_output == TRUE)
   }  
 fscanf(subcat_fptr,"%d %lf",num_topodex_values,area);
 
-
-if((*num_topodex_values)>max_num_increments)
-  {
-  printf("Error, you have too many increments in your ln(a/tanB) file.\n");
-  printf("  The maximum is: %d\n",max_num_increments);
-  printf("program stopped.\n");
-  exit(-9);
-  }
+//Setup the topoindex arrays
+if(*num_topodex_values > WARN_TOPODEX_INCREMENTS){
+  printf("WARNING: Number of ln(a/tanB) increments,%d, is > than %d\n",
+          *num_topodex_values,
+          WARN_TOPODEX_INCREMENTS);
+}
+if((*dist_area_lnaotb)==NULL)
+{
+  //Need one extra value (0.0) at the end of this array to do
+  //sum in topmod, e.g. dist_area_lnaotb[i] + dist_area_lnaotb[i+1]
+  //for each increment
+  d_alloc(dist_area_lnaotb, *num_topodex_values+1);
+}
+if((*lnaotb) == NULL){
+  d_alloc(lnaotb, *num_topodex_values); //NJF why +1 in old code?
+}
+//NJF TODO if not NULL should probably free and then allocate?
+//I don't see any reasonable expectation that these arrays should persist
+//across calls to tread...
 
 /*  num_topodex_values IS NUMBER OF A/TANB ORDINATES */
 /*  AREA IS SUBCATCHMENT AREA AS PROPORTION OF TOTAL CATCHMENT  */
@@ -502,10 +507,28 @@ for(j=2;j<=(*num_topodex_values);j++)
   sumac+=(*dist_area_lnaotb)[j];
   (*tl)+=(*dist_area_lnaotb)[j]*((*lnaotb)[j]+(*lnaotb)[j-1])/2.0;
   }
+//init last value to additive identity
 (*dist_area_lnaotb)[(*num_topodex_values)+1]=0.0;
 
 /*  READ CHANNEL NETWORK DATA */
 fscanf(subcat_fptr,"%d",num_channels);
+
+if(*num_channels > WARN_NUM_SUBCATCHMENTS){
+  printf("WARNING: Number of channels, %d, is greater than %d\n",
+         *num_channels,
+         WARN_NUM_SUBCATCHMENTS);
+}
+
+if((*cum_dist_area_with_dist)==NULL){
+  d_alloc(cum_dist_area_with_dist, *num_channels); //NJF why +1 in old code?
+}
+if((*dist_from_outlet) == NULL){
+  d_alloc(dist_from_outlet, *num_channels); //NJF why +1 in old code?
+}
+//NJF TODO if not NULL should probably free and then allocate?
+//I don't see any reasonable expectation that these arrays should persist
+//calls to tread...
+
 for(j=1;j<=(*num_channels);j++)
   {
   fscanf(subcat_fptr,"%lf %lf",
@@ -598,8 +621,6 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
 /**
  * Function to calculate the time delay histogram
  *
- * @params[in] max_time_delay_ordinates, int, hardcoded as 20 in bmi_topmodel.c
- * 	in init_config() function
  * @params[in] num_channels, int, defined in subcat.dat file
  * @params[in] area, double between 0 and 1 defining catchment area as ratio of 
  * 	entire catchment
@@ -617,7 +638,7 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
  * 	time lag of outflows due to channel routing
  */ 
 
-extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_channels, double area,
+extern void calc_time_delay_histogram(int num_channels, double area,
 				double* tch, double *cum_dist_area_with_dist,
 				int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram) 
 
@@ -625,12 +646,6 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
     // declare local variables
     double time, a1, sumar, a2;
     int j, ir;
-
-    if((*time_delay_histogram)==NULL)
-      {
-      d_alloc(time_delay_histogram,max_time_delay_ordinates);
-      }
-
 
     // casting tch[num_channels] to int truncates tch[num_channels] 
     // (e.g., 7.9 becomes 7)
@@ -647,8 +662,18 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
     //Determine the distance from outlet for first channel ordinate???
     (*num_delay)=(int)tch[1]; 
     (*num_time_delay_histo_ords)-=(*num_delay);
-    
 
+    if(*num_time_delay_histo_ords > WARN_HISTOGRAM_ORDINATES){
+      printf("WARNING: number of time delay hisogram ordinates, %d, is greater than %d\n", 
+            *num_time_delay_histo_ords,
+            WARN_HISTOGRAM_ORDINATES);
+    }
+
+    if((*time_delay_histogram) == NULL){
+      d_alloc(time_delay_histogram, *num_time_delay_histo_ords);
+    } //FIXME always free/realloc
+      //If not, the caller must ensure the correct size of time_delay_histogram prior to calling
+  
     //NJF so we build histogram with ordinates between 1 and "distance" between first and last channel
     for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
       {
@@ -743,11 +768,8 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
 /** 
  * Function to initialize unsaturated zone storage and deficit
  *
- * @params[in] max_atb_increments, int, defines size of one-dimensional double
- * 	precision arrays including stor_unsat_zone, deficit_root_zone, 
- * 	and deficit_local
  * @params[in] num_topodex_values, int, number of topodex histogram values 
- * 	(i.e., number of A/TANB ordinates)
+ * 	(i.e., number of A/TANB ordinates), defines the size of stor_unsat_zone, deficit_root_zone, and deficit_local
  * @params[in] dt, double, timestep in hours
  * @params[in] CALIBRATABLE sr0, pointer of type double, initial root zone storage deficit
  * @params[in] CALIBRATABLE szm, pointer of type double, exponential scaling parameter for decline
@@ -757,38 +779,41 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
  * 	to the surface. 'input as LN(t0)
  * @params[in] tl, double, not well defined, but related to time lag
 
- * @params[out] stor_unsat_zone, double pointer of type double of size max_atb_increments and length num_topodex_values,
+ * @params[out] stor_unsat_zone, double pointer of type double of size num_topodex_values,
  * 	storage in the unsaturated zone
  * @params[out] szq, pointer of type double, not well defined, but related to rate at which moisture
  * 	is lost from the subsruface.
- * @params[out] deficit_local, double pointer of typ edouble of size max_atb_increments, local storage (or saturation) 
+ * @params[out] deficit_local, double pointer of type double of size num_topodex_values, local storage (or saturation) 
  * 	deficit
- * @params[out] deficit_root_zone, double pointer of type  double of size max_atb_increments and 
- * 	length num_topodex_values, root zone storage deficit 
+ * @params[out] deficit_root_zone, double pointer of type  double of size num_topodex_values, root zone storage deficit 
  * @params[out] sbar, pointer of type double, catchment average soil mositure deficit
  * 	edited dynamically as model steps through time.
  * @params[out] bal, pointer of type double, residual of water balance 
  */
  
-extern void init_water_balance(int max_atb_increments, 
+extern void init_water_balance( 
 				int num_topodex_values, double dt, double *sr0, 
 				double *szm, double *Q0, double *t0, double tl,
 				double **stor_unsat_zone, double *szq,
 				double **deficit_local, 
-               			double **deficit_root_zone, double *sbar, 
+        double **deficit_root_zone, double *sbar, 
 				double *bal)
 {
     // declare local variables
     double t0dt;
     int ia;
 
-    if((*stor_unsat_zone)==NULL)
-      {
-      d_alloc(stor_unsat_zone,max_atb_increments);
-      d_alloc(deficit_root_zone,max_atb_increments);
-      d_alloc(deficit_local,max_atb_increments); 
-      }
-
+    if((*stor_unsat_zone) == NULL){
+      d_alloc(stor_unsat_zone, num_topodex_values);
+    }
+    if((*deficit_root_zone) == NULL){
+      d_alloc(deficit_root_zone, num_topodex_values);
+    }
+    if((*deficit_local) == NULL){
+      d_alloc(deficit_local, num_topodex_values);
+    }
+    //FIXME realloc if any of these were NULL so they are guaranteed the correct size? Or carefully
+    //document the assumption and the requirement for caller to size these arrays to num_topodex_values
 
     t0dt=(*t0)+log(dt);  /* was ALOG - specific log function in fortran*/
 
@@ -830,14 +855,9 @@ extern void init_water_balance(int max_atb_increments,
  * @params[in] tl, double, not well defined, but related to time lag
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
  * 	distance from outlet to point on channel with area known (i.e., to a channel; BChoat)
-  * @params[in] max_atb_increments, int, defines size of one-dimensional double
- * 	precision arrays including stor_unsat_zone, deficit_root_zone, 
- * 	and deficit_local
- * @params[in] max_time_delay_ordinates, int, hardcoded as 20 in bmi_topmodel.c
- * 	in init_config() function
- * @params[in] num_time_delay_histo_ords, pointer of type int, number of time delay histogram ordinates,
+ * @params[out] num_time_delay_histo_ords, pointer of type int, number of time delay histogram ordinates,
  * 	output from calc_time_delay_histogram
- * @params[in] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
+ * @params[out] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
  * 	catchment to outlet. Output from calc_time_delay_histogram
 
  * The following 12 variables are read in from the params.dat file using fscanf
@@ -868,11 +888,11 @@ extern void init_water_balance(int max_atb_increments,
  * 	Only read in within init(), not used.
  * ----------------- 	
 
- * @params[out] stor_unsat_zone, double pointer of type double of size max_atb_increments and length num_topodex_values,
+ * @params[out] stor_unsat_zone, double pointer of type double of size num_topodex_values,
  * 	storage in the unsaturated zone
- * @params[out] deficit_local, double pointer of type double of size max_atb_increments, local storage (or saturation) 
+ * @params[out] deficit_local, double pointer of type double of size num_topodex_values, local storage (or saturation) 
  * 	deficit
- * @params[out] deficit_root_zone, double pointer of type double of size max_atb_increments and length num_topodex_values,
+ * @params[out] deficit_root_zone, double pointer of type double of size num_topodex_valuesnum_topodex_values,
  * 	 root zone storage deficit 
  * @params[out] szq, pointer of type double, not well defined, but related to rate at which moisture
  * 	is lost from the subsurface.
@@ -886,10 +906,10 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
 	      double *cum_dist_area_with_dist, double dt, 
-              double tl, double *dist_from_outlet, int max_atb_increments, 
-	      int max_time_delay_ordinates, int *num_time_delay_histo_ords,int *num_delay,
+        double tl, double *dist_from_outlet,
+        int *num_time_delay_histo_ords,int *num_delay,
 	      double *szm, double *t0, double *chv, double *rv, double *td, double *srmax, 
-              double *Q0,double *sr0, int *infex, double *xk0, double *hf, double *dth,
+        double *Q0,double *sr0, int *infex, double *xk0, double *hf, double *dth,
 	      double **stor_unsat_zone, double **deficit_local,
         double **deficit_root_zone,double *szq, double **Q,
         double *sbar, double *bal)
@@ -934,7 +954,7 @@ printf("t0 = %f\n", *t0);
 convert_dist_to_histords(dist_from_outlet, num_channels, chv, rv, dt, tch);
 
 // calculate the time_delay_histogram
-calc_time_delay_histogram(max_time_delay_ordinates, num_channels, area, tch, 
+calc_time_delay_histogram(num_channels, area, tch, 
 			  cum_dist_area_with_dist, num_time_delay_histo_ords,
 			  num_delay, time_delay_histogram);
 
@@ -960,7 +980,7 @@ init_discharge_array(num_delay, Q0, area,
 
 
 // Initialize water balance and unsatrutaed storage and deficits
-init_water_balance(max_atb_increments, num_topodex_values, 
+init_water_balance(num_topodex_values, 
 				dt, sr0, szm, Q0, t0, tl,
 				stor_unsat_zone, szq, 
 				deficit_local, deficit_root_zone, sbar, bal);
