@@ -1,10 +1,10 @@
 # define the C compiler to use
-CC = gcc
+CC = gcc -g
 
 # define any compile-time flags
 # for newer compiler, the right hand side is not needed...
 # ... for instance, remove the flags if using gnu/10.1.0 on Cheyenne.
-CFLAGS =
+CFLAGS = -fsanitize=address
 
 INCLUDES = -I../include
 
