@@ -313,7 +313,7 @@ int init_config(const char* config_file, topmodel_model* model)
 	&model->szm,&model->t0,&model->chv,&model->rv,&model->td, &model->srmax,
 	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,&model->dth,
 	&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
-        &model->szq,model->Q,&model->sbar, &model->bal);
+        &model->szq,&model->Q,&model->sbar, &model->bal);
     fclose(model->params_fptr);
 
 
@@ -1048,9 +1048,9 @@ static int Set_value (Bmi *self, const char *name, void *array)
 				  &topmodel->num_delay, &topmodel->time_delay_histogram);
         free(tch);
         // Reinitialise discharge array
-	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
+        init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
 				&topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
-				topmodel->Q);	
+				&topmodel->Q);	
     }
 
 

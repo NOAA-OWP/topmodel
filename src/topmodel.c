@@ -406,7 +406,11 @@ This change should be make by the AGU 2021 CONUS scale demonstration*/
 d_alloc(r,(*nstep));
 d_alloc(pe,(*nstep));
 d_alloc(Qobs,(*nstep));
-d_alloc(Q,(*nstep));
+//NJF This is dangerous, there is no validation between nstep and
+//number of historgram ordinates, which is used to iterate Q in later steps
+//so this could easily overflow if nstep is smaller than historgram ords
+d_alloc(Q,(*nstep)); //NJF TODO validate that this works correctly
+                     //When used in "stand alone" mode
 d_alloc(contrib_area,(*nstep));
 
 //---------------------------------------
@@ -700,13 +704,20 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
  * @parms[in], time_delay_histogram, double pointer of type double, time lag of outflows due to channel routing,
  * 	output from calc_time_delay_histogram
  *
- * @params[out] Q, pointer of type double and length num_delay, simulated discharge
+ * @params[out] Q, pointer of type double and length num_delay+num_time_delay_histo_ords, simulated discharge
  */
 
 extern void init_discharge_array(int *num_delay, double *Q0, double area, 
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
-                        double *Q)
+                        double **Q)
 {
+    //if Q is already allocated, need to free and re-compute the required size
+    if(*Q != NULL){
+      free(*Q);
+      *Q = NULL;
+    }
+    //*Q = calloc(*num_delay + *num_time_delay_histo_ords + 1, sizeof(double));
+    d_alloc(Q, *num_delay + *num_time_delay_histo_ords);
 
     // declare local variables
     double sum;
@@ -715,16 +726,16 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
     sum=0.0;
 
     for(i=1;i<=(*num_delay);i++)
-      {
-      Q[i]+=(*Q0)*area; //TO-DO: check Q allocation size at initialization to fix memory allocation issue
-      }
+    {
+      (*Q)[i]+=(*Q0)*area;
+    }
           
     for(i=1;i<=(*num_time_delay_histo_ords);i++)
-      {
+    {
       sum+=(*time_delay_histogram)[i];
       in=(*num_delay)+i;
-      Q[in]+=(*Q0)*(area-sum);
-      };
+      (*Q)[in]+=(*Q0)*(area-sum);
+    };
     return;
 }
 
@@ -880,8 +891,8 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      double *szm, double *t0, double *chv, double *rv, double *td, double *srmax, 
               double *Q0,double *sr0, int *infex, double *xk0, double *hf, double *dth,
 	      double **stor_unsat_zone, double **deficit_local,
-              double **deficit_root_zone,double *szq, double *Q,
-              double *sbar, double *bal)
+        double **deficit_root_zone,double *szq, double **Q,
+        double *sbar, double *bal)
 {
 
 /***************************************************************
