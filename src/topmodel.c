@@ -143,7 +143,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
   current_time_step, *sump, *sumae, *sumq, stand_alone
   added as function input parameters */
 //shift Q array to align current time step
-shift_Q(Q, num_time_delay_histo_ords);
+shift_Q(Q, num_delay + num_time_delay_histo_ords);
 
 double ex[num_topodex_values+1]; //+1 to maintin 1 based array indexing
 //NJF TODO consider warning on all program limits here since this is essentially
@@ -331,6 +331,7 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
   //Accumulate previous time dealyed flow with current
   Q[in]+=(*Qout)*time_delay_histogram[ir];
   }
+
   //Add current time flow to mass balance variable
   *sumq += Q[it];
 /* BMI Adaption: replace nstep with current_time_step */
@@ -706,6 +707,8 @@ extern void calc_time_delay_histogram(int num_channels, double area,
     sumar += (*time_delay_histogram)[1];
     if(sumar < 0.99999 || sumar > 1.00001){
       printf("ERROR: Histogram oridnates do not sum to 1.\n");
+      printf("Check that the correct number of values for cum_dist_area_with_dist and dist_from_outlet are provided.\n");
+      printf("The number of values for each variable should be equal to the number of channels (i.e., num_channels).\n\n");
       exit(-1); //FIXME this fuction should probably return an error code
                 //and the error be handled elsewhere, not just an exit here...
     }
@@ -759,6 +762,7 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
       in=(*num_delay)+i;
       (*Q)[in]+=(*Q0)*(area-sum);
     };
+
     return;
 }
 
@@ -947,7 +951,7 @@ printf("rv = %f\n", *rv);
 printf("\nWater balance:\n");
 printf("szm = %f\n", *szm);
 printf("sr0 = %f\n", *sr0);
-printf("t0 = %f\n", *t0);
+printf("t0 = %f\n\n", *t0);
 
 //NJF num_channels is the value provided (SHOULD COME FROM TREAD)
 //Convert distance/area form to time delay histogram ordinates
