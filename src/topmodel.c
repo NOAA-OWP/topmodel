@@ -142,8 +142,6 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 /* BMI Adaption: 
   current_time_step, *sump, *sumae, *sumq, stand_alone
   added as function input parameters */
-//shift Q array to align current time step
-shift_Q(Q, num_delay + num_time_delay_histo_ords);
 
 double ex[num_topodex_values+1]; //+1 to maintin 1 based array indexing
 //NJF TODO consider warning on all program limits here since this is essentially
@@ -175,8 +173,15 @@ if(yes_print_output==TRUE && current_time_step==1)
 /* BMI Adaption: Set iteration to bmi's current_time_step (standalone) or 1 (framework)
   Counter++ is handled by bmi's update()*/
 
-if (stand_alone == TRUE)it=current_time_step;
-else it=1;  
+if (stand_alone == TRUE) {
+	it=current_time_step;
+}
+else {
+        it=1; 
+        //shift Q array to align current time step
+        shift_Q(Q, num_delay + num_time_delay_histo_ords);
+}
+
 
 *qof=0.0;
 *quz=0.0;
@@ -720,6 +725,7 @@ extern void calc_time_delay_histogram(int num_channels, double area,
 
 /** 
  * Function to (re)initialize discharge array
+ * @params[in] stand_alone, int, 0 for running with ngen and 1 for running in stand alone mode
  * @params[in] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
  * 	catchment to outlet. Output from calc_time_delay_histogram
  * @params[in] Q0, pointer of type double, initial subsurface flow per unit area
@@ -732,18 +738,20 @@ extern void calc_time_delay_histogram(int num_channels, double area,
  *
  * @params[out] Q, pointer of type double and length num_delay+num_time_delay_histo_ords, simulated discharge
  */
-
-extern void init_discharge_array(int *num_delay, double *Q0, double area, 
+extern void init_discharge_array(int stand_alone, int *num_delay, double *Q0, double area, 
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
                         double **Q)
 {
-    //if Q is already allocated, need to free and re-compute the required size
-    if(*Q != NULL){
-      free(*Q);
-      *Q = NULL;
+    // if not in stand alone mode, then reallocate Q
+    if(stand_alone != TRUE) {
+      // if Q is already allocated, need to free and re-compute the required size
+      if(*Q != NULL){
+        free(*Q);
+        *Q = NULL;
+      }
+      //*Q = calloc(*num_delay + *num_time_delay_histo_ords + 1, sizeof(double));
+      d_alloc(Q, *num_delay + *num_time_delay_histo_ords);
     }
-    //*Q = calloc(*num_delay + *num_time_delay_histo_ords + 1, sizeof(double));
-    d_alloc(Q, *num_delay + *num_time_delay_histo_ords);
 
     // declare local variables
     double sum;
@@ -844,6 +852,7 @@ extern void init_water_balance(
  * @params[in] in_param_fptr, FILE pointer, file with parameters (e.g., params.dat)
  * @params[in] output_fptr, FILE pointer, file to which output will be written (e.g., topmod-cat.out)
  * @params[in] subcat, pointer of type char, name of subcatchment, read in from in_param_fptr file
+ * @params[in] stand_alone, int, 0 for running with ngen and 1 for running in stand alone mode
  * @params[in] num_channels, int, defined in subcat.dat file
  * @params[in] num_topodex_values, int, number of topodex histogram values 
  * 	(i.e., number of A/TANB ordinates)
@@ -905,7 +914,7 @@ extern void init_water_balance(
  * @params[out] bal, pointer of type double, residual of water balance 
  * 
  */
-extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
+extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand_alone,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
 	      double *cum_dist_area_with_dist, double dt, 
@@ -978,7 +987,7 @@ if(yes_print_output==TRUE)
 
 
 // Reinitialise discharge array
-init_discharge_array(num_delay, Q0, area, 
+init_discharge_array(stand_alone, num_delay, Q0, area, 
 			num_time_delay_histo_ords, time_delay_histogram, 
 			Q);
 

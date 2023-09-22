@@ -302,8 +302,8 @@ int init_config(const char* config_file, topmodel_model* model)
         &model->cum_dist_area_with_dist,&model->tl,&model->dist_from_outlet);
 
     fclose(model->subcat_fptr);
-
-    init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
+ 
+    init(model->params_fptr,model->output_fptr,model->subcat,model->stand_alone, model->num_channels, model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
         model->dt,model->tl,model->dist_from_outlet,&model->num_time_delay_histo_ords,&model->num_delay,
 	&model->szm,&model->t0,&model->chv,&model->rv,&model->td, &model->srmax,
@@ -472,6 +472,7 @@ static int Update_until (Bmi *self, double t)
 
 static int Finalize (Bmi *self)
 {
+
     if (self){
         topmodel_model* model = (topmodel_model *)(self->data);
 
@@ -493,9 +494,9 @@ static int Finalize (Bmi *self)
             // framework-controlled mode.
             //-----------------------------------------------------------
             if (model->stand_alone == TRUE){
-                results(model->output_fptr,model->out_hyd_fptr,model->nstep, 
+	        results(model->output_fptr,model->out_hyd_fptr,model->nstep, 
                 model->Qobs, model->Q, model->yes_print_output);                 
-            }
+	    }
         }    
 
         if( model->Q != NULL )
@@ -1044,7 +1045,7 @@ static int Set_value (Bmi *self, const char *name, void *array)
                   &topmodel->num_delay, &topmodel->time_delay_histogram);
         free(tch);
         // Reinitialise discharge array
-        init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
+        init_discharge_array(topmodel->stand_alone, &topmodel->num_delay, &topmodel->Q0, topmodel->area, 
 				&topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
 				&topmodel->Q);	
     }

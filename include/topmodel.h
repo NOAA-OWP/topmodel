@@ -38,11 +38,11 @@ extern void init_water_balance(
 				double **deficit_local, double **deficit_root_zone, 
 				double *sbar, double *bal);
 
-extern void init_discharge_array(int *num_delay, double *Q0, double area, 
+extern void init_discharge_array(int stand_alone, int *num_delay, double *Q0, double area, 
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
                         double **Q);
 
-extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
+extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand_alone,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
 	      double *cum_dist_area_with_dist, double dt, 
