@@ -644,11 +644,12 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
 
 extern void calc_time_delay_histogram(int num_channels, double area,
 				double* tch, double *cum_dist_area_with_dist,
-				int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram) 
+				int *num_time_delay_histo_ords, int *num_delay,	
+				double **time_delay_histogram) 
 
 {
     // declare local variables
-    double time, a1, sumar, a2;
+    double time, sumar; //, a1, a2;
     int j, ir;
 
     // casting tch[num_channels] to int truncates tch[num_channels] 
@@ -972,20 +973,6 @@ calc_time_delay_histogram(num_channels, area, tch,
 			  num_delay, time_delay_histogram);
 
 
-if(yes_print_output==TRUE)
-  {
-  fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
-  fprintf(output_fptr,"Subcatchment routing data:\n");
-  fprintf(output_fptr,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
-  fprintf(output_fptr,"Sum of Histogram ordinates: %10.4lf\n",sumar);
-  for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
-    {
-    fprintf(output_fptr,"%12.5lf ",(*time_delay_histogram)[ir]);
-    }
-  fprintf(output_fptr,"\n");
-  }
-
-
 // Reinitialise discharge array
 init_discharge_array(stand_alone, num_delay, Q0, area, 
 			num_time_delay_histo_ords, time_delay_histogram, 
@@ -998,13 +985,31 @@ init_water_balance(num_topodex_values,
 				stor_unsat_zone, szq, 
 				deficit_local, deficit_root_zone, sbar, bal);
 
-
 if(yes_print_output==TRUE)
   {
+
+  // calculate sum of hist ords for printing to output file
+  sumar = 0;
+  for(int i =  *num_time_delay_histo_ords; i > 1; i--){
+      sumar += (*time_delay_histogram)[i];
+    }
+  sumar += (*time_delay_histogram)[1];
+
+  fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
+  fprintf(output_fptr,"Subcatchment routing data:\n");
+  fprintf(output_fptr,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
+  fprintf(output_fptr,"Sum of Histogram ordinates: %10.4lf\n",sumar);
+  for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+    {
+    fprintf(output_fptr,"%12.5lf ",(*time_delay_histogram)[ir]);
+    }
+  fprintf(output_fptr,"\n");
+   
   fprintf(output_fptr,"Initial BAL         %12.5f\n",(*bal));
   fprintf(output_fptr,"Initial SBAR        %12.5f\n",(*sbar));
   fprintf(output_fptr,"Initial SR0         %12.5f\n",(*sr0));
   }
+  
 
 return;
 }
