@@ -74,7 +74,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
                 int *num_topodex_values,int *num_channels,double *area,
                 double **dist_area_lnaotb, double **lnaotb, int yes_print_output,
-                double **cum_dist_area_with_dist, double *tl, 
+                int stand_alone, double **cum_dist_area_with_dist, double *tl, 
                 double **dist_from_outlet);
                   
 extern void expinf(int irof, int it, int rint, double *df, double *cumf,

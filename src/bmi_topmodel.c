@@ -235,7 +235,7 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     fscanf(model->subcat_fptr,"%d %d %d",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
 
     // Attempt to read the output file names only if printing to file
-    if(model->yes_print_output == TRUE){
+    if(model->yes_print_output == TRUE && model->stand_alone == TRUE){
         if((model->output_fptr=fopen(output_fname,"w"))==NULL){           
             printf("Can't open output file named %s\n",output_fname);
             exit(-9);
@@ -298,7 +298,7 @@ int init_config(const char* config_file, topmodel_model* model)
     }
 
     tread(model->subcat_fptr,model->output_fptr,model->subcat,&model->num_topodex_values,&model->num_channels,
-        &model->area,&model->dist_area_lnaotb,&model->lnaotb,model->yes_print_output,
+        &model->area,&model->dist_area_lnaotb,&model->lnaotb,model->yes_print_output,model->stand_alone,
         &model->cum_dist_area_with_dist,&model->tl,&model->dist_from_outlet);
 
     fclose(model->subcat_fptr);
@@ -434,9 +434,10 @@ static int Update (Bmi *self)
         &topmodel->sump,&topmodel->sumae,&topmodel->sumq,&topmodel->sumrz,&topmodel->sumuz,
         &topmodel->quz, &topmodel->qb, &topmodel->qof, &topmodel->p, &topmodel->ep );
 
-    if ((topmodel->stand_alone == FALSE) && (topmodel->yes_print_output == TRUE)){
-        fprintf(topmodel->out_hyd_fptr,"%d %lf %lf\n",topmodel->current_time_step,topmodel->Qobs[1],topmodel->Q[1]);
-    }      
+// BCHOAT, delete these lines once confirmed okay
+//    if ((topmodel->stand_alone == FALSE) && (topmodel->yes_print_output == TRUE)){
+//        fprintf(topmodel->out_hyd_fptr,"%d %lf %lf\n",topmodel->current_time_step,topmodel->Qobs[1],topmodel->Q[1]);
+//    }      
 
     return BMI_SUCCESS;
 }
@@ -476,14 +477,14 @@ static int Finalize (Bmi *self)
     if (self){
         topmodel_model* model = (topmodel_model *)(self->data);
 
-        if (model->yes_print_output == TRUE || TOPMODEL_DEBUG >= 1){        
+        if (model->yes_print_output == TRUE && model->stand_alone == TRUE || TOPMODEL_DEBUG >= 1){        
             
             water_balance(model->output_fptr, model->yes_print_output,
                 model->subcat,&model->bal, &model->sbar, &model->sump, 
                 &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
 
             // this is technically needed, yes
-            if(model->yes_print_output==TRUE){
+            if(model->yes_print_output==TRUE && model->stand_alone==TRUE){
                 fprintf(model->output_fptr,"Maximum contributing area %12.5lf\n",model->max_contrib_area);
             }
 
@@ -527,7 +528,7 @@ static int Finalize (Bmi *self)
             free(model->dist_from_outlet);
 
         // Close output files only if opened in first place
-        if(model->yes_print_output == TRUE){
+        if(model->yes_print_output == TRUE && model->stand_alone == TRUE){ // && model->stand_alone == TRUE){
             fclose(model->output_fptr);
             fclose(model->out_hyd_fptr);
         }
