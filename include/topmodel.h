@@ -84,7 +84,7 @@ extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
                 int nstep, double *Qobs, double *Q, 
                 int yes_print_output);
 
-extern void water_balance(FILE *output_fptr, int yes_print_output,
+extern void water_balance(FILE *output_fptr, int yes_print_output, int stand_alone,
                 char *subcat, double *bal, double *sbar, double *sump,
                 double *sumae, double *sumq, double *sumrz, double *sumuz);
 

@@ -368,7 +368,7 @@ return;
 
 }
 
-extern void water_balance(FILE *output_fptr, int yes_print_output,
+extern void water_balance(FILE *output_fptr, int yes_print_output, int stand_alone,
                 char *subcat,double *bal, double *sbar, double *sump, 
                 double *sumae, double *sumq, double *sumrz, double *sumuz)
 {
@@ -383,7 +383,7 @@ extern void water_balance(FILE *output_fptr, int yes_print_output,
           (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
 #endif
 
-  if (yes_print_output==TRUE) 
+  if (yes_print_output==TRUE && stand_alone==TRUE) 
   {
     fprintf(output_fptr,"\nWater Balance for Subcatchment: %s\n",subcat);
     fprintf(output_fptr,

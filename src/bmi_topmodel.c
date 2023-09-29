@@ -478,11 +478,9 @@ static int Finalize (Bmi *self)
         topmodel_model* model = (topmodel_model *)(self->data);
 
         if (model->yes_print_output == TRUE && model->stand_alone == TRUE || TOPMODEL_DEBUG >= 1){        
-            
-            water_balance(model->output_fptr, model->yes_print_output,
+            water_balance(model->output_fptr, model->yes_print_output, model->stand_alone,
                 model->subcat,&model->bal, &model->sbar, &model->sump, 
                 &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
-
             // this is technically needed, yes
             if(model->yes_print_output==TRUE && model->stand_alone==TRUE){
                 fprintf(model->output_fptr,"Maximum contributing area %12.5lf\n",model->max_contrib_area);
