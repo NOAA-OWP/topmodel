@@ -997,6 +997,8 @@ static int Set_value (Bmi *self, const char *name, void *array)
         // assign self->data to topmodel pointer
         topmodel = (topmodel_model *) self->data;
 
+
+#if TOPMODEL_DEBUG >= 1
         printf("\n\n\nAT LEAST ONE OF THE FOLLOWING CALIBRATABLE PARAMETERS "
 			"WAS PROVIDED IN THE REALIZATION.JSON FILE!\n");
 
@@ -1014,6 +1016,7 @@ static int Set_value (Bmi *self, const char *name, void *array)
         printf("szm = %f\n", topmodel->szm); 
 	printf("sr0 = %f\n", topmodel->sr0);
         printf("t0 = %f\n\n\n\n", topmodel->t0);
+#endif
 
     }
 

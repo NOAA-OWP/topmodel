@@ -942,20 +942,22 @@ fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
        szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth);
 
 
-printf("\n\nCalibratable parameters from params*.dat:\n");
-
-printf("\nET and recharge:\n");
-printf("srmax = %f\n", *srmax);
-printf("td = %f\n", *td);
-
-printf("\nDischarge:\n");
-printf("chv = %f\n", *chv);
-printf("rv = %f\n", *rv);
-
-printf("\nWater balance:\n");
-printf("szm = %f\n", *szm);
-printf("sr0 = %f\n", *sr0);
-printf("t0 = %f\n\n", *t0);
+#if TOPMODEL_DEBUG >= 1
+  printf("\n\nCalibratable parameters from params*.dat:\n");
+  
+  printf("\nET and recharge:\n");
+  printf("srmax = %f\n", *srmax);
+  printf("td = %f\n", *td);
+  
+  printf("\nDischarge:\n");
+  printf("chv = %f\n", *chv);
+  printf("rv = %f\n", *rv);
+  
+  printf("\nWater balance:\n");
+  printf("szm = %f\n", *szm);
+  printf("sr0 = %f\n", *sr0);
+  printf("t0 = %f\n\n", *t0);
+#endif
 
 //NJF num_channels is the value provided (SHOULD COME FROM TREAD)
 //Convert distance/area form to time delay histogram ordinates
