@@ -514,9 +514,8 @@ return;
  * to enable calibratable parameters to be updated.
  * BChoat 2023/08/29
  */
-
-
 /** 
+
  * Function to convert distance/area form to time delay histogram ordinates
  * 
  * Converts parameters to m/time step DT
@@ -565,9 +564,8 @@ extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
     tch[1]=dist_from_outlet[1]/chvdt;
     for(j=2;j<=num_channels;j++)
      {
-     
       tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
-     } 
+     }
 
     return;
 
@@ -626,7 +624,6 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
     (*num_delay)=(int)tch[1];
     (*num_time_delay_histo_ords)-=(*num_delay);
     
-
     for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
       {
       time=(double)(*num_delay)+(double)ir;
@@ -665,7 +662,6 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
         (*time_delay_histogram)[ir]*=area;
         }
       }
-
 
     return;
 } 
@@ -714,7 +710,7 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
 
 
 /** 
- * Function to initialize unsaturated zone storage and deficit
+itialize unsaturated zone storage and deficit
  *
  * @params[in] max_atb_increments, int, defines size of one-dimensional double
  * 	precision arrays including stor_unsat_zone, deficit_root_zone, 
@@ -781,7 +777,6 @@ extern void init_water_balance(int max_atb_increments,
 
     return;
 }
-
 
 /**
  * Main initialize function. Calls convert_dist_to_histords(), calc_time_delay_histogram(), 
@@ -877,7 +872,6 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 double tch[11];
 double sumar;
 int ir;
-
 
 
 /* read in run parameters  */

@@ -305,6 +305,7 @@ int init_config(const char* config_file, topmodel_model* model)
         model->max_num_subcatchments,model->max_atb_increments);
     fclose(model->subcat_fptr);
 
+    
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
         model->dt,model->tl,model->dist_from_outlet,model->max_atb_increments,
