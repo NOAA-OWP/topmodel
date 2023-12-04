@@ -710,7 +710,7 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
 
 
 /** 
-itialize unsaturated zone storage and deficit
+ * Function to initialize unsaturated zone storage and deficit
  *
  * @params[in] max_atb_increments, int, defines size of one-dimensional double
  * 	precision arrays including stor_unsat_zone, deficit_root_zone, 
