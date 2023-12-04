@@ -2,11 +2,12 @@
 #include "../include/bmi.h" 
 #include "../include/bmi_topmodel.h"
 
+
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH 256
 #define OUTPUT_VAR_NAME_COUNT 14
 #define INPUT_VAR_NAME_COUNT 2
-#define PARAM_VAR_NAME_COUNT 6
+#define PARAM_VAR_NAME_COUNT 8
   
 static const char *output_var_names[OUTPUT_VAR_NAME_COUNT] = {
         "Qout",
@@ -149,10 +150,14 @@ static const char *param_var_names[PARAM_VAR_NAME_COUNT] = {
     "td",    // unsaturated zone time delay per unit storage deficit (h)
     "srmax", // maximum root zone storage deficit (m)
     "sr0",   // initial root zone storage deficit below field capacity (m)
-    "xk0"    // surface soil hydraulic conductivity (m/h)
+    "xk0",   // surface soil hydraulic conductivity (m/h)
+    "chv",   // average channel velcoity
+    "rv"     // internal overland flow routing velocity
 };
 
 static const char *param_var_types[PARAM_VAR_NAME_COUNT] = {
+    "double",
+    "double",
     "double",
     "double",
     "double",
@@ -303,12 +308,12 @@ int init_config(const char* config_file, topmodel_model* model)
     
     init(model->params_fptr,model->output_fptr,model->subcat,model->num_channels,model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
-        model->dt,&model->szm,&model->t0,model->tl,model->dist_from_outlet,&model->td, &model->srmax,
-	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,
-        &model->dth,model->max_atb_increments,model->max_time_delay_ordinates,&model->num_time_delay_histo_ords,
-	&model->num_delay,&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
+        model->dt,model->tl,model->dist_from_outlet,model->max_atb_increments,
+	model->max_time_delay_ordinates,&model->num_time_delay_histo_ords,&model->num_delay,
+	&model->szm,&model->t0,&model->chv,&model->rv,&model->td, &model->srmax,
+	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,&model->dth,
+	&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
         &model->szq,model->Q,&model->sbar, &model->bal);
-    
     fclose(model->params_fptr);
 
 
@@ -843,6 +848,22 @@ static int Get_value_ptr (Bmi *self, const char *name, void **dest)
         *dest = (void*)&topmodel-> t0;
         return BMI_SUCCESS;
     }
+    // chv (parameter)
+    if (strcmp (name, "chv") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> chv;
+        return BMI_SUCCESS;
+    }
+    // rv (parameter)
+    if (strcmp (name, "rv") == 0) {
+        topmodel_model *topmodel;
+        topmodel = (topmodel_model *) self->data;
+        *dest = (void*)&topmodel-> rv;
+        return BMI_SUCCESS;
+    }
+
+
     
 
     // STANDALONE Note: 
@@ -921,8 +942,141 @@ static int Set_value (Bmi *self, const char *name, void *array)
 
     memcpy (dest, array, nbytes);
 
+    
+    ///////////////////////////////////
+    //Handle calibratable parameters///
+    ///////////////////////////////////
+
+  
+    // CHECK IF/WHICH CALIBRATABLE PARAMETERS TO UPDATE
+
+    // DISCHARGE RELATED PARAMETERS
+
+    // define array holding calibratable parameter names
+    char *calibQParams[] = {"szm", "t0", "chv", "rv", "sr0"};
+
+    // get number of strings to use for loop
+    int numQParams = sizeof(calibQParams) / sizeof(calibQParams[0]);
+
+    // check if name is == any calibratable parameter
+    // create holder to check if name == any calibQParam
+    int nameIsCalibQParam = 0;
+    for (int i = 0; i<numQParams; i++){
+ 	if (strcmp(name, calibQParams[i]) == 0) {
+	    nameIsCalibQParam = 1;
+	    break;
+        }
+    }
+
+    
+    // WATER BALANCE RELATED PARAMETERS
+
+    // define array holding calibratable parameter names
+    char *calibWBParams[] = {"szm", "t0", "sr0"};
+
+    // get number of strings to use for loop
+    int numWBParams = sizeof(calibWBParams) / sizeof(calibWBParams[0]);
+
+    // check if name is == any calibratable parameter
+    // create holder to check if name == any calibWBParam
+    int nameIsCalibWBParam = 0;
+    for (int i = 0; i<numWBParams; i++){
+ 	if (strcmp(name, calibWBParams[i]) == 0) {
+	    nameIsCalibWBParam = 1;
+	    break;
+        }
+    }
+
+    // if any calibratable variables were provided in realization file, then 
+    // print an update with the values being used.
+    // srmax and td do not need to be updated, but are printed to confirm their
+    // presence in the realization.json file.
+    if (nameIsCalibQParam || nameIsCalibWBParam || \
+		    strcmp(name, "srmax") == 0 || strcmp(name, "td") == 0) {
+
+        // instantiate topmodel as a pointer topmodel of type topmodel_model    
+        topmodel_model *topmodel;
+        // assign self->data to topmodel pointer
+        topmodel = (topmodel_model *) self->data;
+
+        printf("\n\n\nAT LEAST ONE OF THE FOLLOWING CALIBRATABLE PARAMETERS "
+			"WAS PROVIDED IN THE REALIZATION.JSON FILE!\n");
+
+	// print updated calibratable parameters
+        printf("\n\nCalibratable parameters related to ET and recharge:\n");
+	printf("srmax = %f\n", topmodel->srmax);
+        printf("td = %f\n", topmodel->td);
+
+	printf("\nCalibratable parameters related to discharge:\n");
+        printf("chv = %f\n", topmodel->chv);
+        printf("rv = %f\n", topmodel->rv);
+
+
+	printf("\nCalibratable parameters related to water balance:\n");
+        printf("szm = %f\n", topmodel->szm); 
+	printf("sr0 = %f\n", topmodel->sr0);
+        printf("t0 = %f\n\n\n\n", topmodel->t0);
+
+    }
+
+    // UPDATE APPROPRIATE PARAMETERS
+
+    // DISCHARGE RELATED PARAMETERS
+
+    // if name is a calibratable parameter, then update outputs
+    if (nameIsCalibQParam) {
+
+         // instantiate topmodel as a pointer topmodel of type topmodel_model    
+        topmodel_model *topmodel;
+        // assign self->data to topmodel pointer
+        topmodel = (topmodel_model *) self->data;
+
+	// declare variables
+	double tch[11];
+
+	
+     	// convert from distance/area to histogram ordinate form
+        convert_dist_to_histords(topmodel->dist_from_outlet, topmodel->num_channels,
+				&topmodel->chv, &topmodel->rv, topmodel->dt, tch);
+
+	// calculate the time_delay_histogram
+	calc_time_delay_histogram(topmodel->max_time_delay_ordinates, topmodel->num_channels, 
+	  			  topmodel->area, tch, 
+ 				  topmodel->cum_dist_area_with_dist, 
+				  &topmodel->num_time_delay_histo_ords,
+				  &topmodel->num_delay, &topmodel->time_delay_histogram);
+	
+        // Reinitialise discharge array
+	init_discharge_array(&topmodel->num_delay, &topmodel->Q0, topmodel->area, 
+				&topmodel->num_time_delay_histo_ords, &topmodel->time_delay_histogram, 
+				topmodel->Q);	
+    }
+
+
+    // WATER BALANCE RELATED PARAMETERS
+
+    // if name is a calibratable parameter, then update outputs
+    if (nameIsCalibWBParam) {
+
+        // instantiate topmodel as a pointer topmodel of type topmodel_model    
+        topmodel_model *topmodel;
+        // assign self->data to topmodel pointer
+        topmodel = (topmodel_model *) self->data;
+
+	
+	// Initialize water balance and unsatrutaed storage and deficits
+	init_water_balance(topmodel->max_atb_increments, topmodel->num_topodex_values, 
+					topmodel->dt, &topmodel->sr0, &topmodel->szm, 
+					&topmodel->Q0, &topmodel->t0, topmodel->tl,
+					&topmodel->stor_unsat_zone, &topmodel->szq, 
+					&topmodel->deficit_local, &topmodel->deficit_root_zone, 
+					&topmodel->sbar, &topmodel->bal);            
+    }
+
     return BMI_SUCCESS;
 }
+
+
 
 static int Set_value_at_indices (Bmi *self, const char *name, int * inds, int len, void *src)
 {

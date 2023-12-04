@@ -514,15 +514,13 @@ return;
  * to enable calibratable parameters to be updated.
  * BChoat 2023/08/29
  */
-
-
-/** // FRED
+/** 
 
  * Function to convert distance/area form to time delay histogram ordinates
  * 
  * Converts parameters to m/time step DT
  * Based on the calculation of values going into output tch, it seems TOPMODEL assumes 
- * 	one main channel with up to 9 areas (or small tributaries) of overland flow contributing to the 
+ * 	one main channel with up to 9 areas of overland flow contributing to the 
  * 	one main channel. tch[1] is the main channel, and tch[>1] are the areas of 
  * 	overland flow (BChoat).
  *
@@ -540,28 +538,28 @@ return;
  *
  *
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
- * 	distance from outlet to point on channel with area known (i.e., to a channel I think-BEC)
+ * 	distance from outlet to point on channel with area known (i.e., to a channel; BChoat)
  * @params[in] num_channels, integer, how many channels are present (m/hr)
- * #params[in] chv, double of length one, the average channel velocity  (m/hr)
- * 	for (all channels I think-BEC) 
- * @params[in] rv, double of length one, average internal overland flow routing velocity
+ * @params[in] CALIBRATABLE chv, pointer of type double and length one, the average channel velocity  (m/hr)
+ * 	for the main channel (BChoat) 
+ * @params[in] CALIBRATABLE rv, pointer of type double and length one, average internal overland flow routing velocity
  * @params[in] dt, double of length one, timestep in hours
 
- * @params(out] tch[11], double of length 11, holds histogram ordinates for each channel (I think-BEC)
+ * @params(out] tch[11], double of length 11, holds histogram ordinates for each channel (BChoat)
  * 	tch is used as input in subsequent functions
  * 	Note, that although tch is an 11 element vector, position 0 is ignored. It was 
- * 	written this way when ported from the original code.
+ * 	written this way when translated from the original code.
  */
 
 extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
-					double chv, double rv, double dt, double tch[11])
-{
-    // declare local variables
+					double *chv, double *rv, double dt, double tch[11])
+{    
+    // declare local variables 
     double chvdt, rvdt;
     int j;
     
-    chvdt = chv*dt; // distance water travels in one timestep within channel
-    rvdt = rv*dt; //distance water travels as overland flow in one timestep
+    chvdt = *chv*dt; // distance water travels in one timestep within channel
+    rvdt = *rv*dt; //distance water travels as overland flow in one timestep
 
     tch[1]=dist_from_outlet[1]/chvdt;
     for(j=2;j<=num_channels;j++)
@@ -586,7 +584,7 @@ extern void convert_dist_to_histords(double *dist_from_outlet, int num_channels,
  * @params[in] tch[11], double of length 11, holds histogram ordinates for each channel
  * 	output from conver_dist_to_histords()
  * 	Note, that although tch is an 11 element vector, position 0 is ignored. It was 
- * 	written this way when ported from the original code.
+ * 	written this way when translated from the original code.
  * @params[in], cum_dist_area_with_dist, pointer of length num_channels-1 and type double,
  * 	cumulative distribution of area with dist_from_outlet. 
 
@@ -602,7 +600,6 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
 				int *num_time_delay_histo_ords, int *num_delay,	double **time_delay_histogram) 
 
 {
-
     // declare local variables
     double time, a1, sumar, a2;
     int j, ir;
@@ -613,21 +610,20 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
       }
 
 
+    // casting tch[num_channels] to int truncates tch[num_channels] 
+    // (e.g., 7.9 becomes 7)
     (*num_time_delay_histo_ords)=(int)tch[num_channels];
     
-    /* why is this necessary with the line above that defines num_time_delay_histo_ords?*/ 
-    // FRED
+    // this is here to round up. Since casting tch as int effectively rounds down, 
+    // we add a value of 1 effectively rounding up.
     if((double)(*num_time_delay_histo_ords)<tch[num_channels]) 
        {
        (*num_time_delay_histo_ords)++;
        }
-    /////////////////////////////////i
 
     (*num_delay)=(int)tch[1];
     (*num_time_delay_histo_ords)-=(*num_delay);
     
-
-
     for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
       {
       time=(double)(*num_delay)+(double)ir;
@@ -670,8 +666,50 @@ extern void calc_time_delay_histogram(int max_time_delay_ordinates, int num_chan
     return;
 } 
 
-/** // FRED
 
+
+/** 
+ * Function to (re)initialize discharge array
+ * @params[in] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
+ * 	catchment to outlet. Output from calc_time_delay_histogram
+ * @params[in] Q0, pointer of type double, initial subsurface flow per unit area
+ * @params[in] area, pointer of type double between 0 and 1 defining catchment area as ratio of
+ * 	entire catchment
+ * @params[in] num_time_delay_histo_ords, pointer of type int, number of time delay histogram ordinates,
+ * 	output from calc_time_delay_histogram
+ * @parms[in], time_delay_histogram, double pointer of type double, time lag of outflows due to channel routing,
+ * 	output from calc_time_delay_histogram
+ *
+ * @params[out] Q, pointer of type double and length num_delay, simulated discharge
+ */
+
+extern void init_discharge_array(int *num_delay, double *Q0, double area, 
+			int *num_time_delay_histo_ords, double **time_delay_histogram,
+                        double *Q)
+{
+
+    // declare local variables
+    double sum;
+    int i, in;
+ 
+    sum=0.0;
+
+    for(i=1;i<=(*num_delay);i++)
+      {
+      Q[i]+=(*Q0)*area; //TO-DO: check Q allocation size at initialization to fix memory allocation issue
+      }
+          
+    for(i=1;i<=(*num_time_delay_histo_ords);i++)
+      {
+      sum+=(*time_delay_histogram)[i];
+      in=(*num_delay)+i;
+      Q[in]+=(*Q0)*(area-sum);
+      };
+    return;
+}
+
+
+/** 
  * Function to initialize unsaturated zone storage and deficit
  *
  * @params[in] max_atb_increments, int, defines size of one-dimensional double
@@ -717,10 +755,11 @@ extern void init_water_balance(int max_atb_increments,
       {
       d_alloc(stor_unsat_zone,max_atb_increments);
       d_alloc(deficit_root_zone,max_atb_increments);
-      d_alloc(deficit_local,max_atb_increments);      }
+      d_alloc(deficit_local,max_atb_increments); 
+      }
 
 
-    t0dt=(*t0)+log(dt);  /* was ALOG */ //FRED, I am considering deleteing this comment, do you think it is still needed/helpful? 
+    t0dt=(*t0)+log(dt);  /* was ALOG - specific log function in fortran*/
 
     /*  Calculate SZQ parameter */
     (*szq)=exp(t0dt-tl);
@@ -738,48 +777,6 @@ extern void init_water_balance(int max_atb_increments,
 
     return;
 }
-
-
-/** 
- * Function to (re)initialize discharge array
- *  @params[out] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
- * 	catchment to outlet. Output from calc_time_delay_histogram
- * @params[in] Q0, pointer of type double, initial subsurface flow per unit area
- * @params[in] area, pointer of type double between 0 and 1 defining catchment area as ratio of
- * 	entire catchment
- * @params[in] num_time_delay_histo_ords, pointer of type int, number of time delay histogram ordinates,
- * 	output from calc_time_delay_histogram
- * @parms[in], time_delay_histogram, double pointer of type double, time lag of outflows due to channel routing,
- * 	output from calc_time_delay_histogram
- *
- * @params[out] Q, pointer of type double and length num_delay, simulated discharge
- */
-
-extern void init_discharge_array(int *num_delay, double *Q0, double area, 
-			int *num_time_delay_histo_ords, double **time_delay_histogram,
-                        double *Q)
-{
-    // declare local variables
-    double sum;
-    int i, in;
- 
-    sum=0.0;
-
-    for(i=1;i<=(*num_delay);i++)
-      {
-      Q[i]+=(*Q0)*area;
-      }
-          
-    for(i=1;i<=(*num_time_delay_histo_ords);i++)
-      {
-      sum+=(*time_delay_histogram)[i];
-      in=(*num_delay)+i;
-      Q[in]+=(*Q0)*(area-sum);
-      };
-    return;
-}
-
-
 
 /**
  * Main initialize function. Calls convert_dist_to_histords(), calc_time_delay_histogram(), 
@@ -799,30 +796,10 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
  * @params[in], cum_dist_area_with_dist, pointer of type double, cumulative distribution of area with
  * 	dist_from_outlet
  * @params[in] dt, double, timestep in hours
- * @params[in] CALIBRATABLE szm, pointer of type double, exponential scaling parameter for decline
- * 	of transmissivity with increase in storage deficit
- * @params[in] CALIBRATABLE t0, pointer of type double, downslope transmissivity when soil is just saturated
- * 	to the surface. 'input as LN(t0)
  * @params[in] tl, double, not well defined, but related to time lag
  * @params[in] dist_from_outlet, pointer to array of length num_channels of type double,
- * 	distance from outlet to point on channel with area known (i.e., to a channel I think-BEC)
- * @params[in] CALIBRATABLE td, pointer of type double, unsaturated zone time delay per unit storage, provided in params.dat
- * 	Only read in within init(), not used.
- * @params[in] CALIBRATABLE srmax, pointer of type double, maximum root zone storage deficit provided in params.dat
- * 	Only read in within init(), not used.
- * @params[in] Q0, pointer of type double, initial subsurface flow per unit area
- * @params[in] CALIBRATABLE sr0, pointer of type double, initial root zone storage deficit
- * @params[in] infex, pointer of type int (boolean), 1 = TRUE; call subroutine to do infiltration excess calcs,
- * 	Not typically appropiate in catchments where TOPMODEL is applicable (i.e., shallow highly
- * 	permeable  soils). 0 = FALSE (default), 
- * 	Only read in within init(), not used. 
- * @params[in] xk0, pointer of type double, surface soil hydraulic conductivity.
- * 	Only read in within init(), not used.
- * @params[in] hf, pointer of type double, wetting from suction for G&A soln.
- * 	Only read in within init(), not used.
- * @params[in] dth, pointer of type double, Water content change across the wetting front
- * 	Only read in within init(), not used.
- * @params[in] max_atb_increments, int, defines size of one-dimensional double
+ * 	distance from outlet to point on channel with area known (i.e., to a channel; BChoat)
+  * @params[in] max_atb_increments, int, defines size of one-dimensional double
  * 	precision arrays including stor_unsat_zone, deficit_root_zone, 
  * 	and deficit_local
  * @params[in] max_time_delay_ordinates, int, hardcoded as 20 in bmi_topmodel.c
@@ -832,6 +809,33 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
  * @params[in] num_delay, pointer of type int, number of time steps lag (delay) in channel within 
  * 	catchment to outlet. Output from calc_time_delay_histogram
 
+ * The following 12 variables are read in from the params.dat file using fscanf
+ * -----------------
+ * @params[out] CALIBRATABLE szm, pointer of type double, exponential scaling parameter for decline
+ * 	of transmissivity with increase in storage deficit
+ * @params[out] CALIBRATABLE t0, pointer of type double, downslope transmissivity when soil is just saturated
+ * 	to the surface. 'input as LN(t0)
+ * @params[out] CALIBRATABLE td, pointer of type double, unsaturated zone time delay for recharge to the 
+ * 	saturated zone per unit of deficit, provided in params.dat
+ * 	Only read in within init(), not used.
+ * @params[out] CALIBRATABLE chv, double of length one, the average channel velocity  (m/hr)
+ * 	for main channel (BChoat) 
+ * @params[out] CALIBRATABLE rv, double of length one, average internal overland flow routing velocity
+ * @params[out] CALIBRATABLE srmax, pointer of type double, maximum root zone storage deficit provided in params.dat
+ * 	Only read in within init(), not used.
+ * @params[out] Q0, pointer of type double, initial subsurface flow per unit area
+ * @params[out] CALIBRATABLE sr0, pointer of type double, initial root zone storage deficit
+ * @params[out] infex, pointer of type int (boolean), 1 = TRUE; call subroutine to do infiltration excess calcs,
+ * 	Not typically appropiate in catchments where TOPMODEL is applicable (i.e., shallow highly
+ * 	permeable  soils). 0 = FALSE (default), 
+ * 	Only read in within init(), not used. 
+ * @params[out] xk0, pointer of type double, surface soil hydraulic conductivity.
+ * 	Only read in within init(), not used.
+ * @params[out] hf, pointer of type double, wetting from suction for G&A soln.
+ * 	Only read in within init(), not used.
+ * @params[out] dth, pointer of type double, Water content change across the wetting front
+ * 	Only read in within init(), not used.
+ * ----------------- 	
 
  * @params[out] stor_unsat_zone, double pointer of type double of size max_atb_increments and length num_topodex_values,
  * 	storage in the unsaturated zone
@@ -850,11 +854,11 @@ extern void init_discharge_array(int *num_delay, double *Q0, double area,
 extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
-	      double *cum_dist_area_with_dist, double dt, double *szm, double *t0, 
-              double tl, double *dist_from_outlet, double *td, double *srmax, 
-              double *Q0,double *sr0, int *infex, double *xk0, double *hf, 
-              double *dth,int max_atb_increments, int max_time_delay_ordinates,
-              int *num_time_delay_histo_ords,int *num_delay,
+	      double *cum_dist_area_with_dist, double dt, 
+              double tl, double *dist_from_outlet, int max_atb_increments, 
+	      int max_time_delay_ordinates, int *num_time_delay_histo_ords,int *num_delay,
+	      double *szm, double *t0, double *chv, double *rv, double *td, double *srmax, 
+              double *Q0,double *sr0, int *infex, double *xk0, double *hf, double *dth,
 	      double **stor_unsat_zone, double **deficit_local,
               double **deficit_root_zone,double *szq, double *Q,
               double *sbar, double *bal)
@@ -865,17 +869,34 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat,
 
    READS PARAMETER DATA
 ******************************************/
-double rv;   /* internal overland flow routing velocity */
-double chv;  /* average channel flow velocity */
 double tch[11];
 double sumar;
 int ir;
 
+
 /* read in run parameters  */
 fgets(subcat,256,in_param_fptr);
 
+printf("subcat: %s\n", subcat);
+
 fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
-       szm,t0,td,&chv,&rv,srmax,Q0,sr0,infex,xk0,hf,dth);
+       szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth);
+
+
+printf("\n\nCalibratable parameters from params*.dat:\n");
+
+printf("\nET and recharge:\n");
+printf("srmax = %f\n", *srmax);
+printf("td = %f\n", *td);
+
+printf("\nDischarge:\n");
+printf("chv = %f\n", *chv);
+printf("rv = %f\n", *rv);
+
+printf("\nWater balance:\n");
+printf("szm = %f\n", *szm);
+printf("sr0 = %f\n", *sr0);
+printf("t0 = %f\n", *t0);
 
 
 //Convert distance/area form to time delay histogram ordinates
@@ -900,16 +921,19 @@ if(yes_print_output==TRUE)
   fprintf(output_fptr,"\n");
   }
 
-// Initialize water balance and unsatrutaed storage and deficits
-init_water_balance( max_atb_increments, num_topodex_values, 
-				dt, sr0, szm, Q0, t0, tl,
-				stor_unsat_zone, szq, 
-				deficit_local, deficit_root_zone, sbar, bal);
 
 // Reinitialise discharge array
 init_discharge_array(num_delay, Q0, area, 
 			num_time_delay_histo_ords, time_delay_histogram, 
 			Q);
+
+
+// Initialize water balance and unsatrutaed storage and deficits
+init_water_balance(max_atb_increments, num_topodex_values, 
+				dt, sr0, szm, Q0, t0, tl,
+				stor_unsat_zone, szq, 
+				deficit_local, deficit_root_zone, sbar, bal);
+
 
 if(yes_print_output==TRUE)
   {
@@ -935,6 +959,7 @@ extern void expinf(int irof, int it, int rint, double* df, double* cumf,
 **************************************************************/
 
 // BMI Adaption: df and cumf are now passed as pointers
+
 
 double sum,fc,func,cd,xke,e,tp,r2,f1;
 double dfunc,fx,add,fac,constant,f,f2,xkf,szf,dth;
