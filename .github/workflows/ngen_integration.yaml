@@ -90,9 +90,9 @@ jobs:
       - name: Prepare to Build topmodel Library for Ngen
         run: |
           # Move files to appropriate directory to build topmodel library
+          rm -rf ${{runner.temp}}/extern/topmodel/topmodel/*
+          mv ./* ${{runner.temp}}/extern/topmodel/topmodel
           mv ${{runner.temp}}/extern extern
-          rm -rf extern/topmodel/topmodel/*
-          mv ./* extern/topmodel/topmodel
           mv ${{runner.temp}}/.github .github
 
       - name: Build Surfacebmi
