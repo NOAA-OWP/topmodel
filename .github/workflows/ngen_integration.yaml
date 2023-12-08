@@ -92,11 +92,11 @@ jobs:
           # Move files to appropriate directory to build topmodel library
           rm -rf ${{runner.temp}}/extern/topmodel/topmodel/*
           mv ./* ${{runner.temp}}/extern/topmodel/topmodel
+          # This line of code will override the new topmodel commit, need change
           mv ${{runner.temp}}/extern extern
-          echo `pwd`
-          echo `ls -l ${{runner.temp}}/.github/actions/ngen-submod-build`
+          echo "runner.temp-dir=$(echo ${{ runner.temp }})" >> $GITHUB_OUTPUT
           mv ${{runner.temp}}/.github ./.github
-          echo `ls -l ./.github/actions/ngen-submod-build`
+          echo "runner.temp-github-dir=$(echo ${{ runner.temp }}/.github)" >> $GITHUB_OUTPUT
 
       - name: Build Surfacebmi
         id: submod_build_1
