@@ -93,7 +93,10 @@ jobs:
           rm -rf ${{runner.temp}}/extern/topmodel/topmodel/*
           mv ./* ${{runner.temp}}/extern/topmodel/topmodel
           mv ${{runner.temp}}/extern extern
-          mv ${{runner.temp}}/.github .github
+          echo `pwd`
+          echo `ls -l ${{runner.temp}}/.github/actions/ngen-submod-build`
+          mv ${{runner.temp}}/.github ./.github
+          echo `ls -l ./.github/actions/ngen-submod-build`
 
       - name: Build Surfacebmi
         id: submod_build_1
