@@ -91,7 +91,8 @@ jobs:
         run: |
           # Move files to appropriate directory to build topmodel library
           mv ${{runner.temp}}/extern extern
-          mv -f ./* extern/topmodel/topmodel
+          rm -rf extern/topmodel/topmodel/*
+          mv ./* extern/topmodel/topmodel
           mv ${{runner.temp}}/.github .github
 
       - name: Build Surfacebmi
