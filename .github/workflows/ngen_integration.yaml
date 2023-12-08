@@ -1,0 +1,122 @@
+# Test ngen-cfe integration
+
+name: Ngen Integration Tests
+
+# Controls when the action will run.
+on:
+  push:
+    branches: [ main, dev, notreal ]
+  pull_request:
+    branches: [ main, dev, notreal ]
+  workflow_dispatch:
+
+env:
+  # Obtained from https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+  # TODO: add something later that can check the runners for hyperthreading
+  LINUX_NUM_PROC_CORES: 2
+  MACOS_NUM_PROC_CORES: 3
+  ASAN_OPTIONS: detect_leaks=false
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Run general unit tests in linux environment
+  test_surfacebmi_plus_cfe:
+    # The type of runner that the job will run on
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: checkout actions in another repo
+        uses: actions/checkout@v4
+        with:
+          repository: noaa-owp/ngen
+
+      - name: Build ISO C Fortran BMI
+        id: submod_build_2
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: "extern/iso_c_fortran_bmi/"
+
+      - name: Build CFE
+        id: submod_build_3
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: "extern/cfe/"
+          targets: "cfebmi"
+
+      - name: Build PET
+        id: submod_build_5
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: "extern/evapotranspiration/evapotranspiration"
+          targets: "petbmi"
+
+      - name: Build SLoTH
+        id: submod_build_6
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: "extern/sloth/"
+          targets: "slothmodel"
+
+      # Build Ngen and save some files
+      - name: Build Ngen
+        id: ngen_id1
+        uses: ./.github/actions/ngen-build
+        with:
+          targets: "ngen"
+          build-cores: ${{ env.LINUX_NUM_PROC_CORES }}
+          #is this required for this test?
+          bmi_c: 'ON'
+          bmi_fortran: 'ON'
+        timeout-minutes: 15
+
+      - name: Cleanup Ngen Build
+        run: |
+          # Save ngen build artifacts to temp directory
+          mv ${{ steps.ngen_id1.outputs.build-dir }} ${{runner.temp}}/ngen-build/
+          mv .github ${{runner.temp}}/.github
+          mv extern ${{runner.temp}}/extern
+          mv data ${{runner.temp}}/data
+
+      # Checkout and build the topmodel
+      - name: Checkout the commit
+        uses: actions/checkout@v4
+
+      - name: Prepare to Build topmodel Library for Ngen
+        run: |
+          # Move files to appropriate directory to build topmodel library
+          mv ${{runner.temp}}/extern extern
+          mv -f ./* extern/topmodel/topmodel
+          mv ${{runner.temp}}/.github .github
+
+      - name: Build Surfacebmi
+        id: submod_build_1
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: " extern/topmodel/"
+          targets: "surfacebmi"
+
+      - name: Move files to appropriate directory to run ngen
+        run: |
+          #Not sure if all the steps are necessary, check later
+          mv ${{runner.temp}}/ngen-build ./ngen-build
+          #mv ${{runner.temp}}/extern/sloth extern
+          #mv ${{runner.temp}}/extern/iso_c_fortran_bmi extern
+          #cp -r ${{runner.temp}}/extern/evapotranspiration extern
+          mv ${{runner.temp}}/data data
+
+          # Run ngen with topmodel with CFE
+          inputfile='data/example_bmi_multi_realization_config.json'
+          ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
+
+      # The following remove a post ngen build error likely related to the temporary files left over during the
+      # build process
+      - name: Re-checkout Ngen
+        uses: actions/checkout@v3
+        with:
+          repository: noaa-owp/ngen
