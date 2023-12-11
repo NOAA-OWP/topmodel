@@ -91,12 +91,12 @@ jobs:
           rm -rf extern/topmodel/topmodel/*
           mv ${{runner.temp}}/topmodel/* extern/topmodel/topmodel
 
-      - name: Build Surfacebmi
+      - name: Build Topmodel
         id: submod_build_1
         uses: ./.github/actions/ngen-submod-build
         with:
           mod-dir: " extern/topmodel/"
-          targets: "surfacebmi"
+          targets: "topmodelbmi"
 
       - name: Run Ngen Test
         run: |
