@@ -46,6 +46,13 @@ jobs:
         with:
           repository: noaa-owp/ngen
 
+      - name: Build Surfacebmi
+        id: submod_build_1
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: " extern/noah-owp-modular/"
+          targets: "surfacebmi"
+
       - name: Build ISO C Fortran BMI
         id: submod_build_2
         uses: ./.github/actions/ngen-submod-build
@@ -92,7 +99,7 @@ jobs:
           mv ${{runner.temp}}/topmodel/* extern/topmodel/topmodel
 
       - name: Build Topmodel
-        id: submod_build_1
+        id: submod_build_4
         uses: ./.github/actions/ngen-submod-build
         with:
           mod-dir: " extern/topmodel/"
