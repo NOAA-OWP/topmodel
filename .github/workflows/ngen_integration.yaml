@@ -30,6 +30,16 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Checkout and build the topmodel
+      - name: Checkout the commit
+        uses: actions/checkout@v4
+
+      - name: Save Topmodel to a Temp Directory
+        run: |
+          # Move files to appropriate temporary directory
+          mkdir ${{runner.temp}}/topmodel
+          mv ./* ${{runner.temp}}/topmodel
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout actions in another repo
         uses: actions/checkout@v4
@@ -75,28 +85,11 @@ jobs:
           bmi_fortran: 'ON'
         timeout-minutes: 15
 
-      - name: Cleanup Ngen Build
-        run: |
-          # Save ngen build artifacts to temp directory
-          mv ${{ steps.ngen_id1.outputs.build-dir }} ${{runner.temp}}/ngen-build/
-          mv .github ${{runner.temp}}/.github
-          mv extern ${{runner.temp}}/extern
-          mv data ${{runner.temp}}/data
-
-      # Checkout and build the topmodel
-      - name: Checkout the commit
-        uses: actions/checkout@v4
-
       - name: Prepare to Build topmodel Library for Ngen
         run: |
           # Move files to appropriate directory to build topmodel library
-          rm -rf ${{runner.temp}}/extern/topmodel/topmodel/*
-          mv ./* ${{runner.temp}}/extern/topmodel/topmodel
-          # This line of code will override the new topmodel commit, need change
-          mv ${{runner.temp}}/extern extern
-          echo "runner.temp-dir=$(echo ${{ runner.temp }})" >> $GITHUB_OUTPUT
-          mv ${{runner.temp}}/.github ./.github
-          echo "runner.temp-github-dir=$(echo ${{ runner.temp }}/.github)" >> $GITHUB_OUTPUT
+          rm -rf extern/topmodel/topmodel/*
+          mv ${{runner.temp}}/topmodel/* extern/topmodel/topmodel
 
       - name: Build Surfacebmi
         id: submod_build_1
@@ -105,15 +98,8 @@ jobs:
           mod-dir: " extern/topmodel/"
           targets: "surfacebmi"
 
-      - name: Move files to appropriate directory to run ngen
+      - name: Run Ngen Test
         run: |
-          #Not sure if all the steps are necessary, check later
-          mv ${{runner.temp}}/ngen-build ./ngen-build
-          #mv ${{runner.temp}}/extern/sloth extern
-          #mv ${{runner.temp}}/extern/iso_c_fortran_bmi extern
-          #cp -r ${{runner.temp}}/extern/evapotranspiration extern
-          mv ${{runner.temp}}/data data
-
           # Run ngen with topmodel with CFE
           inputfile='data/example_bmi_multi_realization_config.json'
           ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
