@@ -30,13 +30,13 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checkout and build the topmodel
+      # Checkout and save the topmodel to a temporary directory
       - name: Checkout the commit
         uses: actions/checkout@v4
 
       - name: Save Topmodel to a Temp Directory
         run: |
-          # Move files to appropriate temporary directory
+          # Move files to a temporary directory
           mkdir ${{runner.temp}}/topmodel
           mv ./* ${{runner.temp}}/topmodel
 
@@ -92,7 +92,7 @@ jobs:
           bmi_fortran: 'ON'
         timeout-minutes: 15
 
-      - name: Prepare to Build topmodel Library for Ngen
+      - name: Prepare to Build Topmodel Library for Ngen
         run: |
           # Move files to appropriate directory to build topmodel library
           rm -rf extern/topmodel/topmodel/*
@@ -116,10 +116,3 @@ jobs:
         run: |
           inputfile='data/example_bmi_multi_realization_config_w_noah_pet_cfe.json'
           ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
-
-      # The following remove a post ngen build error likely related to the temporary files left over during the
-      # build process
-      - name: Re-checkout Ngen
-        uses: actions/checkout@v3
-        with:
-          repository: noaa-owp/ngen
