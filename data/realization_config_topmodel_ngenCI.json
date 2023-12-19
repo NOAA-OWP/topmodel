@@ -8,7 +8,7 @@
                     "forcing_file": "",
                     "init_config": "",
                     "allow_exceed_end_time": true,
-                    "main_output_variable": "Q_OUT",
+                    "main_output_variable": "QINSUR",
                     "modules": [
 			{
 			    "name": "bmi_c++",
@@ -56,7 +56,7 @@
                                 "forcing_file": "",
                                 "init_config": "./extern/topmodel/topmodel/data/topmod.run",
                                 "allow_exceed_end_time": true,
-                                "main_output_variable": "Qout",
+                                "main_output_variable": "QINSUR",
                                 "registration_function": "register_bmi_topmodel",
                                 "variables_names_map": {
                                     "water_potential_evaporation_flux": "EVAPOTRANS",
