@@ -112,7 +112,7 @@ jobs:
           inputfile='data/example_bmi_multi_realization_config.json'
           ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
 
-      - name: Run surfacebmi, cfebmi and petbmi
+      - name: Run surfacebmi, topmodelbmi
         run: |
-          inputfile='data/example_bmi_multi_realization_config_w_noah_pet_cfe.json'
+          inputfile='extern/topmodel/topmodel/data/realization_config_topmodel_ngenCI.json'
           ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
