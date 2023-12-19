@@ -114,5 +114,6 @@ jobs:
 
       - name: Run surfacebmi, topmodelbmi
         run: |
+          cp extern/topmodel/topmodel/data/*.dat data
           inputfile='extern/topmodel/topmodel/data/realization_config_topmodel_ngenCI.json'
           ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
