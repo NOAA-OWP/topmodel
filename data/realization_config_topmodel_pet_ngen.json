@@ -1,0 +1,58 @@
+{
+    "global": {
+        "formulations": [
+            {
+                "name": "bmi_multi",
+                "params": {
+                    "model_type_name": "bmi_multi_pet_topmodel",
+                    "forcing_file": "",
+                    "init_config": "",
+                    "allow_exceed_end_time": true,
+                    "main_output_variable": "Qout",
+                    "modules": [
+                        {
+                            "name": "bmi_c",
+                            "params": {
+                                "model_type_name": "bmi_c_pet",
+                                "library_file": "./extern/evapotranspiration/evapotranspiration/cmake_build/libpetbmi",
+                                "forcing_file": "",
+                                "init_config": "./data/bmi/c/pet/{{id}}_bmi_config.ini",
+                                "allow_exceed_end_time": true,
+                                "main_output_variable": "water_potential_evaporation_flux",
+                                "registration_function":"register_bmi_pet",
+                                "uses_forcing_file": false
+                            }
+                        },
+                        {
+                            "name": "bmi_c",
+                            "params": {
+                                "model_type_name": "bmi_c_topmodel",
+                                "library_file": "./extern/topmodel/cmake_build/libtopmodelbmi.so",
+                                "forcing_file": "",
+                                "init_config": "./extern/topmodel/topmodel/data/topmod.run",
+                                "allow_exceed_end_time": true,
+                                "main_output_variable": "Qout",
+                                "registration_function": "register_bmi_topmodel",
+                                "variables_names_map": {
+                                    "water_potential_evaporation_flux": "water_potential_evaporation_flux"
+                                },
+                                "uses_forcing_file": false
+                            }
+                        }
+                    ],
+                    "uses_forcing_file": false
+                }
+            }
+        ],
+        "forcing": {
+            "file_pattern": ".*{{id}}.*..csv",
+            "path": "./data/forcing/",
+            "provider": "CsvPerFeature"
+        }
+    },
+    "time": {
+        "start_time": "2015-12-01 00:00:00",
+        "end_time": "2015-12-30 23:00:00",
+        "output_interval": 3600
+    }
+}

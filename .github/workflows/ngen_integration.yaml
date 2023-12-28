@@ -20,7 +20,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # Run general unit tests in linux environment
-  test_surfacebmi_plus_cfe:
+  test_topmodelbmi:
     # The type of runner that the job will run on
     strategy:
       matrix:
@@ -58,13 +58,6 @@ jobs:
         uses: ./.github/actions/ngen-submod-build
         with:
           mod-dir: "extern/iso_c_fortran_bmi/"
-
-      - name: Build CFE
-        id: submod_build_3
-        uses: ./.github/actions/ngen-submod-build
-        with:
-          mod-dir: "extern/cfe/"
-          targets: "cfebmi"
 
       - name: Build PET
         id: submod_build_5
@@ -104,16 +97,17 @@ jobs:
         with:
           mod-dir: " extern/topmodel/"
           targets: "topmodelbmi"
-
-      - name: Run Ngen Test
+ 
+      - name: Run petbmi, topmodelbmi
         run: |
-          # Run ngen with topmodel with CFE
+          # Run ngen with topmodel & pet
           mv ${{ steps.ngen_id1.outputs.build-dir }} ./ngen-build/
-          inputfile='data/example_bmi_multi_realization_config.json'
+          cp extern/topmodel/topmodel/data/*.dat data
+          inputfile='extern/topmodel/topmodel/data/realization_config_topmodel_pet_ngen.json'
           ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
 
       - name: Run surfacebmi, topmodelbmi
         run: |
-          cp extern/topmodel/topmodel/data/*.dat data
+          # Run ngen with noahowpmod & topmodel
           inputfile='extern/topmodel/topmodel/data/realization_config_topmodel_ngenCI.json'
           ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
