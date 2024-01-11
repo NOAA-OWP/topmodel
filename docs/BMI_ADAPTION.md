@@ -56,7 +56,7 @@ All BMI functions are thoroughly documented by [CSDMS](https://bmi.readthedocs.i
 | `main()` | *Pseudo-framework* for building and running model control functions | [yes](../refs/original_code_c/tmod9502.c#L151) | [yes](../src/main.c#17) | Completely "absorbed" into BMI functions as explained in this document |
 | `bmi.register_bmi_topmodel()` | allocates memory and generates BMI object class | no | [yes](../src/bmi_topmodel.c#L1047) | Core BMI v2.0; See [Header File](#include-header-file) |
 | `bmi.initialize()` | accepts configuration file path and completes other initial tasks | no | [yes](../src/bmi_topmodel.c#L355) | Core BMI v2.0 |
-| `bmi.init_config()` | reads-in data for all input files | no | [yes](../src/bmi_topmodel.c#L243) | Developer-defined to BMI space; also see [INPUT_FILES_EXPLAINED](./INPUT-FILES_EXPLAINED.md) |
+| `bmi.init_config()` | reads-in data for all input files | no | [yes](../src/bmi_topmodel.c#L243) | Developer-defined to BMI space; also see [INPUT_FILES_EXPLAINED](./INPUT_FILES_EXPLAINED.md) |
 | `bmi.read_init_config()` | reads-in info from configuration and sets appropriate file handles and pointers | no* | [yes](../src/bmi_topmodel.c#L145) | Developer-defined to BMI space; *encompasses lines 231-254 in [source code](../refs/original_code_c/tmod9502.c#L231) |
 | `inputs()` | reads-in data from file `inputs.dat` (forcings and time info) | [yes](../refs/original_code_c/tmod9502.c#L576) | [yes](../src/topmodel.c#L406) | Function definition identical to source code |
 | `tread()` | reads-in data from file `subcat.dat` (topographic index distribution and channel info) | [yes](../refs/original_code_c/tmod9502.c#L275) | [yes](../src/topmodel.c#L444) | Function definition identical to source code |
