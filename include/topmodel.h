@@ -53,9 +53,7 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand
 	      double **stor_unsat_zone, double **deficit_local,
         double **deficit_root_zone,double *szq,double **Q,
         double *sbar, double *bal);
-
-
-                 
+              
 extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
                 double **pe, double **Qobs, double **Q, double **contrib_area);
                    

@@ -1,0 +1,113 @@
+# Test ngen-cfe integration
+
+name: Ngen Integration Tests
+
+# Controls when the action will run.
+on:
+  push:
+    branches: [ master, dev, notreal ]
+  pull_request:
+    branches: [ master, dev, notreal ]
+  workflow_dispatch:
+
+env:
+  # Obtained from https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+  # TODO: add something later that can check the runners for hyperthreading
+  LINUX_NUM_PROC_CORES: 2
+  MACOS_NUM_PROC_CORES: 3
+  ASAN_OPTIONS: detect_leaks=false
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Run general unit tests in linux environment
+  test_topmodelbmi:
+    # The type of runner that the job will run on
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checkout and save the topmodel to a temporary directory
+      - name: Checkout the commit
+        uses: actions/checkout@v4
+
+      - name: Save Topmodel to a Temp Directory
+        run: |
+          # Move files to a temporary directory
+          mkdir ${{runner.temp}}/topmodel
+          mv ./* ${{runner.temp}}/topmodel
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: checkout actions in another repo
+        uses: actions/checkout@v4
+        with:
+          repository: noaa-owp/ngen
+
+      - name: Build Surfacebmi
+        id: submod_build_1
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: " extern/noah-owp-modular/"
+          targets: "surfacebmi"
+
+      - name: Build ISO C Fortran BMI
+        id: submod_build_2
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: "extern/iso_c_fortran_bmi/"
+
+      - name: Build PET
+        id: submod_build_5
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: "extern/evapotranspiration/evapotranspiration"
+          targets: "petbmi"
+
+      - name: Build SLoTH
+        id: submod_build_6
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: "extern/sloth/"
+          targets: "slothmodel"
+
+      # Build Ngen and save some files
+      - name: Build Ngen
+        id: ngen_id1
+        uses: ./.github/actions/ngen-build
+        with:
+          targets: "ngen"
+          build-cores: ${{ env.LINUX_NUM_PROC_CORES }}
+          #is this required for this test?
+          bmi_c: 'ON'
+          bmi_fortran: 'ON'
+        timeout-minutes: 15
+
+      - name: Prepare to Build Topmodel Library for Ngen
+        run: |
+          # Move files to appropriate directory to build topmodel library
+          rm -rf extern/topmodel/topmodel/*
+          mv ${{runner.temp}}/topmodel/* extern/topmodel/topmodel
+
+      - name: Build Topmodel
+        id: submod_build_4
+        uses: ./.github/actions/ngen-submod-build
+        with:
+          mod-dir: " extern/topmodel/"
+          targets: "topmodelbmi"
+ 
+      - name: Run petbmi, topmodelbmi
+        run: |
+          # Run ngen with topmodel & pet
+          mv ${{ steps.ngen_id1.outputs.build-dir }} ./ngen-build/
+          cp extern/topmodel/topmodel/data/*.dat data
+          inputfile='extern/topmodel/topmodel/data/realization_config_topmodel_pet_ngen.json'
+          ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile
+
+      - name: Run surfacebmi, topmodelbmi
+        run: |
+          # Run ngen with noahowpmod & topmodel
+          inputfile='extern/topmodel/topmodel/data/realization_config_topmodel_ngenCI.json'
+          ./ngen-build/ngen ./data/catchment_data.geojson "cat-27" ./data/nexus_data.geojson "nex-26" $inputfile

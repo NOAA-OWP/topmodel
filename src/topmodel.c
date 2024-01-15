@@ -612,9 +612,8 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
     tch[1]=dist_from_outlet[1]/chvdt;
     for(j=2;j<=num_channels;j++)
      {
-     
       tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
-     } 
+     }
 
     return;
 
@@ -842,7 +841,6 @@ extern void init_water_balance(int num_topodex_values, double dt, double *sr0,
     return;
 }
 
-
 /**
  * Main initialize function. Calls convert_dist_to_histords(), calc_time_delay_histogram(), 
  * 	init_water_balance(), and init_discharge_array()
@@ -931,8 +929,6 @@ double tch[num_channels+1]; //+1 to maintain 1 based indexing used by other rout
 double sumar;
 int ir;
 
-
-
 /* read in run parameters  */
 fgets(subcat,256,in_param_fptr);
 
@@ -940,7 +936,6 @@ printf("subcat: %s\n", subcat);
 
 fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
        szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth);
-
 
 #if TOPMODEL_DEBUG >= 1
   printf("\n\nCalibratable parameters from params*.dat:\n");

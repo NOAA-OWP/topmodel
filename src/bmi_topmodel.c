@@ -434,11 +434,6 @@ static int Update (Bmi *self)
         &topmodel->sump,&topmodel->sumae,&topmodel->sumq,&topmodel->sumrz,&topmodel->sumuz,
         &topmodel->quz, &topmodel->qb, &topmodel->qof, &topmodel->p, &topmodel->ep );
 
-// BCHOAT, delete these lines once confirmed okay
-//    if ((topmodel->stand_alone == FALSE) && (topmodel->yes_print_output == TRUE)){
-//        fprintf(topmodel->out_hyd_fptr,"%d %lf %lf\n",topmodel->current_time_step,topmodel->Qobs[1],topmodel->Q[1]);
-//    }      
-
     return BMI_SUCCESS;
 }
 
@@ -995,8 +990,11 @@ static int Set_value (Bmi *self, const char *name, void *array)
         // assign self->data to topmodel pointer
         topmodel = (topmodel_model *) self->data;
 
+<<<<<<< HEAD
 
 #if TOPMODEL_DEBUG >= 1
+=======
+>>>>>>> origin/master
         printf("\n\n\nAT LEAST ONE OF THE FOLLOWING CALIBRATABLE PARAMETERS "
 			"WAS PROVIDED IN THE REALIZATION.JSON FILE!\n");
 
@@ -1014,7 +1012,10 @@ static int Set_value (Bmi *self, const char *name, void *array)
         printf("szm = %f\n", topmodel->szm); 
 	printf("sr0 = %f\n", topmodel->sr0);
         printf("t0 = %f\n\n\n\n", topmodel->t0);
+<<<<<<< HEAD
 #endif
+=======
+>>>>>>> origin/master
 
     }
 
