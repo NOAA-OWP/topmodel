@@ -1,4 +1,4 @@
-# Test ngen-cfe integration
+# Test ngen-topmodel integration
 
 name: Ngen Integration Tests
 
@@ -52,6 +52,7 @@ jobs:
         with:
           mod-dir: " extern/noah-owp-modular/"
           targets: "surfacebmi"
+          cmake-flags: "-DNGEN_IS_MAIN_PROJECT:BOOL=ON"
 
       - name: Build ISO C Fortran BMI
         id: submod_build_2
@@ -97,6 +98,7 @@ jobs:
         with:
           mod-dir: " extern/topmodel/"
           targets: "topmodelbmi"
+          initialize: "false"
  
       - name: Run petbmi, topmodelbmi
         run: |
