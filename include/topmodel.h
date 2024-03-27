@@ -53,8 +53,7 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand
 	      double **stor_unsat_zone, double **deficit_local,
         double **deficit_root_zone,double *szq,double **Q,
         double *sbar, double *bal);
-
-                 
+              
 extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
                 double **pe, double **Qobs, double **Q, double **contrib_area);
                    
@@ -73,7 +72,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
                 int *num_topodex_values,int *num_channels,double *area,
                 double **dist_area_lnaotb, double **lnaotb, int yes_print_output,
-                double **cum_dist_area_with_dist, double *tl, 
+                int stand_alone, double **cum_dist_area_with_dist, double *tl, 
                 double **dist_from_outlet);
                   
 extern void expinf(int irof, int it, int rint, double *df, double *cumf,
@@ -83,7 +82,7 @@ extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
                 int nstep, double *Qobs, double *Q, 
                 int yes_print_output);
 
-extern void water_balance(FILE *output_fptr, int yes_print_output,
+extern void water_balance(FILE *output_fptr, int yes_print_output, int stand_alone,
                 char *subcat, double *bal, double *sbar, double *sump,
                 double *sumae, double *sumq, double *sumrz, double *sumuz);
 

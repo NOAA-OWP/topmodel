@@ -164,7 +164,7 @@ max_contrib_area=0.0;
 /* Note: original source code starts for-loop over nstep here
    Also recall that bmi adaptation removes submatchment loop
    which lived in topmod9502.c main() function */
-if(yes_print_output==TRUE && current_time_step==1)
+if(yes_print_output==TRUE && current_time_step==1 && stand_alone==TRUE)
   {
   fprintf(output_fptr,
  "it      p        ep       q(it)       quz      q       sbar       qof\n");
@@ -340,7 +340,7 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
   //Add current time flow to mass balance variable
   *sumq += Q[it];
 /* BMI Adaption: replace nstep with current_time_step */
-if(yes_print_output==TRUE && in<=current_time_step)
+if(yes_print_output==TRUE && in<=current_time_step && stand_alone==TRUE)
   { 
   fprintf(output_fptr,"%d %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e\n",
           current_time_step, (*p), (*ep), Q[it], (*quz), (*qb), (*sbar), (*qof));
@@ -368,7 +368,7 @@ return;
 
 }
 
-extern void water_balance(FILE *output_fptr, int yes_print_output, 
+extern void water_balance(FILE *output_fptr, int yes_print_output, int stand_alone,
                 char *subcat,double *bal, double *sbar, double *sump, 
                 double *sumae, double *sumq, double *sumrz, double *sumuz)
 {
@@ -383,8 +383,8 @@ extern void water_balance(FILE *output_fptr, int yes_print_output,
           (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
 #endif
 
-  if (yes_print_output==TRUE)
-    {
+  if (yes_print_output==TRUE && stand_alone==TRUE) 
+  {
     fprintf(output_fptr,"\nWater Balance for Subcatchment: %s\n",subcat);
     fprintf(output_fptr,
     "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
@@ -421,8 +421,7 @@ d_alloc(Qobs,(*nstep));
 //NJF This is dangerous, there is no validation between nstep and
 //number of historgram ordinates, which is used to iterate Q in later steps
 //so this could easily overflow if nstep is smaller than historgram ords
-d_alloc(Q,(*nstep)); //NJF TODO validate that this works correctly
-                     //When used in "stand alone" mode
+d_alloc(Q,(*nstep)); 
 d_alloc(contrib_area,(*nstep));
 
 //---------------------------------------
@@ -441,7 +440,7 @@ return;
 extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
                int *num_topodex_values,int *num_channels,double *area,
                double **dist_area_lnaotb,double **lnaotb, int yes_print_output,
-               double **cum_dist_area_with_dist,double *tl,
+               int stand_alone, double **cum_dist_area_with_dist,double *tl,
                double **dist_from_outlet)
 {
 /**************************************************************
@@ -458,7 +457,7 @@ int j;
 fgets(subcat,256,subcat_fptr); /* do twice to read in line-feed */
 fgets(subcat,256,subcat_fptr);
 
-if (yes_print_output == TRUE) 
+if (yes_print_output == TRUE && stand_alone == TRUE) 
   {
     fprintf(output_fptr,"Subcatchment : %s\n",subcat);
   }  
@@ -540,7 +539,7 @@ for(j=1;j<=(*num_channels);j++)
 /*  dist_from_outlet[1] is distance from subcatchment outlet */
 /*  cum_dist_area_with_dist[1] = 0. */
 
-if(yes_print_output==TRUE)
+if(yes_print_output==TRUE && stand_alone==TRUE)
   {
   fprintf(output_fptr,"TL = %8.2lf\n",(*tl));
   fprintf(output_fptr,"SUMAC = %8.2lf\n",sumac);
@@ -555,8 +554,9 @@ return;
  * to enable calibratable parameters to be updated.
  * BChoat 2023/08/29
  */
-/** 
 
+
+/** 
  * Function to convert distance/area form to time delay histogram ordinates
  * 
  * Converts parameters to m/time step DT
@@ -935,7 +935,6 @@ double tch[num_channels+1]; //+1 to maintain 1 based indexing used by other rout
 double sumar;
 int ir;
 
-
 /* read in run parameters  */
 fgets(subcat,256,in_param_fptr);
 
@@ -944,21 +943,22 @@ printf("subcat: %s\n", subcat);
 fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
        szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth);
 
-
-printf("\n\nCalibratable parameters from params*.dat:\n");
-
-printf("\nET and recharge:\n");
-printf("srmax = %f\n", *srmax);
-printf("td = %f\n", *td);
-
-printf("\nDischarge:\n");
-printf("chv = %f\n", *chv);
-printf("rv = %f\n", *rv);
-
-printf("\nWater balance:\n");
-printf("szm = %f\n", *szm);
-printf("sr0 = %f\n", *sr0);
-printf("t0 = %f\n\n", *t0);
+#if TOPMODEL_DEBUG >= 1
+  printf("\n\nCalibratable parameters from params*.dat:\n");
+  
+  printf("\nET and recharge:\n");
+  printf("srmax = %f\n", *srmax);
+  printf("td = %f\n", *td);
+  
+  printf("\nDischarge:\n");
+  printf("chv = %f\n", *chv);
+  printf("rv = %f\n", *rv);
+  
+  printf("\nWater balance:\n");
+  printf("szm = %f\n", *szm);
+  printf("sr0 = %f\n", *sr0);
+  printf("t0 = %f\n\n", *t0);
+#endif
 
 //NJF num_channels is the value provided (SHOULD COME FROM TREAD)
 //Convert distance/area form to time delay histogram ordinates
@@ -982,7 +982,7 @@ init_water_balance(num_topodex_values,
 				stor_unsat_zone, szq, 
 				deficit_local, deficit_root_zone, sbar, bal);
 
-if(yes_print_output==TRUE)
+if(yes_print_output==TRUE && stand_alone == TRUE)
   {
 
   // calculate sum of hist ords for printing to output file
