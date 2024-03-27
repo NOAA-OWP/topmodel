@@ -650,7 +650,7 @@ extern void calc_time_delay_histogram(int num_channels, double area,
     // declare local variables
     double time, sumar; //, a1, a2;
     int j, ir;
-
+    int tmp_num_ords = *num_time_delay_histo_ords;
     // casting tch[num_channels] to int truncates tch[num_channels] 
     // (e.g., 7.9 becomes 7)
     //Determine how many ROUTING ORDINATES 
@@ -675,8 +675,14 @@ extern void calc_time_delay_histogram(int num_channels, double area,
 
     if((*time_delay_histogram) == NULL){
       d_alloc(time_delay_histogram, *num_time_delay_histo_ords);
-    } //FIXME always free/realloc
-      //If not, the caller must ensure the correct size of time_delay_histogram prior to calling
+    } else if(tmp_num_ords != *num_time_delay_histo_ords){
+      //caller cannot know if num_time_delay_histo_ords has changed
+      //since it is computed in this function, so if the histogram exists
+      //and the number or ords has changed based on the calculations in this
+      //function, we will re-allocate it.
+      free(*time_delay_histogram);
+      d_alloc(time_delay_histogram, *num_time_delay_histo_ords);
+    }
   
     //NJF so we build histogram with ordinates between 1 and "distance" between first and last channel
     for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
