@@ -402,7 +402,9 @@ static int Initialize (Bmi *self, const char *cfg_file)
     topmodel = (topmodel_model *) self->data;
 
     // Read and setup data from file
-    init_config(cfg_file, topmodel);
+    int ret = init_config(cfg_file, topmodel);
+    if (ret != BMI_SUCCESS)
+        return ret;
 
     // Initialize model varables which are cumulatively defined
     topmodel->current_time_step=0;
