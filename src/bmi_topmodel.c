@@ -172,7 +172,7 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     /* BMI Adaption: No longer needs to be named "topmod.run" */
     if((model->control_fptr=fopen(config_file,"r"))==NULL){
         printf("Can't open control file named %s\n",config_file);      
-        exit(-9);
+        return BMI_FAILURE;
     }
 
     /* BMI Adaption: Include stand_alone (bool) in config
@@ -203,7 +203,7 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     if (model->stand_alone == TRUE){
         if((model->input_fptr=fopen(input_fname,"r"))==NULL){
             printf("Can't open input file named %s\n",input_fname);
-            exit(-9);
+            return BMI_FAILURE;
         }
     };
 
@@ -218,12 +218,12 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     //Attempt to read the parsed input file names, bail if they cannot be read/created
     if((model->subcat_fptr=fopen(subcat_fname,"r"))==NULL){       
         printf("Can't open subcat file named %s\n",subcat_fname);
-        exit(-9);
+        return BMI_FAILURE;
     }
 
     if((model->params_fptr=fopen(params_fname,"r"))==NULL){
         printf("Can't open params file named %s\n",params_fname);   
-        exit(-9);
+        return BMI_FAILURE;
     }
     
     /* READ IN SUBCATCHMENT TOPOGRAPHIC DATA */
@@ -238,12 +238,12 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     if(model->yes_print_output == TRUE && model->stand_alone == TRUE){
         if((model->output_fptr=fopen(output_fname,"w"))==NULL){           
             printf("Can't open output file named %s\n",output_fname);
-            exit(-9);
+            return BMI_FAILURE;
         }
 
         if((model->out_hyd_fptr=fopen(out_hyd_fname,"w"))==NULL){          
             printf("Can't open output file named %s\n",out_hyd_fname);
-            exit(-9);
+            return BMI_FAILURE;
         }
 
         fprintf(model->output_fptr,"%s\n",model->title);
@@ -266,7 +266,10 @@ int read_init_config(const char* config_file, topmodel_model* model) {
 
 int init_config(const char* config_file, topmodel_model* model)
 {
-    read_init_config(config_file,model);
+    int ret = BMI_SUCCESS;
+    ret = read_init_config(config_file,model);
+    if (ret != BMI_SUCCESS)
+        return ret;
     
     if (model->stand_alone == TRUE){
         /* READ IN nstep, DT and RAINFALL, PE, QOBS INPUTS */
