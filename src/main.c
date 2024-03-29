@@ -73,5 +73,6 @@ int main(void)
 #endif
   model->finalize(model);
 
+  free(model);
   return 0;
 }
