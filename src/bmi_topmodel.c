@@ -406,16 +406,17 @@ static int Initialize (Bmi *self, const char *cfg_file)
     if (ret != BMI_SUCCESS)
         return ret;
 
-    // Initialize model varables which are cumulatively defined
+    // Initialize model variables which are cumulatively defined
     topmodel->current_time_step=0;
     topmodel->sump = 0.0;
     topmodel->sumae = 0.0;
     topmodel->sumq = 0.0;
 
+    topmodel->max_contrib_area=0.0;
+
 /*    irof=0;
 rex=0.0;
 cumf=0.0;
-max_contrib_area=0.0;
 sump=0.0;
 sumae=0.0;
 sumq=0.0;
