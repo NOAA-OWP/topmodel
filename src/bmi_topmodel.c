@@ -186,18 +186,27 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     path/to/topmod.out
     path/to/hyd.out */
 
+    int ret = 0;
+    char *str_ret = NULL;
+
     //Read the stand_alone T/F
     //note: newline is needed here!
-    fscanf(model->control_fptr,"%d\n",&model->stand_alone);
+    ret = fscanf(model->control_fptr,"%d\n",&model->stand_alone);
+    if (ret != 1)
+        return BMI_FAILURE;
 
     //Read the title line, up to 255 characters, of the the file
-    fgets(model->title,256,model->control_fptr);
+    str_ret = fgets(model->title,256,model->control_fptr);
+    if (str_ret == NULL)
+        return BMI_FAILURE;
     
     //Read a string, breaks on whitespace (or newline)
     //These must be done IN ORDER
     char input_fname[MAX_FILENAME_LENGTH];
     //It might be worth always scanning this line, but only opening the file if not STAND_ALONE
-    fscanf(model->control_fptr,"%s",input_fname);
+    ret = fscanf(model->control_fptr,"%s",input_fname);
+    if (ret != 1)
+        return BMI_FAILURE;
     
     //If stand_alone TRUE, read inputs from input file
     if (model->stand_alone == TRUE){
@@ -208,12 +217,20 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     };
 
     char subcat_fname[MAX_FILENAME_LENGTH],params_fname[MAX_FILENAME_LENGTH];
-    fscanf(model->control_fptr,"%s",subcat_fname);
-    fscanf(model->control_fptr,"%s",params_fname);
+    ret = fscanf(model->control_fptr,"%s",subcat_fname);
+    if (ret != 1)
+        return BMI_FAILURE;
+    ret = fscanf(model->control_fptr,"%s",params_fname);
+    if (ret != 1)
+        return BMI_FAILURE;
 
     char output_fname[MAX_FILENAME_LENGTH],out_hyd_fname[MAX_FILENAME_LENGTH];
-    fscanf(model->control_fptr,"%s",output_fname);
-    fscanf(model->control_fptr,"%s",out_hyd_fname);
+    ret = fscanf(model->control_fptr,"%s",output_fname);
+    if (ret != 1)
+        return BMI_FAILURE;
+    ret = fscanf(model->control_fptr,"%s",out_hyd_fname);
+    if (ret != 1)
+        return BMI_FAILURE;
 
     //Attempt to read the parsed input file names, bail if they cannot be read/created
     if((model->subcat_fptr=fopen(subcat_fname,"r"))==NULL){       
@@ -232,7 +249,9 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     //      If framework will never want these out files, 
     //      just use model->stand_alone as control switch
     //      move line to init_config() with others
-    fscanf(model->subcat_fptr,"%d %d %d",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
+    ret = fscanf(model->subcat_fptr,"%d %d %d",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
+    if (ret != 3)
+        return BMI_FAILURE;
 
     // Attempt to read the output file names only if printing to file
     if(model->yes_print_output == TRUE && model->stand_alone == TRUE){
@@ -261,7 +280,6 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     // Output files (if opened) closed in finalize()
 
     return BMI_SUCCESS;
-
 }
 
 int init_config(const char* config_file, topmodel_model* model)
