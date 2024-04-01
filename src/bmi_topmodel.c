@@ -291,8 +291,10 @@ int init_config(const char* config_file, topmodel_model* model)
     
     if (model->stand_alone == TRUE){
         /* READ IN nstep, DT and RAINFALL, PE, QOBS INPUTS */
-        inputs(model->input_fptr, &model->nstep, &model->dt, &model->rain, &model->pe, 
-            &model->Qobs, &model->Q, &model->contrib_area);
+        ret = inputs(model->input_fptr, &model->nstep, &model->dt, &model->rain, &model->pe,
+                     &model->Qobs, &model->Q, &model->contrib_area);
+        if (ret != 0)
+            return BMI_FAILURE;
         fclose(model->input_fptr);
     }
     else {
@@ -324,13 +326,15 @@ int init_config(const char* config_file, topmodel_model* model)
 
     fclose(model->subcat_fptr);
  
-    init(model->params_fptr,model->output_fptr,model->subcat,model->stand_alone, model->num_channels, model->num_topodex_values,
+    ret = init(model->params_fptr,model->output_fptr,model->subcat,model->stand_alone, model->num_channels, model->num_topodex_values,
         model->yes_print_output,model->area,&model->time_delay_histogram,model->cum_dist_area_with_dist,
         model->dt,model->tl,model->dist_from_outlet,&model->num_time_delay_histo_ords,&model->num_delay,
 	&model->szm,&model->t0,&model->chv,&model->rv,&model->td, &model->srmax,
 	&model->Q0,&model->sr0,&model->infex,&model->xk0,&model->hf,&model->dth,
 	&model->stor_unsat_zone,&model->deficit_local,&model->deficit_root_zone,
         &model->szq,&model->Q,&model->sbar, &model->bal);
+    if (ret != 0)
+        return BMI_FAILURE;
     fclose(model->params_fptr);
 
 

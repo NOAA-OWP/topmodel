@@ -396,9 +396,14 @@ return;
 
 }
 
-extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **r,
+#define TOPMODEL_CHECK_FGETS(x) do { str_ret = x; if (str_ret == NULL) return 1; } while (0)
+#define TOPMODEL_CHECK_FSCANF(k, x) do { ret = x; if (ret != k) return 1; } while (0)
+
+extern int inputs(FILE *input_fptr, int *nstep, double *dt, double **r,
                    double **pe, double **Qobs, double **Q, double **contrib_area)
 {
+char* str_ret;
+int ret;
 /***************************************************************
 *
       SUBROUTINE INPUTS
@@ -406,8 +411,7 @@ extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **r,
 *  This subroutine must read in rainfall, pe and observed 
 *  discharges for T = 1,NSTEP with time step DT hours
 ****************************************************************/
-int i;
-fscanf(input_fptr,"%d %lf",nstep,dt);
+TOPMODEL_CHECK_FSCANF(2, fscanf(input_fptr,"%d %lf",nstep,dt));
 /* allocate memory for arrays */
 
 /* TODO: When running on large scales, modify to allocate size via 'num_time_delay_histo_ords'
@@ -427,22 +431,24 @@ d_alloc(contrib_area,(*nstep));
 //---------------------------------------
 // Note: Loop count starts at 1, not 0!
 //---------------------------------------
-for(i=1;i<=(*nstep);i++)
+for(int i=1;i<=(*nstep);i++)
   {
-  fscanf(input_fptr,"%lf %lf %lf",&(*r)[i],&(*pe)[i],&(*Qobs)[i]);
-  
+  TOPMODEL_CHECK_FSCANF(3, fscanf(input_fptr,"%lf %lf %lf",&(*r)[i],&(*pe)[i],&(*Qobs)[i]));
+
   (*Q)[i]=0.0;
   }
 
-return;
+return 0;
 }
 
-extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
+extern int tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat,
                int *num_topodex_values,int *num_channels,double *area,
                double **dist_area_lnaotb,double **lnaotb, int yes_print_output,
                int stand_alone, double **cum_dist_area_with_dist,double *tl,
                double **dist_from_outlet)
 {
+char* str_ret;
+int ret;
 /**************************************************************
 
       SUBROUTINE TREAD
@@ -454,14 +460,14 @@ int j;
 
 // NJF This won't work unless the first line of subcat file has already been consumed
 // Should probably document this behavior for this function...
-fgets(subcat,256,subcat_fptr); /* do twice to read in line-feed */
-fgets(subcat,256,subcat_fptr);
+TOPMODEL_CHECK_FGETS(fgets(subcat,256,subcat_fptr)); /* do twice to read in line-feed */
+TOPMODEL_CHECK_FGETS(fgets(subcat,256,subcat_fptr));
 
 if (yes_print_output == TRUE && stand_alone == TRUE) 
   {
     fprintf(output_fptr,"Subcatchment : %s\n",subcat);
   }  
-fscanf(subcat_fptr,"%d %lf",num_topodex_values,area);
+TOPMODEL_CHECK_FSCANF(2, fscanf(subcat_fptr,"%d %lf",num_topodex_values,area));
 
 //Setup the topoindex arrays
 if(*num_topodex_values > WARN_TOPODEX_INCREMENTS){
@@ -488,7 +494,7 @@ if((*lnaotb) == NULL){
 tarea = 0; //Accumulate area as it is read
 for(j=1;j<=(*num_topodex_values);j++)
   {
-  fscanf(subcat_fptr,"%lf %lf",&(*dist_area_lnaotb)[j],&(*lnaotb)[j]);
+  TOPMODEL_CHECK_FSCANF(2, fscanf(subcat_fptr,"%lf %lf",&(*dist_area_lnaotb)[j],&(*lnaotb)[j]));
   tarea += (*dist_area_lnaotb)[j];
   }
 /*  dist_area_lnaotb IS DISTRIBUTION OF AREA WITH LN(A/TANB) */
@@ -512,7 +518,7 @@ for(j=2;j<=(*num_topodex_values);j++)
 (*dist_area_lnaotb)[(*num_topodex_values)+1]=0.0;
 
 /*  READ CHANNEL NETWORK DATA */
-fscanf(subcat_fptr,"%d",num_channels);
+TOPMODEL_CHECK_FSCANF(1, fscanf(subcat_fptr,"%d",num_channels));
 
 if(*num_channels > WARN_NUM_SUBCATCHMENTS){
   printf("WARNING: Number of channels, %d, is greater than %d\n",
@@ -532,8 +538,8 @@ if((*dist_from_outlet) == NULL){
 
 for(j=1;j<=(*num_channels);j++)
   {
-  fscanf(subcat_fptr,"%lf %lf",
-                 &(*cum_dist_area_with_dist)[j],&(*dist_from_outlet)[j]);
+  TOPMODEL_CHECK_FSCANF(2, fscanf(subcat_fptr,"%lf %lf",
+                                  &(*cum_dist_area_with_dist)[j],&(*dist_from_outlet)[j]));
   }
 /*  cum_dist_area_with_dist IS CUMULATIVE DISTRIBUTION OF AREA WITH dist_from_outlet */
 /*  dist_from_outlet[1] is distance from subcatchment outlet */
@@ -545,7 +551,7 @@ if(yes_print_output==TRUE && stand_alone==TRUE)
   fprintf(output_fptr,"SUMAC = %8.2lf\n",sumac);
   }
 
-return;
+return 0;
 }
 
 
@@ -916,7 +922,7 @@ extern void init_water_balance(int num_topodex_values, double dt, double *sr0,
  * @params[out] bal, pointer of type double, residual of water balance 
  * 
  */
-extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand_alone,
+extern int init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand_alone,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram, double *cum_dist_area_with_dist, 
 	      double dt, double tl, double *dist_from_outlet, int *num_time_delay_histo_ords,
@@ -925,7 +931,8 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand
 	      double **stor_unsat_zone, double **deficit_local, double **deficit_root_zone,double *szq, double **Q,
               double *sbar, double *bal)
 {
-
+char* str_ret;
+int ret;
 /***************************************************************
       SUBROUTINE INIT
 
@@ -936,12 +943,12 @@ double sumar;
 int ir;
 
 /* read in run parameters  */
-fgets(subcat,256,in_param_fptr);
+TOPMODEL_CHECK_FGETS(fgets(subcat,256,in_param_fptr));
 
 printf("subcat: %s\n", subcat);
 
-fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
-       szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth);
+TOPMODEL_CHECK_FSCANF(12, fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
+                                 szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth));
 
 #if TOPMODEL_DEBUG >= 1
   printf("\n\nCalibratable parameters from params*.dat:\n");
@@ -1008,7 +1015,7 @@ if(yes_print_output==TRUE && stand_alone == TRUE)
   }
   
 
-return;
+return 0;
 }
 
 
