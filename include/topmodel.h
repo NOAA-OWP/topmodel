@@ -42,7 +42,7 @@ extern void init_discharge_array(int stand_alone, int *num_delay, double *Q0, do
 			int *num_time_delay_histo_ords, double **time_delay_histogram,
                         double **Q);
 
-extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand_alone,
+extern int init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand_alone,
 	      int num_channels, int num_topodex_values, int yes_print_output,
 	      double area, double **time_delay_histogram,
 	      double *cum_dist_area_with_dist, double dt, 
@@ -54,7 +54,7 @@ extern void init(FILE *in_param_fptr, FILE *output_fptr, char *subcat, int stand
         double **deficit_root_zone,double *szq,double **Q,
         double *sbar, double *bal);
               
-extern void inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
+extern int inputs(FILE *input_fptr, int *nstep, double *dt, double **rain,
                 double **pe, double **Qobs, double **Q, double **contrib_area);
                    
 extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
@@ -69,7 +69,7 @@ extern void topmod(FILE *output_fptr, int nstep, int num_topodex_values,
                 double *sump, double *sumae, double *sumq, double *sumrz, double *sumuz,
                 double *quz, double *qb, double *qof, double *p, double *ep);
 
-extern void tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat, 
+extern int tread(FILE *subcat_fptr,FILE *output_fptr,char *subcat,
                 int *num_topodex_values,int *num_channels,double *area,
                 double **dist_area_lnaotb, double **lnaotb, int yes_print_output,
                 int stand_alone, double **cum_dist_area_with_dist, double *tl, 
