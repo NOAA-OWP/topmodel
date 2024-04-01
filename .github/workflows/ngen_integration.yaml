@@ -99,7 +99,7 @@ jobs:
           mod-dir: " extern/topmodel/"
           targets: "topmodelbmi"
           initialize: "false"
-          cmake-flags: "CFLAGS='-g -fsanitize=address -Werror'"
+          cmake-flags: "-DCMAKE_C_FLAGS='-g -fsanitize=address -Werror'"
  
       - name: Run petbmi, topmodelbmi
         run: |
