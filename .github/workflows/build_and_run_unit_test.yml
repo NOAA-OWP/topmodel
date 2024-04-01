@@ -36,13 +36,13 @@ jobs:
       run: |
         cd ./test
         make clean
-        make 'CFLAGS=-g -fsanitize=address -Werror'
+        make 'CFLAGS=-g -Og -fsanitize=address -Werror'
         ./run_bmi_unit_test
         
     - name: Build and Run Standalone  
       run: |
         cd src/
         make clean
-        make 'CFLAGS=-g -fsanitize=address -Werror'
+        make 'CFLAGS=-g -Og -fsanitize=address -Werror'
         cd ..
         ./run_bmi
