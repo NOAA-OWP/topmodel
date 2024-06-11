@@ -35,8 +35,8 @@ SOFTWARE.
 extern "C" {
 #endif
 
-#define BMI_SUCCESS (0)
-#define BMI_FAILURE (1)
+const static int BMI_SUCCESS = 0;
+const static int BMI_FAILURE = 1;
 
 #define BMI_MAX_UNITS_NAME (2048)
 #define BMI_MAX_TYPE_NAME (2048)
