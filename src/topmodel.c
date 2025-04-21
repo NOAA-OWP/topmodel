@@ -98,6 +98,7 @@
 
 *****************************************************************/
 #include "../include/topmodel.h"
+#include "../include/logger.h"
 
 void shift_Q(double* Q, int num_ordinates){ //NJF Really don't like the +1 size assumption here
   //memmove puts num_ordinates*sizeof(double) bytes starting at Q[1]
@@ -945,7 +946,8 @@ int ir;
 /* read in run parameters  */
 TOPMODEL_CHECK_FGETS(fgets(subcat,256,in_param_fptr));
 
-printf("subcat: %s\n", subcat);
+//printf("subcat: %s\n", subcat);
+Log(INFO, "subcat: %s\n", subcat); 
 
 TOPMODEL_CHECK_FSCANF(12, fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
                                  szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth));
