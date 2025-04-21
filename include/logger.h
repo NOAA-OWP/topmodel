@@ -29,7 +29,7 @@ typedef enum {
     TROUTE,
     SCHISM,
     SFINCS,
-    GC2D,
+    TOPMODEL,
     TOPOFLOW,
     MODULE_COUNT
 } LoggingModule;
@@ -47,7 +47,7 @@ static const char* module_name[MODULE_COUNT] = {
     "TROUTE  ",
     "SCHISM  ",
     "SFINCS  ",
-    "GC2D    ",
+    "TOPMODEL",
     "TOPOFLOW"
 };
 

@@ -111,7 +111,7 @@ void Log(LogLevel messageLevel, const char* message, ...) {
 
         char final_message[1024];
         snprintf(final_message, sizeof(final_message), "%s %s %s%s\n", 
-                 createTimestamp(), module_name[CFE], logType, buffer);
+                 createTimestamp(), module_name[TOPMODEL], logType, buffer);
         
         if (logger->logFile != NULL) {
             fprintf(logger->logFile, "%s", final_message);
@@ -132,7 +132,7 @@ LogLevel GetLogLevel(const char* logLevel) {
 }
 
 void setup_logger() {
-    LogLevel level = ERROR;
+    LogLevel level = INFO;
     Log(ERROR, "Sample Log for LogLevel::%d", level);
     Log(FATAL, "Sample Log for LogLevel::FATAL");
     Log(WARN, "Sample Log for LogLevel::WARN");
@@ -140,10 +140,12 @@ void setup_logger() {
     
     const char* multiline_log = 
         "First line of multiline log:\n"
-        "   Indented second line of multiline log\n"
-        "         Indented third line of multiline log\n"
-        "                Indented fourth line of multiline log";
+        "Second line of multiline log\n"
+        "Third line of multiline log\n"
+        "Fourth line of multiline log";
     Log(INFO, multiline_log);
     
+    level = DEBUG;
     Log(DEBUG, "Sample Log for LogLevel::DEBUG");
+    level = INFO;
 }
