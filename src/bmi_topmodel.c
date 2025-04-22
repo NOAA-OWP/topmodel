@@ -175,6 +175,9 @@ int read_init_config(const char* config_file, topmodel_model* model) {
         Log(FATAL,"Can't open control file named %s\n",config_file);      
         return BMI_FAILURE;
     }
+    else
+        Log(INFO,"config_file=%s\n",config_file);
+
 
     /* BMI Adaption: Include stand_alone (bool) in config
 
@@ -193,14 +196,18 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     //Read the stand_alone T/F
     //note: newline is needed here!
     ret = fscanf(model->control_fptr,"%d\n",&model->stand_alone);
-    if (ret != 1)
+    if (ret != 1) 
         return BMI_FAILURE;
-
+    else
+        Log(INFO,"Standalone=%s\n",(model->stand_alone?"true":"false"));
+        
     //Read the title line, up to 255 characters, of the the file
     str_ret = fgets(model->title,256,model->control_fptr);
-    if (str_ret == NULL)
+    if (str_ret == NULL) 
         return BMI_FAILURE;
-    
+    else
+        Log(INFO,"Title=%s\n",model->title);
+        
     //Read a string, breaks on whitespace (or newline)
     //These must be done IN ORDER
     char input_fname[MAX_FILENAME_LENGTH];
@@ -208,7 +215,9 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     ret = fscanf(model->control_fptr,"%s",input_fname);
     if (ret != 1)
         return BMI_FAILURE;
-    
+    else
+        Log(INFO,"Input file name=%s\n",input_fname);
+ 
     //If stand_alone TRUE, read inputs from input file
     if (model->stand_alone == TRUE){
         if((model->input_fptr=fopen(input_fname,"r"))==NULL){
@@ -253,6 +262,8 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     ret = fscanf(model->subcat_fptr,"%d %d %d",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
     if (ret != 3)
         return BMI_FAILURE;
+    else
+        Log(INFO,"yes_print_output=%s\n",(model->yes_print_output?"true":"false"));
 
     // Attempt to read the output file names only if printing to file
     if(model->yes_print_output == TRUE && model->stand_alone == TRUE){

@@ -1187,7 +1187,7 @@ extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
     f1+=pow((Q[it]-Qobs[it]),2.0);
     f2=f2 + fabs(Q[it]-Qobs[it]);
     if (yes_print_output == TRUE){
-      Log(INFO,"%d %lf %lf\n",it,Qobs[it],Q[it]);
+      Log(INFO,"it=%d Qobs=%lf Q=%lf\n",it,Qobs[it],Q[it]);
     }
   }
   qbar=sumq/(double)nstep;
