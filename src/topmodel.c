@@ -148,7 +148,7 @@ double ex[num_topodex_values+1]; //+1 to maintin 1 based array indexing
 //NJF TODO consider warning on all program limits here since this is essentially
 //"the model" where those assumptions may not be valid...
 if(num_topodex_values > WARN_TOPODEX_INCREMENTS){
-  printf("WARNING: num_topodex_values, %d, is greater than %d\n",
+  Log(WARN, "num_topodex_values, %d, is greater than %d\n",
          num_topodex_values, WARN_TOPODEX_INCREMENTS);
 }
 int ia,ib,in,irof,it,ir;
@@ -167,8 +167,7 @@ max_contrib_area=0.0;
    which lived in topmod9502.c main() function */
 if(yes_print_output==TRUE && current_time_step==1 && stand_alone==TRUE)
   {
-  fprintf(output_fptr,
- "it      p        ep       q(it)       quz      q       sbar       qof\n");
+  Log(INFO,"it      p        ep       q(it)       quz      q       sbar       qof\n");
   }
 
 /* BMI Adaption: Set iteration to bmi's current_time_step (standalone) or 1 (framework)
@@ -343,7 +342,7 @@ for(ir=1;ir<=num_time_delay_histo_ords;ir++)
 /* BMI Adaption: replace nstep with current_time_step */
 if(yes_print_output==TRUE && in<=current_time_step && stand_alone==TRUE)
   { 
-  fprintf(output_fptr,"%d %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e\n",
+  Log(INFO,"%d %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e %6.4e\n",
           current_time_step, (*p), (*ep), Q[it], (*quz), (*qb), (*sbar), (*qof));
   }
 
@@ -377,19 +376,19 @@ extern void water_balance(FILE *output_fptr, int yes_print_output, int stand_alo
 (*bal)+=(*sbar)+(*sump)-(*sumae)-(*sumq)+(*sumrz)-(*sumuz);
 
 #if TOPMODEL_DEBUG >=1  
-  printf("\nWater Balance for Subcatchment: %s\n",subcat);
-  printf(
+  Log(DEBUG,"Water Balance for Subcatchment: %s\n",subcat);
+  Log(DEBUG,
   "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
-  printf("%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
+  Log(DEBUG,"%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
           (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
 #endif
 
   if (yes_print_output==TRUE && stand_alone==TRUE) 
   {
-    fprintf(output_fptr,"\nWater Balance for Subcatchment: %s\n",subcat);
-    fprintf(output_fptr,
+    Log(INFO,"Water Balance for Subcatchment: %s\n",subcat);
+    Log(INFO,
     "   SUMP       SUMAE      SUMQ       SUMRZ      SUMUZ      SBAR        BAL\n");
-    fprintf(output_fptr,"%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
+    Log(INFO,"%6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e  %6.3e\n",
            (*sump),(*sumae),(*sumq),(*sumrz),(*sumuz),(*sbar),(*bal));
     }
 
@@ -466,13 +465,13 @@ TOPMODEL_CHECK_FGETS(fgets(subcat,256,subcat_fptr));
 
 if (yes_print_output == TRUE && stand_alone == TRUE) 
   {
-    fprintf(output_fptr,"Subcatchment : %s\n",subcat);
+    Log(INFO,"Subcatchment : %s\n",subcat);
   }  
 TOPMODEL_CHECK_FSCANF(2, fscanf(subcat_fptr,"%d %lf",num_topodex_values,area));
 
 //Setup the topoindex arrays
 if(*num_topodex_values > WARN_TOPODEX_INCREMENTS){
-  printf("WARNING: Number of ln(a/tanB) increments,%d, is > than %d\n",
+  Log(WARN,"Number of ln(a/tanB) increments,%d, is > than %d\n",
           *num_topodex_values,
           WARN_TOPODEX_INCREMENTS);
 }
@@ -522,7 +521,7 @@ for(j=2;j<=(*num_topodex_values);j++)
 TOPMODEL_CHECK_FSCANF(1, fscanf(subcat_fptr,"%d",num_channels));
 
 if(*num_channels > WARN_NUM_SUBCATCHMENTS){
-  printf("WARNING: Number of channels, %d, is greater than %d\n",
+  Log(WARN, "Number of channels, %d, is greater than %d\n",
          *num_channels,
          WARN_NUM_SUBCATCHMENTS);
 }
@@ -548,8 +547,8 @@ for(j=1;j<=(*num_channels);j++)
 
 if(yes_print_output==TRUE && stand_alone==TRUE)
   {
-  fprintf(output_fptr,"TL = %8.2lf\n",(*tl));
-  fprintf(output_fptr,"SUMAC = %8.2lf\n",sumac);
+  Log(INFO,"TL = %8.2lf\n",(*tl));
+  Log(INFO,"SUMAC = %8.2lf\n",sumac);
   }
 
 return 0;
@@ -606,7 +605,8 @@ extern void convert_dist_to_histords(const double * const dist_from_outlet, cons
     //This function ASSUMES tch is overallocated by 1 and is indexable from (1, num_channels)
     //validate invariants
     if(num_channels < 1){
-      printf("ERROR: convert_dist_to_histords, num channels < 1, must have at least one channel\n");
+      Log(ERROR,"convert_dist_to_histords, num channels < 1, must have at least one channel\n");
+      Log(ERROR,"Exiting Topmodel\n");
       exit(-1); //TODO return int error code and handle error externally
     }
     // declare local variables 
@@ -675,7 +675,7 @@ extern void calc_time_delay_histogram(int num_channels, double area,
     (*num_time_delay_histo_ords)-=(*num_delay);
 
     if(*num_time_delay_histo_ords > WARN_HISTOGRAM_ORDINATES){
-      printf("WARNING: number of time delay hisogram ordinates, %d, is greater than %d\n", 
+      Log(WARN, "number of time delay hisogram ordinates, %d, is greater than %d\n", 
             *num_time_delay_histo_ords,
             WARN_HISTOGRAM_ORDINATES);
     }
@@ -724,9 +724,10 @@ extern void calc_time_delay_histogram(int num_channels, double area,
     }
     sumar += (*time_delay_histogram)[1];
     if(sumar < 0.99999 || sumar > 1.00001){
-      printf("ERROR: Histogram oridnates do not sum to 1.\n");
-      printf("Check that the correct number of values for cum_dist_area_with_dist and dist_from_outlet are provided.\n");
-      printf("The number of values for each variable should be equal to the number of channels (i.e., num_channels).\n\n");
+      Log(ERROR,"Histogram oridnates do not sum to 1.\n");
+      Log(ERROR,"Check that the correct number of values for cum_dist_area_with_dist and dist_from_outlet are provided.\n");
+      Log(ERROR,"The number of values for each variable should be equal to the number of channels (i.e., num_channels).\n\n");
+      Log(ERROR,"Exiting Topmodel\n");
       exit(-1); //FIXME this fuction should probably return an error code
                 //and the error be handled elsewhere, not just an exit here...
     }
@@ -946,27 +947,25 @@ int ir;
 /* read in run parameters  */
 TOPMODEL_CHECK_FGETS(fgets(subcat,256,in_param_fptr));
 
-//printf("subcat: %s\n", subcat);
 Log(INFO, "subcat: %s\n", subcat); 
 
 TOPMODEL_CHECK_FSCANF(12, fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
                                  szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth));
 
 #if TOPMODEL_DEBUG >= 1
-  printf("\n\nCalibratable parameters from params*.dat:\n");
+    Log(DEBUG, "Calibratable parameters from params*.dat:\n"); 
+    Log(DEBUG, "ET and recharge:\n");
+    Log(DEBUG, "  srmax = %f\n", *srmax);
+    Log(DEBUG, "  td = %f\n", *td);
   
-  printf("\nET and recharge:\n");
-  printf("srmax = %f\n", *srmax);
-  printf("td = %f\n", *td);
+    Log(DEBUG, "Discharge:\n");
+    Log(DEBUG, "  chv = %f\n", *chv);
+    Log(DEBUG, "  rv = %f\n", *rv);
   
-  printf("\nDischarge:\n");
-  printf("chv = %f\n", *chv);
-  printf("rv = %f\n", *rv);
-  
-  printf("\nWater balance:\n");
-  printf("szm = %f\n", *szm);
-  printf("sr0 = %f\n", *sr0);
-  printf("t0 = %f\n\n", *t0);
+    Log(DEBUG, "Water balance:\n");
+    Log(DEBUG, "  szm = %f\n", *szm);
+    Log(DEBUG, "  sr0 = %f\n", *sr0);
+    Log(DEBUG, "  t0 = %f\n\n", *t0);
 #endif
 
 //NJF num_channels is the value provided (SHOULD COME FROM TREAD)
@@ -1001,19 +1000,17 @@ if(yes_print_output==TRUE && stand_alone == TRUE)
     }
   sumar += (*time_delay_histogram)[1];
 
-  fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
-  fprintf(output_fptr,"Subcatchment routing data:\n");
-  fprintf(output_fptr,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
-  fprintf(output_fptr,"Sum of Histogram ordinates: %10.4lf\n",sumar);
+  Log(INFO,"SZQ =  %12.5lf\n",(*szq));
+  Log(INFO,"Subcatchment routing data:\n");
+  Log(INFO,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
+  Log(INFO,"Sum of Histogram ordinates: %10.4lf\n",sumar);
   for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
     {
-    fprintf(output_fptr,"%12.5lf ",(*time_delay_histogram)[ir]);
+    Log(INFO,"%12.5lf ",(*time_delay_histogram)[ir]);
     }
-  fprintf(output_fptr,"\n");
-   
-  fprintf(output_fptr,"Initial BAL         %12.5f\n",(*bal));
-  fprintf(output_fptr,"Initial SBAR        %12.5f\n",(*sbar));
-  fprintf(output_fptr,"Initial SR0         %12.5f\n",(*sr0));
+  Log(INFO,"Initial BAL         %12.5f\n",(*bal));
+  Log(INFO,"Initial SBAR        %12.5f\n",(*sbar));
+  Log(INFO,"Initial SR0         %12.5f\n",(*sr0));
   }
   
 
@@ -1096,7 +1093,8 @@ if(irof!=1)
         }
       if(i==20)
         {
-        printf("Max number of iterations exceeded\n");
+        Log(ERROR,"Max number of iterations exceeded in expinf()\n");
+        Log(ERROR,"Exiting Topmodel\n");
         exit(-9);  /* stop the program */
         }
       }
@@ -1144,8 +1142,9 @@ if(tp<=(double)it*dt)
     if(fabs(*df)<e) break;
     if(i==20)
       {
-      printf("Max number of iterations exceeded\n");
-      exit(-9);  /* stop the program */
+        Log(ERROR,"Max number of iterations exceeded calculating sum of series terms in expinf().\n");
+        Log(ERROR,"Exiting Topmodel\n");
+        exit(-9);  /* stop the program */
       }
     }
   if(f<(*cumf+rint))
@@ -1188,7 +1187,7 @@ extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
     f1+=pow((Q[it]-Qobs[it]),2.0);
     f2=f2 + fabs(Q[it]-Qobs[it]);
     if (yes_print_output == TRUE){
-      fprintf(out_hyd_fptr,"%d %lf %lf\n",it,Qobs[it],Q[it]);
+      Log(INFO,"%d %lf %lf\n",it,Qobs[it],Q[it]);
     }
   }
   qbar=sumq/(double)nstep;
@@ -1198,18 +1197,18 @@ extern void results(FILE *output_fptr, FILE *out_hyd_fptr,
 
 /* BMI Adaption: Console prints based on macro setting*/
 #if TOPMODEL_DEBUG >=1  
-  printf("Objective function values:\n");
-  printf("SSE %e    NSE %7.5lf   F2 %e\n",f1,nse,f2);
-  printf("Mean Obs Q %e   Variance Obs Q %e\n",qbar,varq);
-  printf("    Error Variance %e\n",vare);
+  Log(DEBUG,"Objective function values:\n");
+  Log(DEBUG,"SSE %e    NSE %7.5lf   F2 %e\n",f1,nse,f2);
+  Log(DEBUG,"Mean Obs Q %e   Variance Obs Q %e\n",qbar,varq);
+  Log(DEBUG,"    Error Variance %e\n",vare);
 #endif
 
   /* BMI Adaption: All file prints based on yes_print_output*/
   if (yes_print_output == TRUE){
-    fprintf(output_fptr,"Objective function values:\n");
-    fprintf(output_fptr,"F1 %e    NSE %7.5lf   F2 %e\n",f1,nse,f2);
-    fprintf(output_fptr,"Mean Obs Q %e   Variance Obs Q %e\n",qbar,varq);
-    fprintf(output_fptr,"    Error Variance %e\n",vare);
+    Log(INFO,"Objective function values:\n");
+    Log(INFO,"F1 %e    NSE %7.5lf   F2 %e\n",f1,nse,f2);
+    Log(INFO,"Mean Obs Q %e   Variance Obs Q %e\n",qbar,varq);
+    Log(INFO,"    Error Variance %e\n",vare);
   }
 
 return;
@@ -1228,7 +1227,8 @@ int error=0;
 
 if ((rows==0)||(cols==0))
   {
-  printf("Error: Attempting to allocate array of size 0\n");
+  Log(ERROR,"Error: Attempting to allocate array of size 0");
+  Log(ERROR,"Exiting Topmodel\n");
   exit(-9);
   }
 
@@ -1264,7 +1264,8 @@ int error=0;
 
 if ((rows==0)||(cols==0))
   {
-  printf("Error: Attempting to allocate array of size 0\n");
+  Log(ERROR,"Error: Attempting to allocate array of size 0\n");
+  Log(ERROR,"Exiting Topmodel\n");
   exit(-9);
   }
 
@@ -1302,7 +1303,7 @@ void d_alloc(double **var, int size)
    *var = (double *)malloc(size * sizeof(double));
    if (*var == NULL)
       {
-      printf("Problem allocating memory for array in d_alloc.\n");
+      Log(ERROR,"Problem allocating memory for array in d_alloc\n");
       return;
       }
    else memset(*var,0,size*sizeof(double));
@@ -1320,7 +1321,7 @@ void i_alloc(int **var, int size)
    *var = (int *)malloc(size * sizeof(int));
    if (*var == NULL)
       {
-      printf("Problem allocating memory in i_alloc\n");
+      Log(ERROR,"Problem allocating memory in i_alloc\n");
       return; 
       }
    else memset(*var,0,size*sizeof(int));

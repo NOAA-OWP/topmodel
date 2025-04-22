@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include "logger.h"
+#include <ctype.h>
 
 #define MODULE_COUNT 14
 
@@ -88,6 +89,21 @@ Logger* GetInstance() {
     return loggerInstance;
 }
 
+void TrimToOneNewline(char *str, size_t max_len) {
+    size_t len = strlen(str);
+
+    // Strip trailing whitespace including \n, \r, spaces, tabs
+    while (len > 0 && isspace((unsigned char)str[len - 1])) {
+        str[--len] = '\0';
+    }
+
+    // Ensure room to add a newline
+    if (len + 1 < max_len) {
+        str[len] = '\n';
+        str[len + 1] = '\0';
+    }
+}
+
 void Log(LogLevel messageLevel, const char* message, ...) {
     Logger* logger = GetInstance();
     va_list arglist;
@@ -113,6 +129,8 @@ void Log(LogLevel messageLevel, const char* message, ...) {
         snprintf(final_message, sizeof(final_message), "%s %s %s%s\n", 
                  createTimestamp(), module_name[TOPMODEL], logType, buffer);
         
+        TrimToOneNewline(final_message, sizeof(final_message));
+
         if (logger->logFile != NULL) {
             fprintf(logger->logFile, "%s", final_message);
             fflush(logger->logFile);

@@ -62,5 +62,6 @@ void Log(LogLevel messageLevel, const char* message, ...);
 LogLevel GetLogLevel(const char* logLevel);
 char* createTimestamp();
 void setup_logger(void);
+void TrimToOneNewline(char *str, size_t max_len);
 
 #endif
