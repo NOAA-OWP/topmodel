@@ -1,6 +1,7 @@
 #include "../include/topmodel.h" 
 #include "../include/bmi.h" 
 #include "../include/bmi_topmodel.h"
+#include "../include/logger.h"
 
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
@@ -171,9 +172,12 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     // Open the primary config file
     /* BMI Adaption: No longer needs to be named "topmod.run" */
     if((model->control_fptr=fopen(config_file,"r"))==NULL){
-        printf("Can't open control file named %s\n",config_file);      
+        Log(FATAL,"Can't open control file named %s\n",config_file);      
         return BMI_FAILURE;
     }
+    else
+        Log(INFO,"config_file=%s\n",config_file);
+
 
     /* BMI Adaption: Include stand_alone (bool) in config
 
@@ -192,14 +196,18 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     //Read the stand_alone T/F
     //note: newline is needed here!
     ret = fscanf(model->control_fptr,"%d\n",&model->stand_alone);
-    if (ret != 1)
+    if (ret != 1) 
         return BMI_FAILURE;
-
+    else
+        Log(INFO,"Standalone=%s\n",(model->stand_alone?"true":"false"));
+        
     //Read the title line, up to 255 characters, of the the file
     str_ret = fgets(model->title,256,model->control_fptr);
-    if (str_ret == NULL)
+    if (str_ret == NULL) 
         return BMI_FAILURE;
-    
+    else
+        Log(INFO,"Title=%s\n",model->title);
+        
     //Read a string, breaks on whitespace (or newline)
     //These must be done IN ORDER
     char input_fname[MAX_FILENAME_LENGTH];
@@ -207,11 +215,13 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     ret = fscanf(model->control_fptr,"%s",input_fname);
     if (ret != 1)
         return BMI_FAILURE;
-    
+    else
+        Log(INFO,"Input file name=%s\n",input_fname);
+ 
     //If stand_alone TRUE, read inputs from input file
     if (model->stand_alone == TRUE){
         if((model->input_fptr=fopen(input_fname,"r"))==NULL){
-            printf("Can't open input file named %s\n",input_fname);
+            Log(FATAL,"Can't open input file named %s\n",input_fname);
             return BMI_FAILURE;
         }
     };
@@ -234,12 +244,12 @@ int read_init_config(const char* config_file, topmodel_model* model) {
 
     //Attempt to read the parsed input file names, bail if they cannot be read/created
     if((model->subcat_fptr=fopen(subcat_fname,"r"))==NULL){       
-        printf("Can't open subcat file named %s\n",subcat_fname);
+        Log(FATAL,"Can't open subcat file named %s\n",subcat_fname);
         return BMI_FAILURE;
     }
 
     if((model->params_fptr=fopen(params_fname,"r"))==NULL){
-        printf("Can't open params file named %s\n",params_fname);   
+        Log(FATAL,"Can't open params file named %s\n",params_fname);   
         return BMI_FAILURE;
     }
     
@@ -252,26 +262,28 @@ int read_init_config(const char* config_file, topmodel_model* model) {
     ret = fscanf(model->subcat_fptr,"%d %d %d",&model->num_sub_catchments,&model->imap,&model->yes_print_output);
     if (ret != 3)
         return BMI_FAILURE;
+    else
+        Log(INFO,"yes_print_output=%s\n",(model->yes_print_output?"true":"false"));
 
     // Attempt to read the output file names only if printing to file
     if(model->yes_print_output == TRUE && model->stand_alone == TRUE){
         if((model->output_fptr=fopen(output_fname,"w"))==NULL){           
-            printf("Can't open output file named %s\n",output_fname);
+            Log(FATAL,"Can't open output file named %s\n",output_fname);
             return BMI_FAILURE;
         }
 
         if((model->out_hyd_fptr=fopen(out_hyd_fname,"w"))==NULL){          
-            printf("Can't open output file named %s\n",out_hyd_fname);
+            Log(FATAL,"Can't open output file named %s\n",out_hyd_fname);
             return BMI_FAILURE;
         }
 
-        fprintf(model->output_fptr,"%s\n",model->title);
+        Log(INFO,"%s\n",model->title);
 
     }    
  
 #if TOPMODEL_DEBUG >= 1    
-    printf("TOPMODEL Version: TMOD95.02\n");
-    printf("This run: %s\n",model->title);
+    Log(DEBUG,"TOPMODEL Version: TMOD95.02\n");
+    Log(DEBUG,"This run: %s\n",model->title);
 #endif
 
     fclose(model->control_fptr);
@@ -388,7 +400,7 @@ static int Get_current_time (Bmi *self, double * time)
 {
     Get_start_time(self, time);
 #if TOPMODEL_DEBUG > 1
-    printf("Current model time step: '%d'\n", ((topmodel_model *) self->data)->current_time_step);
+    Log(DEBUG,"Current model time step: '%d'\n", ((topmodel_model *) self->data)->current_time_step);
 #endif
     *time += (((topmodel_model *) self->data)->current_time_step * 
               ((topmodel_model *) self->data)->dt);
@@ -506,7 +518,7 @@ static int Finalize (Bmi *self)
                 &model->sumae, &model->sumq, &model->sumrz, &model->sumuz);
             // this is technically needed, yes
             if(model->yes_print_output==TRUE && model->stand_alone==TRUE){
-                fprintf(model->output_fptr,"Maximum contributing area %12.5lf\n",model->max_contrib_area);
+                Log(INFO,"Maximum contributing area %12.5lf\n",model->max_contrib_area);
             }
 
             //-----------------------------------------------------------
@@ -1019,23 +1031,23 @@ static int Set_value (Bmi *self, const char *name, void *array)
         topmodel = (topmodel_model *) self->data;
 
 #if TOPMODEL_DEBUG >= 1
-        printf("\n\n\nAT LEAST ONE OF THE FOLLOWING CALIBRATABLE PARAMETERS "
+        Log(DEBUG,"\n\n\nAT LEAST ONE OF THE FOLLOWING CALIBRATABLE PARAMETERS "
 			"WAS PROVIDED IN THE REALIZATION.JSON FILE!\n");
 
 	// print updated calibratable parameters
-        printf("\n\nCalibratable parameters related to ET and recharge:\n");
-	printf("srmax = %f\n", topmodel->srmax);
-        printf("td = %f\n", topmodel->td);
+        Log(DEBUG,"\n\nCalibratable parameters related to ET and recharge:\n");
+	Log(DEBUG,"srmax = %f\n", topmodel->srmax);
+        Log(DEBUG,"td = %f\n", topmodel->td);
 
-	printf("\nCalibratable parameters related to discharge:\n");
-        printf("chv = %f\n", topmodel->chv);
-        printf("rv = %f\n", topmodel->rv);
+	Log(DEBUG,"\nCalibratable parameters related to discharge:\n");
+        Log(DEBUG,"chv = %f\n", topmodel->chv);
+        Log(DEBUG,"rv = %f\n", topmodel->rv);
 
 
-	printf("\nCalibratable parameters related to water balance:\n");
-        printf("szm = %f\n", topmodel->szm); 
-	printf("sr0 = %f\n", topmodel->sr0);
-        printf("t0 = %f\n\n\n\n", topmodel->t0);
+	Log(DEBUG,"\nCalibratable parameters related to water balance:\n");
+        Log(DEBUG,"szm = %f\n", topmodel->szm); 
+	Log(DEBUG,"sr0 = %f\n", topmodel->sr0);
+        Log(DEBUG,"t0 = %f\n\n\n\n", topmodel->t0);
 #endif
     }
 

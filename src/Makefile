@@ -12,7 +12,7 @@ LFLAGS =
 LIBS = -lm
 
 # define the C source files
-SRCS = main.c bmi_topmodel.c topmodel.c
+SRCS = main.c bmi_topmodel.c topmodel.c logger.c
 
 # define the C object files 
 OBJS = $(SRCS:.c=.o)
