@@ -6,62 +6,29 @@
 #include <string.h>
 #include <time.h>
 #include <stdarg.h> // for variable args: va_list
+#include <stdbool.h>
+
 
 typedef enum {      
     NONE = 0,
-    DEBUG,
-    INFO,
-    FATAL,
-    WARN,
-    ERROR,
+    DEBUG = 1,
+    INFO = 2,
+    WARN = 3,
+    ERROR = 4,
+    FATAL = 5,
 } LogLevel;
 
-typedef enum {
-    NGEN,
-    NOAHOWP,
-    SNOW17,
-    UEB,
-    CFE,
-    SACSMA,
-    LASAM,
-    SMP,
-    SFT,
-    TROUTE,
-    SCHISM,
-    SFINCS,
-    TOPMODEL,
-    TOPOFLOW,
-    MODULE_COUNT
-} LoggingModule;
-
-static const char* module_name[MODULE_COUNT] = {
-    "NGEN    ",
-    "NOAHOWP ",
-    "SNOW17  ",
-    "UEB     ",
-    "CFE     ",
-    "SACSMA  ",
-    "LASAM   ",
-    "SMP     ",
-    "SFT     ",
-    "TROUTE  ",
-    "SCHISM  ",
-    "SFINCS  ",
-    "TOPMODEL",
-    "TOPOFLOW"
-};
-
-typedef struct {
-    LogLevel logLevel;
-    FILE* logFile;
-} Logger;
-
-Logger* GetInstance();
-void SetLogPreferences(Logger* logger);
-void Log(LogLevel messageLevel, const char* message, ...);
+// Methods
+void CreateTimestamp(char *buffer, size_t size, bool appendMS, bool iso);
+bool CreateDirectory(const char *path);
+bool DirectoryExists(const char *path);
 LogLevel GetLogLevel(const char* logLevel);
-char* createTimestamp();
-void setup_logger(void);
+void Log(LogLevel messageLevel, const char* message, ...);
+bool LogFileReady(bool appendMode);
+void SetLogModuleName(void);
+void SetLogPreferences(void);
+void SetupLogFile(void);
+void TrimString(const char *input, char *output, size_t outputSize);
 void TrimToOneNewline(char *str, size_t max_len);
-
+void WriteLogTestMsgs(void);
 #endif
