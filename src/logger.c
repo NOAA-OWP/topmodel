@@ -11,13 +11,21 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-#define DS                  "/"              // Directory separator
-#define LOG_DIR_NGENCERF    "/ngencerf/data" // ngenCERF log directory string if environement var empty.
-#define LOG_DIR_DEFAULT     "run-logs"
-#define LOG_FILE_EXT        "log"
-#define LOG_MODULE_NAME_LEN  8               // Width of module name for log entries
-#define MODULE_NAME          "TopModel"
+// Define Environment Variable Names
+#define MODULE_NAME           "TopModel"
+#define EV_MODULE_LOGLEVEL    "TOPMODEL_LOGLEVEL"     // This modules log level
+#define EV_MODULE_LOGFILEPATH "TOPMODEL_LOGFILEPATH"  // This modules log full log filename
+#define EV_NGEN_LOGFILEPATH   "NGEN_LOG_FILE_PATH"    // ngen log file 
 
+#define EV_EWTS_LOGGING       "NGEN_EWTS_LOGGING"     // Enable/disable of Error Warning and Trapping System  
+
+#define DS                    "/"                     // Directory separator
+#define LOG_DIR_NGENCERF      "/ngencerf/data"        // ngenCERF log directory
+#define LOG_DIR_DEFAULT       "run-logs"              // Default subdir if ngen log file env not found
+#define LOG_FILE_EXT          "log"
+#define LOG_MODULE_NAME_LEN   8                       // Width of module name for log entries
+
+bool ewtsEnabled = true;
 bool openedAppendMode = true;
 bool loggerInitialized = false;
 FILE *logFile = NULL;
@@ -147,12 +155,12 @@ void SetupLogFile(void) {
     bool appendEntries = true;
     bool moduleLogEnvExists = false;
 
-    const char *envVar = getenv("TOPMODEL_LOGFILEPATH");
+    const char *envVar = getenv(EV_MODULE_LOGFILEPATH);
     if (envVar && envVar[0] != '\0') {
         strncpy(logFilePath, envVar, sizeof(logFilePath) - 1);
         moduleLogEnvExists = true;
     } else {
-        envVar = getenv("NGEN_LOG_FILE_PATH");
+        envVar = getenv(EV_NGEN_LOGFILEPATH);
         if (envVar && envVar[0] != '\0') {
             strncpy(logFilePath, envVar, sizeof(logFilePath) - 1);
         } else {
@@ -194,7 +202,7 @@ void SetupLogFile(void) {
     }
 
     if (LogFileReady(appendEntries)) {
-        if (!moduleLogEnvExists) setenv("TOPMODEL_LOGFILEPATH", logFilePath, 1);
+        if (!moduleLogEnvExists) setenv(EV_MODULE_LOGFILEPATH, logFilePath, 1);
     } else {
         printf("Unable to open log file ");
         if (strlen(logFilePath) > 0) {
@@ -206,26 +214,46 @@ void SetupLogFile(void) {
 
 const char* ConvertLogLevelToString(LogLevel level) {
     switch (level) {
-        case DEBUG: return "DEBUG";
-        case INFO:  return "INFO";
-        case WARN:  return "WARN";
-        case ERROR: return "ERROR";
-        case FATAL: return "FATAL";
-        default:    return "NONE";
+        case DEBUG:   return "DEBUG  ";
+        case INFO:    return "INFO   ";
+        case WARNING: return "WARNING";
+        case SEVERE:  return "SEVERE ";
+        case FATAL:   return "FATAL  ";
+        default:      return "NONE   ";
     }
 }
 
 LogLevel ConvertStringToLogLevel(const char* str) {
-    if (strcasecmp(str, "DEBUG") == 0) return DEBUG;
-    if (strcasecmp(str, "INFO")  == 0) return INFO;
-    if (strcasecmp(str, "WARN")  == 0) return WARN;
-    if (strcasecmp(str, "ERROR") == 0) return ERROR;
-    if (strcasecmp(str, "FATAL") == 0) return FATAL;
+    char trimmedStr[20] = {0};
+    TrimString(str, trimmedStr, sizeof(trimmedStr));
+    if (strcasecmp(trimmedStr, "DEBUG") == 0) return DEBUG;
+    if (strcasecmp(trimmedStr, "INFO")  == 0) return INFO;
+    if (strcasecmp(trimmedStr, "WARNING")  == 0) return WARNING;
+    if (strcasecmp(trimmedStr, "SEVERE") == 0) return SEVERE;
+    if (strcasecmp(trimmedStr, "FATAL") == 0) return FATAL;
     return NONE;
 }
 
-bool CheckLogLevelEv(void) {
-    const char* envLogLevel = getenv("TOPMODEL_LOGLEVEL");
+bool IsEwtsEnabled(void) {
+    const char* ewtsStr = getenv(EV_EWTS_LOGGING);
+    if (ewtsStr && ewtsStr[0] != '\0') {
+        char trimmedStr[20] = {0};
+        TrimString(ewtsStr, trimmedStr, sizeof(trimmedStr));
+        bool ewtsEv = ((strcasecmp(trimmedStr, "ENABLE") == 0))? true:false;
+        if (ewtsEv != ewtsEnabled) {
+            ewtsEnabled = ewtsEv;
+            if (ewtsEnabled && loggerInitialized) {
+                char lMsg[100];
+                snprintf(lMsg, sizeof(lMsg), "INFO ONLY: %s changed. Set to %s\n", EV_EWTS_LOGGING, trimmedStr);
+                Log(logLevel, lMsg);
+            }
+        }
+    }
+    return ewtsEnabled;
+}
+
+void CheckLogLevel(void) {
+    const char* envLogLevel = getenv(EV_MODULE_LOGLEVEL);
     if (envLogLevel && envLogLevel[0] != '\0') {
         LogLevel envll = ConvertStringToLogLevel(envLogLevel);
         if (envll != logLevel) {
@@ -234,38 +262,40 @@ bool CheckLogLevelEv(void) {
             char llStr[10];
             char llMsg[100];
             TrimString(ConvertLogLevelToString(logLevel), llStr, sizeof(llStr));
-            snprintf(llMsg, sizeof(llMsg), "INFO ONLY: Log level changed to %s found in TOPMODEL_LOGLEVEL\n", llStr);
+            snprintf(llMsg, sizeof(llMsg), "INFO ONLY: Log level changed in %s. Set to %s\n", EV_MODULE_LOGLEVEL, llStr);
             if (loggerInitialized) Log(logLevel, llMsg);
         }
-        return 1;
     }
-    return 0;
 }
 
 void SetLogPreferences(void) {
 
-    // Set the module name used in log entries
-    SetLogModuleName();
+    if (IsEwtsEnabled()) {
 
-    // Set the log file path name and open it
-    SetupLogFile();
-    loggerInitialized = true;
-    printf("Module %s Log File: %s\n", MODULE_NAME, logFilePath);
-    // This is an INFO message that always should be in the log but the
-    // logLevel could be different than INFO. Therefore use logLevel to
-    // ensure the message is recorded in the log
-    char logMsg[1100];
-    snprintf(logMsg, sizeof(logMsg), "Logfile: %s\n", logFilePath);
-    Log(logLevel, logMsg);
-    if (logFile != NULL) Log(INFO, "Opened log file %s in %s mode\n", logFilePath, (openedAppendMode ? "Append" : "Truncate"));
+        // Set the module name used in log entries
+        SetLogModuleName();
 
-    // Check for the log level environment variable for a log level
-    char llStr[10];
-    char llMsg[80];
-    TrimString(ConvertLogLevelToString(logLevel), llStr, sizeof(llStr));
-    snprintf(llMsg,sizeof(llMsg), "INFO ONLY: Default log level is %s\n", llStr);
-    Log(logLevel, llMsg);
-    CheckLogLevelEv(); // Check for log level set in the environment variable
+        // Set the log file path name and open it
+        SetupLogFile();
+        loggerInitialized = true;
+        printf("Module %s Log File: %s\n", MODULE_NAME, logFilePath);
+        // This is an INFO message that always should be in the log but the
+        // logLevel could be different than INFO. Therefore use logLevel to
+        // ensure the message is recorded in the log
+        Log(logLevel, "INFO ONLY: Opened log file %s in %s mode\n", logFilePath, (openedAppendMode ? "Append" : "Truncate"));
+        Log(logLevel, "INFO ONLY: EWTS default ENABLED\n");
+
+        // Check for the log level environment variable for a log level
+        char llStr[10];
+        char llMsg[80];
+        TrimString(ConvertLogLevelToString(logLevel), llStr, sizeof(llStr));
+        snprintf(llMsg,sizeof(llMsg), "INFO ONLY: Default log level is %s\n", llStr);
+        Log(logLevel, llMsg);
+        CheckLogLevel(); // Check for log level set in the environment variable
+        
+        // FOR TESTING ONLY! Uncomment next line to generate test log entries
+        // WriteLogTestMsgs();
+    }
 }
 
 void TrimToOneNewline(char *str, size_t max_len) {
@@ -284,80 +314,63 @@ void TrimToOneNewline(char *str, size_t max_len) {
 }
 
 void Log(LogLevel messageLevel, const char* message, ...) {
-    if (!loggerInitialized) SetLogPreferences(); // Initialize logger on first call
+    if (IsEwtsEnabled()) {
+        if (!loggerInitialized) SetLogPreferences(); // Initialize logger on first call
 
-    // Check for change in log level environment variable
-    (void)CheckLogLevelEv();
+        // Check for change in log level environment variable
+        CheckLogLevel();
 
-    if (messageLevel < logLevel) return;
+        if (messageLevel < logLevel) return;
 
-    va_list arglist;
-    va_start(arglist, message);
-    va_list arglist_copy;
-    va_copy(arglist_copy, arglist);
+        va_list arglist;
+        va_start(arglist, message);
+        va_list arglist_copy;
+        va_copy(arglist_copy, arglist);
 
-    int length = vsnprintf(NULL, 0, message, arglist_copy);
-    va_end(arglist_copy);
+        int length = vsnprintf(NULL, 0, message, arglist_copy);
+        va_end(arglist_copy);
 
-    char *buffer = malloc(length + 1);
-    if (!buffer) return; // Always good to check
+        char *buffer = malloc(length + 1);
+        if (!buffer) return; // Always good to check
 
-    vsnprintf(buffer, length + 1, message, arglist);
-    va_end(arglist);
+        vsnprintf(buffer, length + 1, message, arglist);
+        va_end(arglist);
 
-    const char* logType;
-    switch (messageLevel) {
-        case DEBUG: logType = "DEBUG"; break;
-        case INFO:  logType = "INFO "; break;
-        case WARN:  logType = "WARN "; break;
-        case ERROR: logType = "ERROR"; break;
-        case FATAL: logType = "FATAL"; break;
-        default:    logType = "NONE "; break;
-    }
+        char timestamp[32];
+        CreateTimestamp(timestamp, sizeof(timestamp), 1, 1);
 
-    char timestamp[32];
-    CreateTimestamp(timestamp, sizeof(timestamp), 1, 1);
+        char logPrefix[128];
+        snprintf(logPrefix, sizeof(logPrefix), "%s %s %s", timestamp, moduleName, ConvertLogLevelToString(messageLevel));
 
-    char logPrefix[128];
-    snprintf(logPrefix, sizeof(logPrefix), "%s %s %s", timestamp, moduleName, logType);
-
-    TrimToOneNewline(buffer, sizeof(buffer));
-    char *line = strtok(buffer, "\n");
-    if (LogFileReady(true)) {
-        while (line != NULL) {
-            fprintf(logFile, "%s %s\n", logPrefix, line);
-            line = strtok(NULL, "\n");
+        TrimToOneNewline(buffer, sizeof(buffer));
+        char *line = strtok(buffer, "\n");
+        if (LogFileReady(true)) {
+            while (line != NULL) {
+                fprintf(logFile, "%s %s\n", logPrefix, line);
+                line = strtok(NULL, "\n");
+            }
+            fflush(logFile);
+        } else {
+            while (line != NULL) {
+                printf("%s %s\n", logPrefix, line);
+                line = strtok(NULL, "\n");
+            }
+            fflush(stdout);
         }
-        fflush(logFile);
-    } else {
-        while (line != NULL) {
-            printf("%s %s\n", logPrefix, line);
-            line = strtok(NULL, "\n");
-        }
-        fflush(stdout);
+
+        free(buffer);
     }
-
-    free(buffer);
-}
-
-LogLevel GetLogLevel(const char* logLevel) {
-    if (strcmp(logLevel, "DEBUG") == 0) return DEBUG;
-    if (strcmp(logLevel, "INFO") == 0)  return INFO;
-    if (strcmp(logLevel, "WARN") == 0)  return ERROR;
-    if (strcmp(logLevel, "ERROR") == 0) return ERROR;
-    if (strcmp(logLevel, "FATAL") == 0) return ERROR;
-    return NONE;
 }
 
 void WriteLogTestMsgs() {
 
-    if (!loggerInitialized) SetLogPreferences();
     LogLevel savedLogLevel = logLevel;
-    logLevel = ERROR; Log(ERROR, "Sample Log for LogLevel::ERROR");
-    logLevel = FATAL; Log(FATAL, "Sample Log for LogLevel::FATAL");
-    logLevel = WARN; Log(WARN, "Sample Log for LogLevel::WARN");
-    logLevel = INFO; Log(INFO, "Sample Log for LogLevel::INFO");
-    logLevel = DEBUG; Log(DEBUG, "Sample Log for LogLevel::DEBUG");
+    
+    setenv(EV_MODULE_LOGLEVEL, "SEVERE", 1);  Log(SEVERE, "Sample Log for LogLevel::SEVERE");
+    setenv(EV_MODULE_LOGLEVEL, "FATAL", 1);   Log(FATAL, "Sample Log for LogLevel::FATAL");
+    setenv(EV_MODULE_LOGLEVEL, "WARNING", 1); Log(WARNING, "Sample Log for LogLevel::WARNING");
+    setenv(EV_MODULE_LOGLEVEL, "INFO", 1);    Log(INFO, "Sample Log for LogLevel::INFO");
+    setenv(EV_MODULE_LOGLEVEL, "DEBUG", 1);   Log(DEBUG, "Sample Log for LogLevel::DEBUG");
     
     const char* multiline_log = 
         "First line of multiline log:\n"
@@ -366,5 +379,5 @@ void WriteLogTestMsgs() {
         "Fourth line of multiline log";
     Log(DEBUG, multiline_log);
     
-    logLevel = savedLogLevel;
+    setenv(EV_MODULE_LOGLEVEL, ConvertLogLevelToString(savedLogLevel), 1); 
 }
