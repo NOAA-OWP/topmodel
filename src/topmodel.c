@@ -180,7 +180,7 @@ extern void topmod(
     // NJF TODO consider warning on all program limits here since this is essentially
     //"the model" where those assumptions may not be valid...
     if (num_topodex_values > WARN_TOPODEX_INCREMENTS) {
-        Log(WARN,
+        Log(WARNING,
             "num_topodex_values, %d, is greater than %d\n",
             num_topodex_values,
             WARN_TOPODEX_INCREMENTS);
@@ -543,7 +543,7 @@ extern int tread(
 
     // Setup the topoindex arrays
     if (*num_topodex_values > WARN_TOPODEX_INCREMENTS) {
-        Log(WARN,
+        Log(WARNING,
             "Number of ln(a/tanB) increments,%d, is > than %d\n",
             *num_topodex_values,
             WARN_TOPODEX_INCREMENTS);
@@ -594,7 +594,7 @@ extern int tread(
     TOPMODEL_CHECK_FSCANF(1, fscanf(subcat_fptr, "%d", num_channels));
 
     if (*num_channels > WARN_NUM_SUBCATCHMENTS) {
-        Log(WARN,
+        Log(WARNING,
             "Number of channels, %d, is greater than %d\n",
             *num_channels,
             WARN_NUM_SUBCATCHMENTS);
@@ -685,8 +685,8 @@ extern void convert_dist_to_histords(
     // This function ASSUMES tch is overallocated by 1 and is indexable from (1, num_channels)
     // validate invariants
     if (num_channels < 1) {
-        Log(ERROR, "convert_dist_to_histords, num channels < 1, must have at least one channel\n");
-        Log(ERROR, "Exiting Topmodel\n");
+        Log(SEVERE, "convert_dist_to_histords, num channels < 1, must have at least one channel\n");
+        Log(SEVERE, "Exiting Topmodel\n");
         exit(-1); // TODO return int error code and handle error externally
     }
     // declare local variables
@@ -757,7 +757,7 @@ extern void calc_time_delay_histogram(
     (*num_time_delay_histo_ords) -= (*num_delay);
 
     if (*num_time_delay_histo_ords > WARN_HISTOGRAM_ORDINATES) {
-        Log(WARN,
+        Log(WARNING,
             "number of time delay hisogram ordinates, %d, is greater than %d\n",
             *num_time_delay_histo_ords,
             WARN_HISTOGRAM_ORDINATES);
@@ -802,14 +802,14 @@ extern void calc_time_delay_histogram(
     }
     sumar += (*time_delay_histogram)[1];
     if (sumar < 0.99999 || sumar > 1.00001) {
-        Log(ERROR, "Histogram oridnates do not sum to 1.\n");
-        Log(ERROR,
+        Log(SEVERE, "Histogram oridnates do not sum to 1.\n");
+        Log(SEVERE,
             "Check that the correct number of values for cum_dist_area_with_dist and "
             "dist_from_outlet are provided.\n");
-        Log(ERROR,
+        Log(SEVERE,
             "The number of values for each variable should be equal to the number of channels "
             "(i.e., num_channels).\n\n");
-        Log(ERROR, "Exiting Topmodel\n");
+        Log(SEVERE, "Exiting Topmodel\n");
         exit(-1); // FIXME this fuction should probably return an error code
                   // and the error be handled elsewhere, not just an exit here...
     }
@@ -1262,8 +1262,8 @@ extern void expinf(
                         break;
                 }
                 if (i == 20) {
-                    Log(ERROR, "Max number of iterations exceeded in expinf()\n");
-                    Log(ERROR, "Exiting Topmodel\n");
+                    Log(SEVERE, "Max number of iterations exceeded in expinf()\n");
+                    Log(SEVERE, "Exiting Topmodel\n");
                     exit(-9); /* stop the program */
                 }
             }
@@ -1306,10 +1306,10 @@ extern void expinf(
             if (fabs(*df) < e)
                 break;
             if (i == 20) {
-                Log(ERROR,
+                Log(SEVERE,
                     "Max number of iterations exceeded calculating sum of series terms in "
                     "expinf().\n");
-                Log(ERROR, "Exiting Topmodel\n");
+                Log(SEVERE, "Exiting Topmodel\n");
                 exit(-9); /* stop the program */
             }
         }
@@ -1394,8 +1394,8 @@ void itwo_alloc(int ***array, int rows, int cols) {
     int error = 0;
 
     if ((rows == 0) || (cols == 0)) {
-        Log(ERROR, "Error: Attempting to allocate array of size 0");
-        Log(ERROR, "Exiting Topmodel\n");
+        Log(SEVERE, "Error: Attempting to allocate array of size 0");
+        Log(SEVERE, "Exiting Topmodel\n");
         exit(-9);
     }
 
@@ -1425,8 +1425,8 @@ void dtwo_alloc(double ***array, int rows, int cols) {
     int error = 0;
 
     if ((rows == 0) || (cols == 0)) {
-        Log(ERROR, "Error: Attempting to allocate array of size 0\n");
-        Log(ERROR, "Exiting Topmodel\n");
+        Log(SEVERE, "Error: Attempting to allocate array of size 0\n");
+        Log(SEVERE, "Exiting Topmodel\n");
         exit(-9);
     }
 
@@ -1458,7 +1458,7 @@ void d_alloc(double **var, int size) {
 
     *var = (double *)malloc(size * sizeof(double));
     if (*var == NULL) {
-        Log(ERROR, "Problem allocating memory for array in d_alloc\n");
+        Log(SEVERE, "Problem allocating memory for array in d_alloc\n");
         return;
     } else
         memset(*var, 0, size * sizeof(double));
@@ -1474,7 +1474,7 @@ void i_alloc(int **var, int size) {
 
     *var = (int *)malloc(size * sizeof(int));
     if (*var == NULL) {
-        Log(ERROR, "Problem allocating memory in i_alloc\n");
+        Log(SEVERE, "Problem allocating memory in i_alloc\n");
         return;
     } else
         memset(*var, 0, size * sizeof(int));
