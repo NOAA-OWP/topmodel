@@ -11,10 +11,13 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+// Define Environment Variable Names
 #define MODULE_NAME           "TopModel"
-#define EV_MODULE_LOGLEVEL    "TOPMODEL_LOGLEVEL"     // Environment variable for this modules log level
-#define EV_MODULE_LOGFILEPATH "TOPMODEL_LOGFILEPATH"  // Environment variable for this modules log full log filename
-#define EV_NGEN_LOGFILEPATH   "NGEN_LOG_FILE_PATH"    // Environment variable for ngen's log file 
+#define EV_MODULE_LOGLEVEL    "TOPMODEL_LOGLEVEL"     // This modules log level
+#define EV_MODULE_LOGFILEPATH "TOPMODEL_LOGFILEPATH"  // This modules log full log filename
+#define EV_NGEN_LOGFILEPATH   "NGEN_LOG_FILE_PATH"    // ngen log file 
+
+#define EV_EWTS_LOGGING       "NGEN_EWTS_LOGGING"     // Enable/disable of Error Warning and Trapping System  
 
 #define DS                    "/"                     // Directory separator
 #define LOG_DIR_NGENCERF      "/ngencerf/data"        // ngenCERF log directory
@@ -22,6 +25,7 @@
 #define LOG_FILE_EXT          "log"
 #define LOG_MODULE_NAME_LEN   8                       // Width of module name for log entries
 
+bool ewtsEnabled = true;
 bool openedAppendMode = true;
 bool loggerInitialized = false;
 FILE *logFile = NULL;
@@ -230,7 +234,25 @@ LogLevel ConvertStringToLogLevel(const char* str) {
     return NONE;
 }
 
-bool CheckLogLevelEv(void) {
+bool IsEwtsEnabled(void) {
+    const char* ewtsStr = getenv(EV_EWTS_LOGGING);
+    if (ewtsStr && ewtsStr[0] != '\0') {
+        char trimmedStr[20] = {0};
+        TrimString(ewtsStr, trimmedStr, sizeof(trimmedStr));
+        bool ewtsEv = ((strcasecmp(trimmedStr, "ENABLE") == 0))? true:false;
+        if (ewtsEv != ewtsEnabled) {
+            ewtsEnabled = ewtsEv;
+            if (ewtsEnabled && loggerInitialized) {
+                char lMsg[100];
+                snprintf(lMsg, sizeof(lMsg), "INFO ONLY: %s changed. Set to %s\n", EV_EWTS_LOGGING, trimmedStr);
+                Log(logLevel, lMsg);
+            }
+        }
+    }
+    return ewtsEnabled;
+}
+
+void CheckLogLevel(void) {
     const char* envLogLevel = getenv(EV_MODULE_LOGLEVEL);
     if (envLogLevel && envLogLevel[0] != '\0') {
         LogLevel envll = ConvertStringToLogLevel(envLogLevel);
@@ -243,38 +265,37 @@ bool CheckLogLevelEv(void) {
             snprintf(llMsg, sizeof(llMsg), "INFO ONLY: Log level changed in %s. Set to %s\n", EV_MODULE_LOGLEVEL, llStr);
             if (loggerInitialized) Log(logLevel, llMsg);
         }
-        return 1;
     }
-    return 0;
 }
 
 void SetLogPreferences(void) {
 
-    // Set the module name used in log entries
-    SetLogModuleName();
+    if (IsEwtsEnabled()) {
 
-    // Set the log file path name and open it
-    SetupLogFile();
-    loggerInitialized = true;
-    printf("Module %s Log File: %s\n", MODULE_NAME, logFilePath);
-    // This is an INFO message that always should be in the log but the
-    // logLevel could be different than INFO. Therefore use logLevel to
-    // ensure the message is recorded in the log
-    char logMsg[1100];
-    snprintf(logMsg, sizeof(logMsg), "Logfile: %s\n", logFilePath);
-    Log(logLevel, logMsg);
-    if (logFile != NULL) Log(INFO, "Opened log file %s in %s mode\n", logFilePath, (openedAppendMode ? "Append" : "Truncate"));
+        // Set the module name used in log entries
+        SetLogModuleName();
 
-    // Check for the log level environment variable for a log level
-    char llStr[10];
-    char llMsg[80];
-    TrimString(ConvertLogLevelToString(logLevel), llStr, sizeof(llStr));
-    snprintf(llMsg,sizeof(llMsg), "INFO ONLY: Default log level is %s\n", llStr);
-    Log(logLevel, llMsg);
-    CheckLogLevelEv(); // Check for log level set in the environment variable
+        // Set the log file path name and open it
+        SetupLogFile();
+        loggerInitialized = true;
+        printf("Module %s Log File: %s\n", MODULE_NAME, logFilePath);
+        // This is an INFO message that always should be in the log but the
+        // logLevel could be different than INFO. Therefore use logLevel to
+        // ensure the message is recorded in the log
+        Log(logLevel, "INFO ONLY: Opened log file %s in %s mode\n", logFilePath, (openedAppendMode ? "Append" : "Truncate"));
+        Log(logLevel, "INFO ONLY: EWTS default ENABLED\n");
 
-    // FOR TESTING ONLY! Uncomment next line to generate test log entries
-    // WriteLogTestMsgs();
+        // Check for the log level environment variable for a log level
+        char llStr[10];
+        char llMsg[80];
+        TrimString(ConvertLogLevelToString(logLevel), llStr, sizeof(llStr));
+        snprintf(llMsg,sizeof(llMsg), "INFO ONLY: Default log level is %s\n", llStr);
+        Log(logLevel, llMsg);
+        CheckLogLevel(); // Check for log level set in the environment variable
+        
+        // FOR TESTING ONLY! Uncomment next line to generate test log entries
+        // WriteLogTestMsgs();
+    }
 }
 
 void TrimToOneNewline(char *str, size_t max_len) {
@@ -293,50 +314,52 @@ void TrimToOneNewline(char *str, size_t max_len) {
 }
 
 void Log(LogLevel messageLevel, const char* message, ...) {
-    if (!loggerInitialized) SetLogPreferences(); // Initialize logger on first call
+    if (IsEwtsEnabled()) {
+        if (!loggerInitialized) SetLogPreferences(); // Initialize logger on first call
 
-    // Check for change in log level environment variable
-    (void)CheckLogLevelEv();
+        // Check for change in log level environment variable
+        CheckLogLevel();
 
-    if (messageLevel < logLevel) return;
+        if (messageLevel < logLevel) return;
 
-    va_list arglist;
-    va_start(arglist, message);
-    va_list arglist_copy;
-    va_copy(arglist_copy, arglist);
+        va_list arglist;
+        va_start(arglist, message);
+        va_list arglist_copy;
+        va_copy(arglist_copy, arglist);
 
-    int length = vsnprintf(NULL, 0, message, arglist_copy);
-    va_end(arglist_copy);
+        int length = vsnprintf(NULL, 0, message, arglist_copy);
+        va_end(arglist_copy);
 
-    char *buffer = malloc(length + 1);
-    if (!buffer) return; // Always good to check
+        char *buffer = malloc(length + 1);
+        if (!buffer) return; // Always good to check
 
-    vsnprintf(buffer, length + 1, message, arglist);
-    va_end(arglist);
+        vsnprintf(buffer, length + 1, message, arglist);
+        va_end(arglist);
 
-    char timestamp[32];
-    CreateTimestamp(timestamp, sizeof(timestamp), 1, 1);
+        char timestamp[32];
+        CreateTimestamp(timestamp, sizeof(timestamp), 1, 1);
 
-    char logPrefix[128];
-    snprintf(logPrefix, sizeof(logPrefix), "%s %s %s", timestamp, moduleName, ConvertLogLevelToString(messageLevel));
+        char logPrefix[128];
+        snprintf(logPrefix, sizeof(logPrefix), "%s %s %s", timestamp, moduleName, ConvertLogLevelToString(messageLevel));
 
-    TrimToOneNewline(buffer, sizeof(buffer));
-    char *line = strtok(buffer, "\n");
-    if (LogFileReady(true)) {
-        while (line != NULL) {
-            fprintf(logFile, "%s %s\n", logPrefix, line);
-            line = strtok(NULL, "\n");
+        TrimToOneNewline(buffer, sizeof(buffer));
+        char *line = strtok(buffer, "\n");
+        if (LogFileReady(true)) {
+            while (line != NULL) {
+                fprintf(logFile, "%s %s\n", logPrefix, line);
+                line = strtok(NULL, "\n");
+            }
+            fflush(logFile);
+        } else {
+            while (line != NULL) {
+                printf("%s %s\n", logPrefix, line);
+                line = strtok(NULL, "\n");
+            }
+            fflush(stdout);
         }
-        fflush(logFile);
-    } else {
-        while (line != NULL) {
-            printf("%s %s\n", logPrefix, line);
-            line = strtok(NULL, "\n");
-        }
-        fflush(stdout);
+
+        free(buffer);
     }
-
-    free(buffer);
 }
 
 void WriteLogTestMsgs() {
