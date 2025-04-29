@@ -239,7 +239,7 @@ bool IsEwtsEnabled(void) {
     if (ewtsStr && ewtsStr[0] != '\0') {
         char trimmedStr[20] = {0};
         TrimString(ewtsStr, trimmedStr, sizeof(trimmedStr));
-        bool ewtsEv = ((strcasecmp(trimmedStr, "ENABLE") == 0))? true:false;
+        bool ewtsEv = ((strcasecmp(trimmedStr, "ENABLED") == 0))? true:false;
         if (ewtsEv != ewtsEnabled) {
             ewtsEnabled = ewtsEv;
             if (ewtsEnabled && loggerInitialized) {
