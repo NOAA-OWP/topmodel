@@ -2,6 +2,7 @@
 #define LOGGER_H
 
 #include <stdarg.h> // for variable args: va_list
+#include <stdbool.h>
 
 typedef enum {      
     NONE = 0,
@@ -13,6 +14,8 @@ typedef enum {
 } LogLevel;
 
 // Public Methods
+LogLevel GetLogLevel(void);
+bool IsLoggingEnabled(void);
 void Log(LogLevel messageLevel, const char* message, ...);
 
 #endif // LOGGER_H
