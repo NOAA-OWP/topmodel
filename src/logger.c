@@ -202,6 +202,7 @@ void SetupLogFile(void) {
     if (LogFileReady(appendEntries)) {
         if (!moduleLogEnvExists) setenv(EV_MODULE_LOGFILEPATH, logFilePath, 1);
         printf("Module %s Log File: %s\n", MODULE_NAME, logFilePath);
+        fflush(stdout); // Force flushing of stdout
         LogLevel saveLevel = logLevel;
         logLevel = INFO; // Ensure this INFO message is always logged
         Log(logLevel, "Opened log file %s in %s mode\n", logFilePath, (openedAppendMode ? "Append" : "Truncate"));
@@ -212,6 +213,7 @@ void SetupLogFile(void) {
             printf("%s (Perhaps check permissions)\n", logFilePath);
         }
         printf("Log entries will be written to stdout\n");
+        fflush(stdout); // Force flushing of stdout
     }
 }
 
@@ -245,6 +247,7 @@ void SetLoggingFlag(void) {
         bool loggingEnabled = ((strcasecmp(trimmedStr, "ENABLED") == 0))? true:false;
     }
     printf("%s Logging %s\n", MODULE_NAME, ((loggingEnabled)?"ENABLED":"DISABLED"));
+    fflush(stdout); // Force flushing of stdout
 }
 
 void SetLogLevel(void) {
@@ -257,6 +260,7 @@ void SetLogLevel(void) {
     TrimString(ConvertLogLevelToString(logLevel), llStr, sizeof(llStr));
     snprintf(msg, sizeof(msg), "Log level set to %s\n", llStr);
     printf("%s %s", MODULE_NAME, msg);
+    fflush(stdout); // Force flushing of stdout
     LogLevel saveLevel = logLevel;
     logLevel = INFO; // Ensure this INFO message is always logged
     Log(logLevel, msg);
