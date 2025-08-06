@@ -2,7 +2,6 @@
 #include "../include/bmi.h"
 #include "../include/logger.h"
 #include "../include/topmodel.h"
-#include "../include/bmi_serialization.h"
 
 /* BMI Adaption: Max i/o file name length changed from 30 to 256 */
 #define MAX_FILENAME_LENGTH   256
@@ -605,9 +604,6 @@ static int Finalize(Bmi *self) {
             fclose(model->out_hyd_fptr);
         }
 
-        if (model->serialized != NULL)
-            free(model->serialized);
-
         free(self->data);
     }
     return BMI_SUCCESS;
@@ -638,17 +634,6 @@ static int Get_var_type(Bmi *self, const char *name, char *type) {
             strncpy(type, param_var_types[i], BMI_MAX_TYPE_NAME);
             return BMI_SUCCESS;
         }
-    }
-    // save state specials
-    if (strcmp(name, "serialization_create") == 0) {
-        strncpy(type, "uint64_t", BMI_MAX_TYPE_NAME);
-        return BMI_SUCCESS;
-    } else if (strcmp(name, "serialization_state") == 0) {
-        strncpy(type, "char", BMI_MAX_TYPE_NAME);
-        return BMI_SUCCESS;
-    } else if (strcmp(name, "serialization_free") == 0) {
-        strncpy(type, "int", BMI_MAX_TYPE_NAME);
-        return BMI_SUCCESS;
     }
     // If we get here, it means the variable name wasn't recognized
     type[0] = '\0';
@@ -697,12 +682,6 @@ static int Get_var_itemsize(Bmi *self, const char *name, int *size) {
         return BMI_SUCCESS;
     } else if (strcmp(type, "long") == 0) {
         *size = sizeof(long);
-        return BMI_SUCCESS;
-    } else if (strcmp(type, "char") == 0) {
-        *size = sizeof(char);
-        return BMI_SUCCESS;
-    } else if (strcmp(type, "uint64_t") == 0) {
-        *size = sizeof(uint64_t);
         return BMI_SUCCESS;
     } else {
         *size = 0;
@@ -769,19 +748,6 @@ static int Get_var_nbytes(Bmi *self, const char *name, int *nbytes) {
                 item_count = output_var_item_count[i];
                 break;
             }
-        }
-    }
-    // special cases for save state
-    if (item_count < 1) {
-        if (strcmp(name, "serialization_create") == 0 || strcmp(name, "serialization_free") == 0) {
-            item_count = 1;
-        } else if (strcmp(name, "serialization_state") == 0) {
-            topmodel_model* model = (topmodel_model*)self->data;
-            if (model->serialized == NULL){
-                Log(WARNING, "Attempting to access a saved state without a state being created on the model.");
-                return BMI_FAILURE;
-            }
-            item_count = model->serialized_length;
         }
     }
     if (item_count < 1)
@@ -974,22 +940,6 @@ static int Get_value_ptr(Bmi *self, const char *name, void **dest) {
         return BMI_SUCCESS;
     }
 
-    // serialization commands
-    if (strcmp(name, "serialization_create") == 0) {
-        // create new serialized data
-        if (serialize_topmodel(self) != BMI_SUCCESS)
-            return BMI_FAILURE;
-        topmodel_model* topmodel = (topmodel_model*)self->data;
-        *dest = &topmodel->serialized_length;
-        return BMI_SUCCESS;
-    } else if (strcmp(name, "serialization_state") == 0) {
-        topmodel_model* topmodel = (topmodel_model*)self->data;
-        if (topmodel->serialized == NULL)
-            return BMI_FAILURE;
-        *dest = topmodel->serialized;
-        return BMI_SUCCESS;
-    }
-
     return BMI_FAILURE;
 }
 
@@ -1034,31 +984,6 @@ static int Get_value(Bmi *self, const char *name, void *dest) {
 static int Set_value(Bmi *self, const char *name, void *array) {
     void *dest = NULL;
     int nbytes = 0;
-
-    // special cases for serialized data
-    if (strcmp(name, "serialization_free") == 0) {
-        topmodel_model* model = (topmodel_model*)self->data;
-        if (model->serialized != NULL) 
-            free(model->serialized);
-        model->serialized = NULL;
-        model->serialized_length = 0;
-        return BMI_SUCCESS;
-    } else if (strcmp(name, "serialization_state") == 0) {
-        if (deserialize_topmodel(self, (char*)array) == BMI_SUCCESS) {
-            topmodel_model* model = (topmodel_model*)self->data;
-            if (model->serialized != NULL) {
-                free(model->serialized);
-                model->serialized = NULL;
-                model->serialized_length = 0;
-            }
-            return BMI_SUCCESS;
-        } else {
-            return BMI_FAILURE;
-        }
-    } else if (strcmp(name, "serialization_create") == 0) {
-        Log(WARNING, "Cannot set a value with \"serialization_create\".");
-        return BMI_FAILURE;
-    }
 
     if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
         return BMI_FAILURE;
@@ -1389,8 +1314,6 @@ topmodel_model *new_bmi_topmodel() //(void)?
     data->lnaotb           = NULL; // these are the ln(a/tanB) values
     data->cum_dist_area_with_dist = NULL; // channel cum. distr. of area with distance
     data->dist_from_outlet = NULL; // distance from outlet to point on channel with area known
-    data->serialized = NULL; // empty serialized state
-    data->serialized_length = 0;
     return data;
 }
 
