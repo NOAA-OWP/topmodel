@@ -1,26 +1,21 @@
 # define the C compiler to use
 CC = gcc
-CXX = g++
 
 # define any compile-time flags
 # for newer compiler, the right hand side is not needed
 CFLAGS = -std=c99
-CXXFLAGS = -std=c++17
 
-INCLUDES = -I../include -I$(BOOST_ROOT)/include
+INCLUDES = -I../include
 
-LFLAGS = -L$(BOOST_ROOT)/lib
+LFLAGS =
 
 LIBS = -lm
 
 # define the C source files
 SRCS = main.c bmi_topmodel.c topmodel.c logger.c
-CXX_SRCS = bmi_serialization.cpp
 
 # define the C object files 
-C_OBJS = $(SRCS:.c=.o)
-CXX_OBJS = $(CXX_SRCS:.cpp=.o)
-OBJS = $(C_OBJS) $(CXX_OBJS)
+OBJS = $(SRCS:.c=.o)
 
 # define the executable file 
 MAIN = run_bmi
@@ -32,7 +27,7 @@ all:    $(MAIN)
 	@mv run_bmi ..
 
 $(MAIN): $(OBJS) 
-	$(CXX) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
@@ -40,9 +35,6 @@ $(MAIN): $(OBJS)
 # (see the gnu make manual section about automatic variables)
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
-
-.cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<  -o $@
 
 clean:
 	$(RM) *.o *~ $(MAIN)
