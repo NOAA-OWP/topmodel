@@ -505,7 +505,7 @@ extern int inputs(
     return 0;
 }
 
-xtern int tread(
+extern int tread(
     FILE *subcat_fptr,
     FILE *output_fptr,
     char *subcat,
