@@ -548,14 +548,17 @@ extern int tread(
             *num_topodex_values,
             WARN_TOPODEX_INCREMENTS);
     }
+
     if ((*dist_area_lnaotb) == NULL) {
-        // Need one extra value (0.0) at the end of this array to do
-        // sum in topmod, e.g. dist_area_lnaotb[i] + dist_area_lnaotb[i+1]
-        // for each increment
-        d_alloc(dist_area_lnaotb, *num_topodex_values + 1);
+        // We later write dist_area_lnaotb[N+1] = 0.0; with 1-based indexing this
+        // requires capacity for indices [0..N+1] => N+2 elements.
+        d_alloc(dist_area_lnaotb, *num_topodex_values + 2);
+        (*dist_area_lnaotb)[0] = 0.0;   // safe pad
     }
     if ((*lnaotb) == NULL) {
-        d_alloc(lnaotb, *num_topodex_values); // NJF why +1 in old code?
+        // 1-based indexing => need N+1 to safely address [1..N]
+        d_alloc(lnaotb, *num_topodex_values + 1);
+        (*lnaotb)[0] = 0.0;             // safe pad
     }
     // NJF TODO if not NULL should probably free and then allocate?
     // I don't see any reasonable expectation that these arrays should persist
@@ -574,11 +577,16 @@ extern int tread(
     /*  dist_area_lnaotb IS DISTRIBUTION OF AREA WITH LN(A/TANB) */
     /*  lnaotb IS LN(A/TANB) VALUE */
 
+    /* Guard against divide-by-zero if file is malformed */
+    if (tarea == 0.0) {
+        Log(ERROR, "tread(): Sum of dist_area_lnaotb is zero; cannot normalize.\n");
+        return -1;
+    }
+
     /*  CALCULATE AREAL INTEGRAL OF LN(A/TANB)
      *  NB.  a/tanB values should be ordered from high to low with lnaotb[1]
-     *  as an upper limit such that dist_area_lnaotb[1] should be zero, with dist_area_lnaotb(2)
-     * representing the area between lnaotb[1] and lnaotb[2] */
-
+     *  as an upper limit such that dist_area_lnaotb[1] should be zero, with
+     *  dist_area_lnaotb(2) representing the area between lnaotb[1] and lnaotb[2] */
     *tl = 0.0;
     (*dist_area_lnaotb)[1] /= tarea;
     sumac = (*dist_area_lnaotb)[1];
@@ -587,7 +595,7 @@ extern int tread(
         sumac += (*dist_area_lnaotb)[j];
         (*tl) += (*dist_area_lnaotb)[j] * ((*lnaotb)[j] + (*lnaotb)[j - 1]) / 2.0;
     }
-    // init last value to additive identity
+    // init last value to additive identity (requires N+2 allocation above)
     (*dist_area_lnaotb)[(*num_topodex_values) + 1] = 0.0;
 
     /*  READ CHANNEL NETWORK DATA */
@@ -601,10 +609,14 @@ extern int tread(
     }
 
     if ((*cum_dist_area_with_dist) == NULL) {
-        d_alloc(cum_dist_area_with_dist, *num_channels); // NJF why +1 in old code?
+        // 1-based indexing => need N+1 to safely address [1..N]
+        d_alloc(cum_dist_area_with_dist, *num_channels + 1);
+        (*cum_dist_area_with_dist)[0] = 0.0;  // safe pad
     }
     if ((*dist_from_outlet) == NULL) {
-        d_alloc(dist_from_outlet, *num_channels); // NJF why +1 in old code?
+        // 1-based indexing => need N+1 to safely address [1..N]
+        d_alloc(dist_from_outlet, *num_channels + 1);
+        (*dist_from_outlet)[0] = 0.0;        // safe pad
     }
     // NJF TODO if not NULL should probably free and then allocate?
     // I don't see any reasonable expectation that these arrays should persist
@@ -735,26 +747,32 @@ extern void calc_time_delay_histogram(
     int *num_delay,
     double **time_delay_histogram
 )
-
 {
     // declare local variables
     double time, sumar; //, a1, a2;
     int j, ir;
     int tmp_num_ords = *num_time_delay_histo_ords;
+
     // casting tch[num_channels] to int truncates tch[num_channels]
     // (e.g., 7.9 becomes 7)
     // Determine how many ROUTING ORDINATES
     // computed, essentially, by the `dist_from_outlet` of the FARTHEST channel segment
-    (*num_time_delay_histo_ords) = (int)tch[num_channels];
+    (*num_time_delay_histo_ords) = (int) tch[num_channels];
 
     // this is here to round up. Since casting tch as int effectively rounds down,
     // we add a value of 1 effectively rounding up.
     if ((double)(*num_time_delay_histo_ords) < tch[num_channels]) {
         (*num_time_delay_histo_ords)++;
     }
-    // Determine the distance from outlet for first channel ordinate???
-    (*num_delay) = (int)tch[1];
+
+    // Determine the distance from outlet for first channel ordinate (1-based)
+    (*num_delay) = (int) tch[1];
     (*num_time_delay_histo_ords) -= (*num_delay);
+
+    // Edge case: if farthest and first travel times are equal integers, ords can be 0
+    if (*num_time_delay_histo_ords <= 0) {
+        *num_time_delay_histo_ords = 1;
+    }
 
     if (*num_time_delay_histo_ords > WARN_HISTOGRAM_ORDINATES) {
         Log(WARNING,
@@ -763,21 +781,26 @@ extern void calc_time_delay_histogram(
             WARN_HISTOGRAM_ORDINATES);
     }
 
+    // Allocate histogram for 1-based indexing (need ords+1 so [1..ords] is valid)
     if ((*time_delay_histogram) == NULL) {
-        d_alloc(time_delay_histogram, *num_time_delay_histo_ords);
+        d_alloc(time_delay_histogram, *num_time_delay_histo_ords + 1);
     } else if (tmp_num_ords != *num_time_delay_histo_ords) {
-        // caller cannot know if num_time_delay_histo_ords has changed
-        // since it is computed in this function, so if the histogram exists
-        // and the number or ords has changed based on the calculations in this
-        // function, we will re-allocate it.
+        // Re-allocate if the number of ordinates changed
         free(*time_delay_histogram);
-        d_alloc(time_delay_histogram, *num_time_delay_histo_ords);
+        d_alloc(time_delay_histogram, *num_time_delay_histo_ords + 1);
     }
 
-    // NJF so we build histogram with ordinates between 1 and "distance" between first and last
-    // channel
+    // Zero the bins to avoid summing uninitialized values in edge paths
+    if (*time_delay_histogram) {
+        for (int k = 0; k <= *num_time_delay_histo_ords; ++k) {
+            (*time_delay_histogram)[k] = 0.0;
+        }
+    }
+
+    // Build histogram with ordinates between 1 and "distance" between first and last channel
     for (ir = 1; ir <= (*num_time_delay_histo_ords); ir++) {
-        time = (double)(*num_delay) + (double)ir;
+        time = (double)(*num_delay) + (double) ir;
+
         if (time > tch[num_channels]) {
             (*time_delay_histogram)[ir] = 1.0;
         } else {
@@ -790,28 +813,31 @@ extern void calc_time_delay_histogram(
                     break; /* exits this for loop */
                 }
             }
+            // Note: for num_channels==1 and time <= tch[1], this stays 0.0 (matches prior behavior)
         }
     }
 
-    sumar = 0;
-    // Convert ordinates to cummulative area, should sum to 1
+    // Convert ordinates to cumulative area; should sum to 1
+    sumar = 0.0;
     for (int i = *num_time_delay_histo_ords; i > 1; i--) {
         (*time_delay_histogram)[i] -= (*time_delay_histogram)[i - 1] * area;
         (*time_delay_histogram)[i] *= area;
         sumar += (*time_delay_histogram)[i];
     }
     sumar += (*time_delay_histogram)[1];
+
     if (sumar < 0.99999 || sumar > 1.00001) {
-        Log(SEVERE, "Histogram oridnates do not sum to 1.\n");
+        Log(SEVERE, "Histogram oridnates do not sum to 1.");
         Log(SEVERE,
             "Check that the correct number of values for cum_dist_area_with_dist and "
-            "dist_from_outlet are provided.\n");
+            "dist_from_outlet are provided.");
         Log(SEVERE,
             "The number of values for each variable should be equal to the number of channels "
-            "(i.e., num_channels).\n\n");
-        Log(SEVERE, "Exiting Topmodel\n");
-        exit(-1); // FIXME this fuction should probably return an error code
+            "(i.e., num_channels).");
+        Log(SEVERE, "Exiting Topmodel");
+	exit(-1); // FIXME this fuction should probably return an error code
                   // and the error be handled elsewhere, not just an exit here...
+
     }
 
     return;
