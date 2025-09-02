@@ -579,7 +579,7 @@ extern int tread(
 
     /* Guard against divide-by-zero if file is malformed */
     if (tarea == 0.0) {
-        Log(ERROR, "tread(): Sum of dist_area_lnaotb is zero; cannot normalize.\n");
+        Log(SEVERE, "tread(): Sum of dist_area_lnaotb is zero; cannot normalize.\n");
         return -1;
     }
 
