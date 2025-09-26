@@ -89,7 +89,7 @@ const int serialize_topmodel(Bmi* bmi) {
     try {
         archive << serializer;
     } catch (const std::exception& e) {
-        Log(LogLevel::SEVERE, "Serializing Topmodel encounterd an error: %s", e.what());
+        Log(LogLevel::SEVERE, "Serializing Topmodel encountered an error: %s", e.what());
         return BMI_FAILURE;
     }
     // copy serialized data into topmodel data
