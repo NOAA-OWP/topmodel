@@ -643,6 +643,9 @@ static int Get_var_type(Bmi *self, const char *name, char *type) {
     if (strcmp(name, "serialization_create") == 0) {
         strncpy(type, "uint64_t", BMI_MAX_TYPE_NAME);
         return BMI_SUCCESS;
+    } else if (strcmp(name, "serialization_size") == 0) {
+        strncpy(type, "uint64_t", BMI_MAX_TYPE_NAME);
+        return BMI_SUCCESS;
     } else if (strcmp(name, "serialization_state") == 0) {
         strncpy(type, "char", BMI_MAX_TYPE_NAME);
         return BMI_SUCCESS;
@@ -773,7 +776,7 @@ static int Get_var_nbytes(Bmi *self, const char *name, int *nbytes) {
     }
     // special cases for save state
     if (item_count < 1) {
-        if (strcmp(name, "serialization_create") == 0 || strcmp(name, "serialization_free") == 0) {
+        if (strcmp(name, "serialization_create") == 0 || strcmp(name, "serialization_size") == 0 || strcmp(name, "serialization_free") == 0) {
             item_count = 1;
         } else if (strcmp(name, "serialization_state") == 0) {
             topmodel_model* model = (topmodel_model*)self->data;
@@ -975,14 +978,14 @@ static int Get_value_ptr(Bmi *self, const char *name, void **dest) {
     }
 
     // serialization commands
-    if (strcmp(name, "serialization_create") == 0) {
-        // create new serialized data
-        if (serialize_topmodel(self) != BMI_SUCCESS)
-            return BMI_FAILURE;
+    if (strcmp(name, "serialization_size") == 0) {
         topmodel_model* topmodel = (topmodel_model*)self->data;
-        *dest = &topmodel->serialized_length;
+        if (topmodel->serialized == NULL)
+            return BMI_FAILURE;
+        *dest = (void*)&topmodel->serialized_length;
         return BMI_SUCCESS;
-    } else if (strcmp(name, "serialization_state") == 0) {
+    }
+    if (strcmp(name, "serialization_state") == 0) {
         topmodel_model* topmodel = (topmodel_model*)self->data;
         if (topmodel->serialized == NULL)
             return BMI_FAILURE;
@@ -1043,6 +1046,11 @@ static int Set_value(Bmi *self, const char *name, void *array) {
         model->serialized = NULL;
         model->serialized_length = 0;
         return BMI_SUCCESS;
+    } else if (strcmp(name, "serialization_create") == 0) {
+        // create new serialized data
+        if (serialize_topmodel(self) != BMI_SUCCESS)
+            return BMI_FAILURE;
+        return BMI_SUCCESS;
     } else if (strcmp(name, "serialization_state") == 0) {
         if (deserialize_topmodel(self, (char*)array) == BMI_SUCCESS) {
             topmodel_model* model = (topmodel_model*)self->data;
@@ -1055,9 +1063,6 @@ static int Set_value(Bmi *self, const char *name, void *array) {
         } else {
             return BMI_FAILURE;
         }
-    } else if (strcmp(name, "serialization_create") == 0) {
-        Log(WARNING, "Cannot set a value with \"serialization_create\".");
-        return BMI_FAILURE;
     }
 
     if (self->get_value_ptr(self, name, &dest) == BMI_FAILURE)
