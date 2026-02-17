@@ -10,12 +10,9 @@
 #define TRUE  1
 #define FALSE 0
 
-// Print to console settings:
-// 0: Nothing
-// 1: Model info (source code)
-// 2: BMI info (e.g.current timestep)
-// Note: All errors causing program to exit will print console message
-#define TOPMODEL_DEBUG 0
+// Print to console settings (i.e., TOPMODEL_DEBUG value) now controlled via CMake
+// Set the DEBUG_VERBOSITY CMake variable on command line when creating build directory
+// See CMakeLists.txt
 
 //The following "limits" from the original beven code
 //are now treated as warnings
