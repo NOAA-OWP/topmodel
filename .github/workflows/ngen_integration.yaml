@@ -104,7 +104,7 @@ jobs:
       # For the time being, generate a CMake build directory aligned as if this was a submodule (i.e., under extern/)
       # However, don't use the code or CMakeLists.txt there (and don't use ngen-submod-build)
       - name: Prepare to Build Topmodel Library for Ngen
-        run: cmake -B extern/topmodel/cmake_build -g -Og -fsanitize=address -Werror -S ${{runner.temp}}/topmodel/
+        run: cmake -B extern/topmodel/cmake_build -DCMAKE_C_FLAGS="-g -Og -fsanitize=address -Werror" -S ${{runner.temp}}/topmodel/
 
       - name: Build Topmodel
         id: submod_build_4

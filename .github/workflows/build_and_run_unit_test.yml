@@ -34,7 +34,7 @@ jobs:
     
     - name: Build and Run Unit Test
       run: |
-        cmake -B cmake_build -g -Og -fsanitize=address -Werror -S .
+        cmake -B cmake_build -DCMAKE_C_FLAGS="-g -Og -fsanitize=address -Werror" -S .
         cmake --build cmake_build --target clean
         cmake --build cmake_build --target simple_unit_tests
         cd cmake_build/
@@ -42,7 +42,7 @@ jobs:
 
     - name: Build and Run Standalone
       run: |
-        cmake -B cmake_build -g -Og -fsanitize=address -Werror -S .
+        cmake -B cmake_build -DCMAKE_C_FLAGS="-g -Og -fsanitize=address -Werror" -S .
         cmake --build cmake_build --target clean
         cmake --build cmake_build --target topmodeldriver
         ./cmake_build/topmodeldriver
