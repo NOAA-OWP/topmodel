@@ -34,15 +34,15 @@ jobs:
     
     - name: Build and Run Unit Test
       run: |
-        cd ./test
-        make clean
-        make 'CFLAGS=-g -Og -fsanitize=address -Werror'
-        ./run_bmi_unit_test
-        
-    - name: Build and Run Standalone  
+        cmake -B cmake_build -g -Og -fsanitize=address -Werror -S .
+        cmake --build cmake_build --target clean
+        cmake --build cmake_build --target simple_unit_tests
+        cd cmake_build/
+        ./simple_unit_tests
+
+    - name: Build and Run Standalone
       run: |
-        cd src/
-        make clean
-        make 'CFLAGS=-g -Og -fsanitize=address -Werror'
-        cd ..
-        ./run_bmi
+        cmake -B cmake_build -g -Og -fsanitize=address -Werror -S .
+        cmake --build cmake_build --target clean
+        cmake --build cmake_build --target topmodeldriver
+        ./cmake_build/topmodeldriver
