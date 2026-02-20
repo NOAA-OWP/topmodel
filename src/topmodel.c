@@ -945,7 +945,9 @@ int ir;
 /* read in run parameters  */
 TOPMODEL_CHECK_FGETS(fgets(subcat,256,in_param_fptr));
 
+#if TOPMODEL_DEBUG >= 1
 printf("subcat: %s\n", subcat);
+#endif
 
 TOPMODEL_CHECK_FSCANF(12, fscanf(in_param_fptr,"%lf %lf %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
                                  szm,t0,td,chv,rv,srmax,Q0,sr0,infex,xk0,hf,dth));
