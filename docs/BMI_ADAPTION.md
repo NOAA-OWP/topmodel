@@ -113,7 +113,7 @@ Also, variable `isc` ([source code](../refs/original_code_c/tmod9502.c#212)) was
 - 	All output files (`topmod.out` and `hyd.out`), if opened, are closed during `bmi.finalize()` 
 
 ### Console Prints
-`printf()` statements are now handled by `TOPMODEL_DEBUG` found in [`topmodel.h`](../include/topmodel.h#L18).  Note: Macro uses greater than or equal to logic `>=`; i.e. a setting of `2` will include `0`, `1`, & `2`. Verbosity levels are, 
+`printf()` statements are now handled by `TOPMODEL_DEBUG`, though this now is set via the CMake variable `DEBUG_VERBOSITY` when generating the CMake build directory. Note: Macro uses greater than or equal to logic `>=`; i.e. a setting of `2` will include `0`, `1`, & `2`. Verbosity levels are, 
 
 	-	0: Nothing
 	-	1: Error messages (& exit program) 

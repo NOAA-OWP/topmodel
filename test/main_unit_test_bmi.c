@@ -24,7 +24,14 @@ main(void){
     // Test BMI: CONTROL FUNCTION initialize()
     {
         printf(" initializing...");
-        const char *cfg_file = "./data/topmod_unit_test.run";
+
+        #ifndef REPO_ROOT_DIR
+        // We need this next for a const string, so bail if it hasn't been defined
+        printf("Please set REPO_ROOT_DIR build macro and rebuild test executable");
+        return BMI_FAILURE;
+        #endif
+
+        const char *cfg_file = REPO_ROOT_DIR "/test/data/topmod_unit_test.run";
         printf(" configuration found: %s\n", cfg_file);
         status = model->initialize(model, cfg_file);
         if (status == BMI_FAILURE) return BMI_FAILURE;
