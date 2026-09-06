@@ -14,7 +14,7 @@ and the inital NULL value is being maintained throughout model run
 */
 
 
-int main(void)
+int main(int argc, char* argv[])
 {
   
   // allocating memory to store the entire BMI structure
@@ -27,9 +27,13 @@ int main(void)
   printf("\n Registering TOPMODEL BMI model ... \n");
 #endif
   register_bmi_topmodel(model);
-
-  const char *cfg_file = "./data/topmod.run";
-
+  const char *cfg_file;
+  if(argc < 2){
+    cfg_file = "./data/topmod.run";
+  }
+  else{
+    cfg_file = argv[1];
+  }
 #if TOPMODEL_DEBUG > 1  
   printf("\n Initializeing TOPMODEL BMI model ... \n");
 #endif
